@@ -70,7 +70,7 @@
     - number_of_view : int (Not null)
     - number_of_comment : int (Not null)
     - number_of_like : int (Not null)
-    - is_file_attached : boolean (Not null, defalut = True)
+    - is_file_attached : boolean (Not null, defalut = False)
     - is_visible : boolean (Not null, defalut = True)
 - Comment
     - id : int (pk)
@@ -80,7 +80,7 @@
     - content : str (Not null)
     - create_date : datetime (Not null)
     - update_date : datetime (Not null)
-    - is_file_attached : boolean (Not null, defalut = True)
+    - is_file_attached : boolean (Not null, defalut = False)
     - is_visible : boolean (Not null, defalut = True)
 - ChatSession
     - id : int (pk)
