@@ -1,4 +1,3 @@
-import secrets
 from datetime import datetime
 
 from typing import List, Optional
@@ -39,7 +38,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(64), unique=True)
     email: Mapped[str] = mapped_column(String(256), unique=True)
     password: Mapped[str] = mapped_column(String())
-    password_salt: Mapped[str] = mapped_column(String(), default=secrets.token_hex(4))
+    password_salt: Mapped[str] = mapped_column(String())
     join_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now())
     is_superuser: Mapped[Boolean] = mapped_column(Boolean(), default=False)
     is_banned: Mapped[Boolean] = mapped_column(Boolean(), default=False)
@@ -60,7 +59,7 @@ class Post(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     user: Mapped["User"] = relationship(back_populates="posts")
-    comments: Mapped[List["User"]] = relationship(back_populates="posts")
+    comments: Mapped[List["Comment"]] = relationship(back_populates="post")
 
     name: Mapped[str] = mapped_column(String(64))
     content: Mapped[str] = mapped_column(String(1024))
