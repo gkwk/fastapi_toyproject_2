@@ -43,75 +43,103 @@
 # 데이터베이스 테이블 구조
 - User
     - id : int (pk)
-    - name : str (unique, Not null)
-    - email : str (unique, Not null)
+    - Posts: List["Post"] (1 to N)
+    - Comments: List["Comment"] (1 to N)
+    - ChatSessions: List["ChatSession"] (N to M)
+    - Chat: List["Chat"] (1 to N)
+    - AIlogs: List["AIlog"] (1 to N)
+    - name : str (unique, Not null, length=64)
+    - email : str (unique, Not null, length=256)
     - password : str (hash, Not null)
     - password_salt : str (Not null)
     - join_date : datetime (Not null)
     - is_superuser : boolean (Not null, default = False)
     - is_banned : boolean (Not null, defalut = False)
-    - Posts: List["Post"] (relationship())
-    - Comments: List["Comment"] (relationship())
-    - ChatSessions: List["ChatSession"] (relationship())
-    - Chat: List["Chat"] (relationship())
-    - AIlogs: List["AIlog"] (relationship())
 - Board
     - id : int (pk)
-    - name : str (unique, Not null)
-    - information : str (Not null)
+    - name : str (unique, Not null, length=128)
+    - information : str (Not null, length=512)
     - is_visible : boolean (Not null, defalut = True)
 - Post
     - id : int (pk)
-    - user : User.id (fk)
-    - name : str (unique, Not null)
-    - content : str (Not null)
-    - create_date : datetime (Not null)
+    - user_id : int (user.id) (fk)
+    - user : User (1 to N)
+    - comments : List["Comment"] (1 to N)
+    - name : str (unique, Not null, length=64)
+    - content : str (Not null, length=1024)
+    - create_date : datetime (Not null, default=datetime.now())
     - update_date : datetime (Not null)
-    - number_of_view : int (Not null)
-    - number_of_comment : int (Not null)
-    - number_of_like : int (Not null)
+    - number_of_view : int (Not null, defalut = 0)
+    - number_of_comment : int (Not null, defalut = 0)
+    - number_of_like : int (Not null, defalut = 0)
     - is_file_attached : boolean (Not null, defalut = False)
     - is_visible : boolean (Not null, defalut = True)
 - Comment
     - id : int (pk)
-    - post : Post.id (fk)
-    - user : User.id (fk)
-    - name : str (unique, Not null)
-    - content : str (Not null)
-    - create_date : datetime (Not null)
+    - user_id : int (user.id) (fk)
+    - user : User (1 to N)
+    - post_id : int (post.id) (fk)
+    - post : Post (1 to N)
+    - content : str (Not null, length=256)
+    - create_date : datetime (Not null, default=datetime.now())
     - update_date : datetime (Not null)
     - is_file_attached : boolean (Not null, defalut = False)
     - is_visible : boolean (Not null, defalut = True)
 - ChatSession
     - id : int (pk)
-    - users : List["User"] (relationship())
-    - chats : List["Chat"] (relationship())
-    - name : str (Not null)
-    - create_date : datetime (Not null)
+    - users : List["User"] (N to M)
+    - chats : List["Chat"] (1 to N)
+    - name : str (Not null, length=256)
+    - create_date : datetime (Not null, default=datetime.now())
     - update_date : datetime (Not null)
 - Chat
     - id : int (pk)
-    - user : User.id (fk)
-    - chat_session : ChatSession.id (fk)
-    - content : str (Not null)
-    - create_date : datetime (Not null)
+    - user_id : int (user.id) (fk)
+    - user : User (1 to N)
+    - chat_session_id : int (chat_session.id) (fk)
+    - chat_session : ChatSession (1 to N)
+    - content : str (Not null, length=256)
+    - create_date : datetime (Not null, default=datetime.now())
     - is_visible : boolean (Not null, defalut = True)
 - AI
     - id : int (pk)
-    - name : str (unique, Not null)
-    - ailogs : List["AIlog"] (relationship())
-    - information : str (Not null)
+    - ai_logs : List["AIlog"] (1 to N)
+    - name : str (unique, Not null, length=64)
+    - information : str (Not null, length=256)
     - is_visible : boolean (Not null, defalut = True)
 - AIlog
     - id : int (pk)
-    - user : User.id (fk)
-    - ai : AI.id (fk)
-    - content : str (Not null)
-    - create_date : datetime (Not null)
+    - user_id : int (user.id) (fk)
+    - user : User (1 to N)
+    - ai_id : int (AI.id) (fk)
+    - ai : AI (1 to N)
+    - content : str (Not null, length=256)
+    - create_date : datetime (Not null, default=datetime.now())
     - finish_date : datetime (Not null)
     - is_finished : boolean (Not null, defalut = False)
 
 # 실행방법
+- 터미널에서 아래의 명령어 입력
+```bash
+alembic init migrations
+```
+- `./alembic.ini` 에서 `sqlalchemy.url`를 아래와 같이 변경
+```
+sqlalchemy.url = sqlite:///./test.sqlite
+```
+- `./migrations/env.py` 에서 아래의 내용 추가
+```
+import models
+```
+- `./migrations/env.py` 에서 `target_metadata`를 아래와 같이 변경
+```
+target_metadata = models.base.metadata
+```
+- 터미널에서 아래의 명령어 입력
+```bash
+alembic revision --autogenerate
+alembic upgrade head
+```
 - 터미널에서 아래의 명령어 입력
 ```bash
 uvicorn main:app --reload
