@@ -9,7 +9,12 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 
 from models import User
-from domain.user.user_schema import UserCreate
+from domain.user.user_schema import (
+    UserCreate,
+    UserReadWithEmailAndName,
+    UserUpdate,
+    UserUpdatePassword,
+)
 from database import get_data_base
 from config import get_settings
 
@@ -20,37 +25,35 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl=get_settings().APP_JWT_URL)
 password_context = CryptContext(schemes=["bcrypt"])
 
 
-def does_user_already_exist(data_base: Session, user_create: UserCreate):
+def does_user_name_already_exist(data_base: Session, schema: UserCreate):
+    return data_base.query(User).filter_by(name=schema.name).first()
+
+
+def does_user_email_already_exist(data_base: Session, schema: UserCreate):
+    return data_base.query(User).filter_by(email=schema.email).first()
+
+
+def does_user_already_exist(data_base: Session, schema: UserCreate):
     return (
         data_base.query(User)
-        .filter((User.name == user_create.name) | (User.email == user_create.email))
+        .filter((User.name == schema.name) | (User.email == schema.email))
         .first()
     )
 
 
-def create_user(data_base: Session, user_create: UserCreate):
-    generated_password_salt = secrets.token_hex(4)
-    user = User(
-        name=user_create.name,
-        password=get_password_context().hash(
-            user_create.password1 + generated_password_salt
-        ),
-        password_salt=generated_password_salt,
-        join_date=datetime.now(),
-        email=user_create.email,
-    )
-    data_base.add(user)
-    data_base.commit()
-
-
-def get_user(data_base: Session, user_name: str):
+def get_user_with_name(data_base: Session, user_name: str):
     user = data_base.query(User).filter(User.name == user_name).first()
     return user
 
 
-def get_user_detail(data_base: Session, user_id, user_name):
-    user_detail = data_base.query(User).filter_by(id=user_id, name=user_name).first()
-    return user_detail
+def get_user_with_email(data_base: Session, schema: UserReadWithEmailAndName):
+    user = data_base.query(User).filter_by(name=schema.name, email=schema.email).first()
+    return user
+
+
+def get_user_with_id_and_name(data_base: Session, user_id: int, user_name: str):
+    user = data_base.query(User).filter_by(id=user_id, name=user_name).first()
+    return user
 
 
 def get_oauth2_scheme():
@@ -61,18 +64,91 @@ def get_password_context():
     return password_context
 
 
+def create_user(data_base: Session, schema: UserCreate):
+    if does_user_name_already_exist(data_base=data_base, schema=schema):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="동일한 이름을 사용중인 유저가 이미 존재합니다.",
+        )
+    if does_user_email_already_exist(data_base=data_base, schema=schema):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="동일한 이메일을 사용중인 유저가 이미 존재합니다.",
+        )
+
+    generated_password_salt = secrets.token_hex(4)
+    user = User(
+        name=schema.name,
+        password=get_password_context().hash(
+            schema.password1 + generated_password_salt
+        ),
+        password_salt=generated_password_salt,
+        join_date=datetime.now(),
+        email=schema.email,
+    )
+    data_base.add(user)
+    data_base.commit()
+
+
+def update_user(data_base: Session, schema: UserUpdate, decoded_token: dict):
+    user = get_user_with_id_and_name(
+        data_base=data_base,
+        user_name=decoded_token["user_name"],
+        user_id=decoded_token["user_id"],
+    )
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="유저가 존재하지 않습니다.",
+        )
+
+    user.email = schema.email
+    data_base.add(user)
+    data_base.commit()
+
+
+def update_user_password(
+    data_base: Session, schema: UserUpdatePassword, decoded_token: dict
+):
+    user = get_user_with_id_and_name(
+        data_base=data_base,
+        user_name=decoded_token["user_name"],
+        user_id=decoded_token["user_id"],
+    )
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="유저가 존재하지 않습니다.",
+        )
+
+    generated_password_salt = secrets.token_hex(4)
+    user.password = get_password_context().hash(
+        schema.password1 + generated_password_salt
+    )
+    user.password_salt = generated_password_salt
+    data_base.add(user)
+    data_base.commit()
+
+
 def generate_user_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     data_base: Session = Depends(get_data_base),
 ):
-    user = get_user(data_base=data_base, user_name=form_data.username)
+    user = get_user_with_name(data_base=data_base, user_name=form_data.username)
 
-    if (not user) or (
-        not get_password_context().verify((form_data.password + user.password_salt), user.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="입력된 이름을 가지는 유저가 존재하지 않습니다.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not get_password_context().verify(
+        (form_data.password + user.password_salt), user.password
     ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="유저 이름 혹은 패스워드가 일치하지 않습니다.",
+            detail="패스워드가 일치하지 않습니다.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -108,7 +184,9 @@ def check_and_decode_user_token(
     except JWTError:
         raise credentials_exception
     else:
-        user_detail = get_user_detail(data_base, user_name=user_name, user_id=user_id)
+        user_detail = get_user_with_id_and_name(
+            data_base, user_name=user_name, user_id=user_id
+        )
         if user_detail is None:
             raise credentials_exception
 
