@@ -29,7 +29,7 @@ def get_oauth2_scheme_user():
 
 
 def get_oauth2_scheme_admin():
-    return oauth2_scheme_user
+    return oauth2_scheme_admin
 
 
 def get_password_context():
@@ -37,8 +37,8 @@ def get_password_context():
 
 
 def generate_user_token(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    data_base: Session = Depends(get_data_base),
+    form_data: OAuth2PasswordRequestForm,
+    data_base: Session,
 ):
     user = data_base.query(User).filter_by(name=form_data.username).first()
 
@@ -74,7 +74,7 @@ def generate_user_token(
     }
 
 
-def check_and_decode_user_token(token: str = Depends()):
+def check_and_decode_user_token(token: str):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="토큰이 유효하지 않습니다.",
@@ -94,8 +94,8 @@ def check_and_decode_user_token(token: str = Depends()):
 
 
 def generate_admin_token(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    data_base: Session = Depends(get_data_base),
+    form_data: OAuth2PasswordRequestForm,
+    data_base: Session,
 ):
     admin = data_base.query(User).filter_by(name=form_data.username).first()
 
@@ -139,7 +139,7 @@ def generate_admin_token(
     }
 
 
-def check_and_decode_admin_token(token: str = Depends()):
+def check_and_decode_admin_token(token: str):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="토큰이 유효하지 않습니다.",
