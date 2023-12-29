@@ -21,7 +21,9 @@ from config import get_settings
 ACCESS_TOKEN_EXPIRE_MINUTES = get_settings().APP_JWT_EXPIRE_MINUTES
 SECRET_KEY = get_settings().APP_JWT_SECRET_KEY
 ALGORITHM = get_settings().PASSWORD_ALGORITHM
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=get_settings().APP_JWT_URL)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=get_settings().APP_JWT_URL, scheme_name="user_oauth2_schema")
+oauth2_scheme_admin = OAuth2PasswordBearer(tokenUrl="/api/admin/login", scheme_name="admin_oauth2_schema")
+
 password_context = CryptContext(schemes=["bcrypt"])
 
 
@@ -56,7 +58,9 @@ def get_user_with_id_and_name(data_base: Session, user_id: int, user_name: str):
     return user
 
 
-def get_oauth2_scheme():
+def get_oauth2_scheme(is_admin=False):
+    if is_admin:
+        return oauth2_scheme_admin
     return oauth2_scheme
 
 
