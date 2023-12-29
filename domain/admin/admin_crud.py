@@ -21,7 +21,7 @@ from domain.user.user_schema import (
     UserUpdate,
     UserUpdatePassword,
 )
-from domain.admin.admin_schema import UserDetailList
+from domain.admin.admin_schema import UserMoreDetailList
 
 from database import get_data_base
 from config import get_settings
@@ -39,11 +39,19 @@ from domain.user.user_crud import (
     ALGORITHM,
 )
 from domain.user.user_schema import UserCreate
+from domain.admin.admin_schema import UserBanOption
 from database import session_local
 
 
 def get_users(data_base: Session):
     return data_base.query(User).all()
+
+
+def update_user_is_banned(data_base: Session, schema: UserBanOption):
+    user = data_base.query(User).filter_by(id=schema.id).first()
+    user.is_banned = schema.is_banned
+    data_base.add(user)
+    data_base.commit()
 
 
 def create_admin():
@@ -129,12 +137,13 @@ def generate_admin_token(
         "access_token": access_token,
         "token_type": "bearer",
         "user_name": admin.name,
-        "is_admin" : True,
+        "is_admin": True,
     }
 
 
 def check_and_decode_admin_token(
-    token=Depends(get_oauth2_scheme()), data_base: Session = Depends(get_data_base)
+    token=Depends(get_oauth2_scheme(is_admin=True)),
+    data_base: Session = Depends(get_data_base),
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -157,3 +166,10 @@ def check_and_decode_admin_token(
             raise credentials_exception
 
     return payload
+
+
+def ban_user(
+    token=Depends(get_oauth2_scheme(is_admin=True)),
+    data_base: Session = Depends(get_data_base),
+):
+    pass
