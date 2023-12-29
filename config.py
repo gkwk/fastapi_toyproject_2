@@ -4,9 +4,11 @@ from functools import lru_cache
 
 
 class Settings(BaseSettings):
+    APP_DOMAIN: str
     APP_JWT_SECRET_KEY: str
     APP_JWT_EXPIRE_MINUTES: int
-    APP_JWT_URL: str
+    APP_JWT_USER_URL: str
+    APP_JWT_ADMIN_URL: str
     PASSWORD_ALGORITHM: str
     SQLALCHEMY_DATABASE_URL: str
 
