@@ -5,13 +5,13 @@ import getpass
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from models import User
+from models import User, Board, user_permisson_table
 from domain.user.user_crud import (
     does_user_name_already_exist,
     does_user_email_already_exist,
 )
 from domain.user.user_schema import UserCreate
-from domain.admin.admin_schema import UserBanOption
+from domain.admin.admin_schema import UserBanOption, BoradCreate
 from database import session_local
 from auth import get_password_context
 
@@ -24,6 +24,25 @@ def update_user_is_banned(data_base: Session, schema: UserBanOption):
     user = data_base.query(User).filter_by(id=schema.id).first()
     user.is_banned = schema.is_banned
     data_base.add(user)
+    data_base.commit()
+
+
+def create_board(data_base: Session, schema: BoradCreate):
+    board = Board(
+        name=schema.name, information=schema.information, is_visible=schema.is_visible
+    )
+    data_base.add(board)
+    data_base.commit()
+
+    if board.is_visible:
+        users = data_base.query(User).all()
+        for user in users:
+            user.boards.append(board)
+    else:
+        superusers = data_base.query(User).filter_by(is_superuser=True).all()
+        for superuser in superusers:
+            superuser.boards.append(board)
+
     data_base.commit()
 
 
