@@ -44,3 +44,13 @@ def update_user_is_banned(
     data = check_and_decode_admin_token(token=token)
 
     return admin_crud.update_user_is_banned(data_base=data_base, schema=schema)
+
+@router.post("/create_board", status_code=status.HTTP_204_NO_CONTENT)
+def create_board(
+    schema: admin_schema.BoradCreate,
+    token=Depends(get_oauth2_scheme_admin()),
+    data_base: Session = Depends(get_data_base),
+):
+    data = check_and_decode_admin_token(token=token)
+
+    return admin_crud.create_board(data_base=data_base, schema=schema)
