@@ -22,6 +22,13 @@ user_chat_session_table = Table(
     Column("chat_session_id", ForeignKey("chat_session.id"), primary_key=True),
 )
 
+user_permisson_table = Table(
+    "user_board_table",
+    Base.metadata,
+    Column("user_id", ForeignKey("user.id"), primary_key=True),
+    Column("board_id", ForeignKey("board.id"), primary_key=True),
+)
+
 
 class User(Base):
     __tablename__ = "user"
@@ -31,6 +38,9 @@ class User(Base):
     comments: Mapped[List["Comment"]] = relationship(back_populates="user")  # 1 to N
     chat_sessions: Mapped[List["ChatSession"]] = relationship(
         secondary=user_chat_session_table, back_populates="users"
+    )  # N to M
+    boards: Mapped[List["Board"]] = relationship(
+        secondary=user_permisson_table, back_populates="users"
     )  # N to M
     chats: Mapped[List["Chat"]] = relationship(back_populates="user")  # 1 to N
     ai_logs: Mapped[List["AIlog"]] = relationship(back_populates="user")  # 1 to N
@@ -49,6 +59,9 @@ class Board(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(128), unique=True)
+    users: Mapped[List["User"]] = relationship(
+        secondary=user_permisson_table, back_populates="boards"
+    )  # N to M
     information: Mapped[str] = mapped_column(String(512), unique=True)
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
 
