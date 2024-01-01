@@ -46,6 +46,7 @@
     - Posts: List["Post"] (1 to N)
     - Comments: List["Comment"] (1 to N)
     - ChatSessions: List["ChatSession"] (N to M)
+    - boards : List["Board"] (N to M)
     - Chat: List["Chat"] (1 to N)
     - AIlogs: List["AIlog"] (1 to N)
     - name : str (unique, Not null, length=64)
@@ -58,6 +59,7 @@
 - Board
     - id : int (pk)
     - name : str (unique, Not null, length=128)
+    - users : List["User"] (N to M)
     - information : str (Not null, length=512)
     - is_visible : boolean (Not null, defalut = True)
 - Post
