@@ -27,3 +27,8 @@ class AdminToken(BaseModel):
 class UserBanOption(BaseModel):
     id: int
     is_banned: bool
+
+class BoradCreate(BaseModel):
+    name: str
+    information: str
+    is_visible: bool
