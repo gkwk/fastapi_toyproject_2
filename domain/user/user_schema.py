@@ -72,8 +72,15 @@ class BoardID(BaseModel):
     id: int
 
 
+class PostID(BaseModel):
+    name: str
+    board_id: int
+    id: int
+
+
 class UserDetail(BaseModel):
     name: str
     email: EmailStr
     join_date: datetime.datetime
     boards: List["BoardID"]
+    posts: List["PostID"]
