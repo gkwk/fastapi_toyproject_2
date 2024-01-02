@@ -62,6 +62,7 @@ class Board(Base):
     users: Mapped[List["User"]] = relationship(
         secondary=user_permisson_table, back_populates="boards"
     )  # N to M
+    posts: Mapped[List["Post"]] = relationship(back_populates="board")  # 1 to N
     information: Mapped[str] = mapped_column(String(512))
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
 
@@ -72,6 +73,8 @@ class Post(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     user: Mapped["User"] = relationship(back_populates="posts")
+    board_id: Mapped[int] = mapped_column(ForeignKey("board.id"))
+    board: Mapped["Board"] = relationship(back_populates="posts")
     comments: Mapped[List["Comment"]] = relationship(back_populates="post")
 
     name: Mapped[str] = mapped_column(String(64))
