@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 
 from pydantic import BaseModel, field_validator, EmailStr
 from pydantic_core.core_schema import FieldValidationInfo
@@ -67,7 +68,12 @@ class UserToken(BaseModel):
     user_name: str
 
 
+class BoardID(BaseModel):
+    id: int
+
+
 class UserDetail(BaseModel):
     name: str
     email: EmailStr
     join_date: datetime.datetime
+    boards: List["BoardID"]
