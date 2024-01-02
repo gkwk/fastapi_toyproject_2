@@ -62,7 +62,7 @@ class Board(Base):
     users: Mapped[List["User"]] = relationship(
         secondary=user_permisson_table, back_populates="boards"
     )  # N to M
-    information: Mapped[str] = mapped_column(String(512), unique=True)
+    information: Mapped[str] = mapped_column(String(512))
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
 
 
