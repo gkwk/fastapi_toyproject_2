@@ -11,7 +11,11 @@ from domain.user.user_crud import (
     does_user_email_already_exist,
 )
 from domain.user.user_schema import UserCreate
-from domain.admin.admin_schema import UserBanOption, BoradCreate
+from domain.admin.admin_schema import (
+    UserBanOption,
+    BoradCreate,
+    UserBoardPermissionSwitch,
+)
 from database import session_local
 from auth import get_password_context
 
@@ -43,6 +47,22 @@ def create_board(data_base: Session, schema: BoradCreate):
         for superuser in superusers:
             superuser.boards.append(board)
 
+    data_base.commit()
+
+
+def switch_user_board_permission(data_base: Session, schema: UserBoardPermissionSwitch):
+    user = data_base.query(User).filter_by(id=schema.user_id).first()
+    board = data_base.query(Board).filter_by(id=schema.board_id).first()
+    query = user_permisson_table.select().where(
+        user_permisson_table.c.user_id == schema.user_id,
+        user_permisson_table.c.board_id == schema.board_id,
+    )
+    if schema.is_permitted:
+        if not data_base.execute(query).fetchall():
+            user.boards.append(board)
+    else:
+        if data_base.execute(query).fetchall():
+            user.boards.remove(board)
     data_base.commit()
 
 
