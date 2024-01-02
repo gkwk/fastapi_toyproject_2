@@ -28,7 +28,14 @@ class UserBanOption(BaseModel):
     id: int
     is_banned: bool
 
+
 class BoradCreate(BaseModel):
     name: str
     information: str
     is_visible: bool
+
+
+class UserBoardPermissionSwitch(BaseModel):
+    user_id: int
+    board_id: int
+    is_permitted: bool
