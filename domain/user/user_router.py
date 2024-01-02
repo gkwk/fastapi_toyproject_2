@@ -43,7 +43,7 @@ def get_user_detail(
     )
 
 
-@router.post("/update_detail", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/update_detail", status_code=status.HTTP_204_NO_CONTENT)
 def update_user_detail(
     schema: user_schema.UserUpdate,
     token=Depends(get_oauth2_scheme_user()),
@@ -53,7 +53,7 @@ def update_user_detail(
     user_crud.update_user(data_base=data_base, schema=schema, decoded_token=data)
 
 
-@router.post("/update_password", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/update_password", status_code=status.HTTP_204_NO_CONTENT)
 def update_user_detail(
     schema: user_schema.UserUpdatePassword,
     token=Depends(get_oauth2_scheme_user()),

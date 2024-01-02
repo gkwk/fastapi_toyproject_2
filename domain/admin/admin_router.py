@@ -35,7 +35,7 @@ def login_admin(
     return generate_admin_token(form_data=form_data, data_base=data_base)
 
 
-@router.post("/update_user_board_permission", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/update_user_board_permission", status_code=status.HTTP_204_NO_CONTENT)
 def update_user_board_permission(
     schema: admin_schema.UserBoardPermissionSwitch,
     token=Depends(get_oauth2_scheme_admin()),
@@ -45,7 +45,7 @@ def update_user_board_permission(
     admin_crud.switch_user_board_permission(data_base=data_base, schema=schema)
 
 
-@router.post("/update_user_is_banned", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/update_user_is_banned", status_code=status.HTTP_204_NO_CONTENT)
 def update_user_is_banned(
     schema: admin_schema.UserBanOption,
     token=Depends(get_oauth2_scheme_admin()),
