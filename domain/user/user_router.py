@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from starlette import status
+from fastapi.responses import JSONResponse
 
 from database import get_data_base
 from domain.user import user_schema, user_crud
@@ -11,10 +12,16 @@ from auth import (
     generate_user_token,
 )
 
+from celery_app.celery import create_task
 
 router = APIRouter(
     prefix="/api/user",
 )
+
+@router.get("/test", status_code=status.HTTP_201_CREATED)
+def testing():
+    answer = create_task.delay()
+    return JSONResponse({"task_id": answer.id})
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT)

@@ -142,7 +142,8 @@ target_metadata = models.base.metadata
 alembic revision --autogenerate
 alembic upgrade head
 ```
-- 터미널에서 아래의 명령어 입력
+- 각각의 터미널에서 아래의 명령어들을 입력
 ```bash
-uvicorn main:app --reload
+python main.py
+celery -A celery_app worker -l info --pool=solo
 ```
