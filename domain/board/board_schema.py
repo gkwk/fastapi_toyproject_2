@@ -44,3 +44,41 @@ class PostUpdate(PostCreate):
 class PostDelete(BaseModel):
     id: int
     board_id: int
+
+
+class CommentCreate(BaseModel):
+    content: str
+    post_id: int
+    is_file_attached: bool
+    is_visible: bool
+
+    @field_validator("content")
+    def is_not_empty(cls, value: str):
+        if not value.strip():
+            raise ValueError("값이 공백일 수 없습니다.")
+        return value
+
+
+class CommentRead(BaseModel):
+    id: int
+    content: str
+    post_id: int
+    user_id: int
+    create_date: datetime.datetime
+    update_date: datetime.datetime | None
+    is_file_attached: bool
+    is_visible: bool
+
+
+class CommentsRead(BaseModel):
+    total: int
+    comments: List["CommentRead"]
+
+
+class CommentUpdate(CommentCreate):
+    id: int
+
+
+class CommentDelete(BaseModel):
+    id: int
+    post_id: int
