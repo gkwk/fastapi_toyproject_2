@@ -1,7 +1,10 @@
+from typing import Annotated
+from fastapi import Depends
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
 
 from config import get_settings
+
 
 engine = create_engine(
     get_settings().SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
@@ -28,3 +31,6 @@ def get_data_base():
         yield data_base
     finally:
         data_base.close()
+
+
+data_base_dependency = Annotated[Session, Depends(get_data_base)]
