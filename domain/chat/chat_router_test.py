@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse
 
 
 router = APIRouter(
-    prefix="/api/chat_test",
+    prefix="/chat_test",
 )
 
 
@@ -118,7 +118,7 @@ def chat_html(user_id, chat_id):
             <script>
                 var client_id = {user_id}
                 document.querySelector("#ws-id").textContent = client_id;
-                var ws = new WebSocket(`ws://localhost:8000/api/chat_test/ws/{chat_id}/{user_id}`);                
+                var ws = new WebSocket(`ws://localhost:8000/api/v1/chat_test/ws/{chat_id}/{user_id}`);                
                 
                 ws.onmessage = function(event) {{
                     var jsonData = JSON.parse(event.data)
@@ -209,7 +209,7 @@ async def test(chat_id: int, user_id: int):
 #             <script>
 #                 var client_id = "{uuid_chat}"
 #                 document.querySelector("#ws-id").textContent = client_id;
-#                 var ws = new WebSocket(`ws://localhost:8000/api/chat_test/ws/${{client_id}}`);
+#                 var ws = new WebSocket(`ws://localhost:8000/api/v1/chat_test/ws/${{client_id}}`);
 
 #                 ws.onmessage = function(event) {{
 #                     var jsonData = JSON.parse(event.data)

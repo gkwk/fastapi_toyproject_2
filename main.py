@@ -5,10 +5,8 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 import uvicorn
 
-from domain.user import user_router
-from domain.admin import admin_router, admin_crud
-from domain.board import board_router
-from domain.chat import chat_router,chat_router_test
+import v1_router
+from domain.admin import admin_crud
 
 app = FastAPI()
 
@@ -22,11 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(user_router.router)
-app.include_router(admin_router.router)
-app.include_router(board_router.router)
-app.include_router(chat_router.router)
-app.include_router(chat_router_test.router)
+app.include_router(v1_router.router)
 
 
 if __name__ == "__main__":

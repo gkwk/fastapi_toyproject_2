@@ -6,7 +6,7 @@ from domain.board import board_crud, board_schema
 from auth import current_user_payload
 
 router = APIRouter(
-    prefix="/api/board",
+    prefix="/board",
 )
 
 

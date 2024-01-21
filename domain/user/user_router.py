@@ -15,7 +15,7 @@ from auth import (
 from celery_app.celery import create_task
 
 router = APIRouter(
-    prefix="/api/user",
+    prefix="/user",
 )
 
 

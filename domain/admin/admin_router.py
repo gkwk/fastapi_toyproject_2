@@ -6,7 +6,7 @@ from domain.admin import admin_schema, admin_crud
 from auth import current_admin_payload, validate_and_decode_admin_access_token
 
 router = APIRouter(
-    prefix="/api/admin",
+    prefix="/admin",
 )
 
 

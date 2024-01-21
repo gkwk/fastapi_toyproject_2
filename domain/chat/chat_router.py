@@ -20,7 +20,7 @@ from auth import (
 )
 
 router = APIRouter(
-    prefix="/api/chat",
+    prefix="/chat",
 )
 
 
