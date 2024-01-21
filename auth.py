@@ -38,7 +38,7 @@ http_exception_params = {
         "headers": {"WWW-Authenticate": "Bearer"},
     },
     "not_admin": {
-        "status_code": status.HTTP_401_UNAUTHORIZED,
+        "status_code": status.HTTP_403_FORBIDDEN,
         "detail": "관리자 권한이 존재하지 않습니다.",
         "headers": {"WWW-Authenticate": "Bearer"},
     },
@@ -53,7 +53,7 @@ http_exception_params = {
         "headers": {"WWW-Authenticate": "Bearer"},
     },
     "banned": {
-        "status_code": status.HTTP_401_UNAUTHORIZED,
+        "status_code": status.HTTP_403_FORBIDDEN,
         "detail": "차단되었습니다.",
         "headers": {"WWW-Authenticate": "Bearer"},
     },
