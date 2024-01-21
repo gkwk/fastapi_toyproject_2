@@ -12,7 +12,7 @@ from domain.board.board_schema import (
 )
 
 
-def get_posts(data_base: Session, board_id: int, skip: int = 0, limit: int = 10):
+def get_posts(data_base: Session, board_id: int, skip: int, limit: int):
     posts = (
         data_base.query(Post)
         .filter_by(board_id=board_id)
@@ -25,9 +25,7 @@ def get_posts(data_base: Session, board_id: int, skip: int = 0, limit: int = 10)
 
 
 def get_post_detail(data_base: Session, post_id: int, board_id: int):
-    post_detail = data_base.query(Post).filter_by(id=post_id, board_id=board_id).first()
-
-    return post_detail
+    return data_base.query(Post).filter_by(id=post_id, board_id=board_id).first()
 
 
 def create_post(data_base: Session, schema: PostCreate, token_payload: dict):
@@ -77,7 +75,7 @@ def delete_post(data_base: Session, schema: PostDelete, token_payload: dict):
     data_base.commit()
 
 
-def get_comments(data_base: Session, post_id: int, skip: int = 0, limit: int = 10):
+def get_comments(data_base: Session, post_id: int, skip: int, limit: int):
     comments = (
         data_base.query(Comment)
         .filter_by(post_id=post_id)

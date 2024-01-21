@@ -65,7 +65,6 @@ class UserUpdatePassword(BaseModel):
 class UserToken(BaseModel):
     access_token: str
     token_type: str
-    user_name: str
 
 
 class BoardID(BaseModel):
