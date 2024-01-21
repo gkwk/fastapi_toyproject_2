@@ -8,7 +8,7 @@ import uvicorn
 from domain.user import user_router
 from domain.admin import admin_router, admin_crud
 from domain.board import board_router
-from domain.chat import chat_router
+from domain.chat import chat_router,chat_router_test
 
 app = FastAPI()
 
@@ -26,6 +26,7 @@ app.include_router(user_router.router)
 app.include_router(admin_router.router)
 app.include_router(board_router.router)
 app.include_router(chat_router.router)
+app.include_router(chat_router_test.router)
 
 
 if __name__ == "__main__":

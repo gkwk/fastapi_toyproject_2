@@ -2,22 +2,9 @@ import uuid
 import json
 from typing import Any, Dict
 
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
-from starlette import status
 
-from database import get_data_base
-from domain.chat import *
-from auth import (
-    get_oauth2_scheme_admin,
-    check_and_decode_admin_token,
-    generate_admin_token,
-    get_oauth2_scheme_user,
-    generate_user_token,
-    check_and_decode_user_token,
-)
 
 router = APIRouter(
     prefix="/api/chat_test",
