@@ -10,12 +10,12 @@ from starlette import status
 from database import get_data_base
 from domain.chat import *
 from auth import (
-    get_oauth2_scheme_admin,
-    check_and_decode_admin_token,
-    generate_admin_token,
-    get_oauth2_scheme_user,
-    generate_user_token,
-    check_and_decode_user_token,
+    get_oauth2_scheme_v1,
+    validate_and_decode_user_access_token,
+    generate_access_token,
+    get_oauth2_scheme_v1,
+    generate_access_token,
+    validate_and_decode_user_access_token,
 )
 
 router = APIRouter(
