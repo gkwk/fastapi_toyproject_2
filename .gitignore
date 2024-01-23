@@ -164,3 +164,4 @@ alembic.ini
 *.db
 test.py
 *.sqlite
+models_store/*
