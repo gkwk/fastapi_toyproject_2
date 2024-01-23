@@ -1,4 +1,5 @@
 import sys
+import contextlib
 
 from fastapi import FastAPI
 
@@ -7,8 +8,18 @@ import uvicorn
 
 import v1_router
 from domain.admin import admin_crud
+from database import database_engine_shutdown
 
-app = FastAPI()
+
+@contextlib.asynccontextmanager
+async def app_lifespan(app: FastAPI):
+    print("lifespan_start")
+    yield
+    print("lifespan_shutdown")
+    database_engine_shutdown()
+
+
+app = FastAPI(lifespan=app_lifespan)
 
 origins = ["*"]
 
