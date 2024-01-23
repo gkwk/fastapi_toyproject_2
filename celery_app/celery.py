@@ -1,18 +1,77 @@
 import os
-import time,datetime
+import time, datetime
 
 from celery import Celery
 
-app = Celery(__name__)
-app.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "amqp://guest:guest@localhost:5672")
-app.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "db+sqlite:///celery.sqlite")
+celery_app = Celery(__name__)
+celery_app.conf.broker_url = os.environ.get(
+    "CELERY_BROKER_URL", "amqp://guest:guest@localhost:5672"
+)
+celery_app.conf.result_backend = os.environ.get(
+    "CELERY_RESULT_BACKEND", "db+sqlite:///celery.sqlite"
+)
 
-app.autodiscover_tasks()
+celery_app.autodiscover_tasks()
 
 
-@app.task(name="test_task")
+@celery_app.task(name="test_task")
 def create_task():
     timer = datetime.datetime.now()
     time.sleep(5)
     timerend = datetime.datetime.now()
-    return (timerend-timer).seconds
+    return (timerend - timer).seconds
+
+
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+import pickle
+import uuid
+
+from fastapi import HTTPException
+from starlette import status
+
+from models import AI
+from auth import get_password_context, token_dependency
+from database import data_base_dependency,get_data_base, session_local
+
+
+from database import get_data_base_decorator
+
+from sqlalchemy.orm import Session
+def load_model(path: str):
+    try:
+        with open(path, "rb") as model_file:
+            return pickle.load(model_file)
+    except FileNotFoundError:
+        return None
+
+
+def save_model(path: str, model_object):
+    with open(path, "wb") as model_file:
+        pickle.dump(model_object, model_file)
+
+
+@celery_app.task(name="train_ai_task")
+@get_data_base_decorator
+def train_ai_task(data_base : Session, information, is_visible):
+    result_uuid = uuid.uuid4().hex
+
+    data_frame = pd.read_csv("AI_test.CSV")
+    x = data_frame.drop("y", axis=1)
+    y = data_frame["y"]
+
+    x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.3)
+
+    model = LinearRegression()
+    model.fit(x_train, y_train)
+    y_pred = model.predict(x_val)
+    rmse = mean_squared_error(y_val, y_pred,squared=False)
+    print(rmse)
+
+    save_model(f"models_store/{result_uuid}",model)
+    ai = AI(name=result_uuid, information=information, is_visible=is_visible)
+    data_base.add(ai)
+    data_base.commit()
