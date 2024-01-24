@@ -15,6 +15,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
 
+
 user_chat_session_table = Table(
     "user_chat_session_table",
     Base.metadata,
@@ -49,7 +50,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(256), unique=True)
     password: Mapped[str] = mapped_column(String())
     password_salt: Mapped[str] = mapped_column(String())
-    join_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now())
+    join_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
     is_superuser: Mapped[Boolean] = mapped_column(Boolean(), default=False)
     is_banned: Mapped[Boolean] = mapped_column(Boolean(), default=False)
 
@@ -79,7 +80,7 @@ class Post(Base):
 
     name: Mapped[str] = mapped_column(String(64))
     content: Mapped[str] = mapped_column(String(1024))
-    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now())
+    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
     update_date: Mapped[Optional[DateTime]] = mapped_column(DateTime())
     number_of_view: Mapped[int] = mapped_column(Integer(), default=0)
     number_of_comment: Mapped[int] = mapped_column(Integer(), default=0)
@@ -98,7 +99,7 @@ class Comment(Base):
     post: Mapped["Post"] = relationship(back_populates="comments")
 
     content: Mapped[str] = mapped_column(String(256))
-    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now())
+    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
     update_date: Mapped[Optional[DateTime]] = mapped_column(DateTime())
     is_file_attached: Mapped[Boolean] = mapped_column(Boolean(), default=False)
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
@@ -114,7 +115,7 @@ class ChatSession(Base):
     chats: Mapped[List["Chat"]] = relationship(back_populates="chat_session")
 
     content: Mapped[str] = mapped_column(String(256))
-    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now())
+    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
     update_date: Mapped[Optional[DateTime]] = mapped_column(DateTime())
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
 
@@ -129,7 +130,7 @@ class Chat(Base):
     chat_session: Mapped["ChatSession"] = relationship(back_populates="chats")
 
     content: Mapped[str] = mapped_column(String(256))
-    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now())
+    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
 
 
@@ -153,7 +154,8 @@ class AIlog(Base):
     ai_id: Mapped[int] = mapped_column(ForeignKey("ai.id"))
     ai: Mapped[AI] = relationship(back_populates="ai_logs")
 
-    content: Mapped[str] = mapped_column(String(256))
-    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now())
+    information: Mapped[str] = mapped_column(String(256))
+    result: Mapped[str] = mapped_column(String(256))
+    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
     finish_date: Mapped[Optional[DateTime]] = mapped_column(DateTime())
     is_finished: Mapped[Boolean] = mapped_column(Boolean(), default=False)
