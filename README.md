@@ -147,3 +147,14 @@ alembic upgrade head
 python main.py
 celery -A celery_app worker -l info --pool=solo
 ```
+
+# SQLite 사용시 추가사항
+- alembic init 후 migration 내 env.py 에서 다음과 같이 수정사항 반영
+- SQLite의 ALTER 미지원 문제를 해결하여 DB Column을 변경할 수 있게 해준다.
+```python
+with connectable.connect() as connection:
+    context.configure(
+        connection=connection, target_metadata=target_metadata,
+        render_as_batch=True #추가사항
+    )
+```
