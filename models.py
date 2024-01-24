@@ -155,5 +155,5 @@ class AIlog(Base):
 
     content: Mapped[str] = mapped_column(String(256))
     create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now())
-    finish_date: Mapped[DateTime] = mapped_column(DateTime())
-    is_finished: Mapped[Boolean] = mapped_column(Boolean(), default=True)
+    finish_date: Mapped[Optional[DateTime]] = mapped_column(DateTime())
+    is_finished: Mapped[Boolean] = mapped_column(Boolean(), default=False)
