@@ -29,18 +29,23 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 import pickle
 import uuid
+import json
+
+from datetime import datetime
 
 from fastapi import HTTPException
 from starlette import status
 
-from models import AI
+from models import AI, AIlog
 from auth import get_password_context, token_dependency
-from database import data_base_dependency,get_data_base, session_local
+from database import data_base_dependency, get_data_base, session_local
 
 
 from database import get_data_base_decorator
 
 from sqlalchemy.orm import Session
+
+
 def load_model(path: str):
     try:
         with open(path, "rb") as model_file:
@@ -56,7 +61,7 @@ def save_model(path: str, model_object):
 
 @celery_app.task(name="train_ai_task")
 @get_data_base_decorator
-def train_ai_task(data_base : Session, information, is_visible):
+def train_ai_task(data_base: Session, information, is_visible):
     result_uuid = uuid.uuid4().hex
 
     data_frame = pd.read_csv("AI_test.CSV")
@@ -68,10 +73,37 @@ def train_ai_task(data_base : Session, information, is_visible):
     model = LinearRegression()
     model.fit(x_train, y_train)
     y_pred = model.predict(x_val)
-    rmse = mean_squared_error(y_val, y_pred,squared=False)
+    rmse = mean_squared_error(y_val, y_pred, squared=False)
     print(rmse)
 
-    save_model(f"models_store/{result_uuid}",model)
+    save_model(f"models_store/{result_uuid}.pkl", model)
     ai = AI(name=result_uuid, information=information, is_visible=is_visible)
     data_base.add(ai)
+    data_base.commit()
+
+
+json_encoder = json.JSONEncoder()
+json_decoder = json.JSONDecoder()
+
+@celery_app.task(name="infer_ai_task")
+@get_data_base_decorator
+def infer_ai_task(data_base: Session, ai_log_id: int, ai_id: int):
+    data_frame = pd.read_csv("AI_test.CSV")
+    x = data_frame.drop("y", axis=1)
+    y = data_frame["y"]
+
+    ai = data_base.query(AI).filter_by(id=ai_id).first()
+    model:LinearRegression = load_model(f"models_store/{ai.name}.pkl")
+    y_pred = model.predict(x)
+    rmse = mean_squared_error(y, y_pred, squared=False)
+    
+    ai_log = data_base.query(AIlog).filter_by(id=ai_log_id).first()
+    
+    result = json_decoder.decode(ai_log.result)
+    result["result"] = rmse
+    ai_log.result = json_encoder.encode(result)
+    ai_log.finish_date = datetime.now()
+    ai_log.is_finished = True
+    
+    data_base.add(ai_log)
     data_base.commit()
