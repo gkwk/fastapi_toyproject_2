@@ -8,16 +8,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from starlette import status
 
-from database import get_data_base
-from domain.chat import *
-from auth import (
-    get_oauth2_scheme_v1,
-    validate_and_decode_user_access_token,
-    generate_access_token,
-    get_oauth2_scheme_v1,
-    generate_access_token,
-    validate_and_decode_user_access_token,
-)
+from database import data_base_dependency
+from domain.chat import chat_crud, chat_schema
+from auth import current_user_payload
+from models import ChatSession
 
 router = APIRouter(
     prefix="/chat",
@@ -43,9 +37,6 @@ class ConnectionManager:
 
             await websocket.accept()
 
-        print(self.active_connections)
-        print(self.active_user_id)
-
     def disconnect(self, websocket: WebSocket, chatting_room_id: int, user_id: int):
         self.active_connections[chatting_room_id].pop(websocket)
         self.active_user_id[user_id].pop(chatting_room_id)
@@ -64,45 +55,140 @@ json_encoder = json.JSONEncoder()
 json_decoder = json.JSONDecoder()
 
 
-@router.websocket("/ws/{chatting_room_id}/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, chatting_room_id: int, user_id: int):
-    await manager.connect(websocket, chatting_room_id, user_id)
-    try:
-        for for_websocket in manager.active_connections[chatting_room_id]:
-            for_user_id = manager.active_connections[chatting_room_id][for_websocket][
-                "user_id"
-            ]
-            if for_user_id != user_id:
+@router.post("/create_chatsession", status_code=status.HTTP_204_NO_CONTENT)
+def create_comment(
+    token: current_user_payload,
+    data_base: data_base_dependency,
+    content:str,
+    is_visible:bool
+    
+):
+    chat_crud.create_chatsession(data_base=data_base, token=token, content=content,is_visible=is_visible)
+
+
+
+
+
+@router.websocket("/ws/chat/{chatting_room_id}/{user_id}")
+async def websocket_test_endpoint(
+    websocket: WebSocket,
+    token: current_user_payload,
+    data_base: data_base_dependency,
+    chatting_room_id: int,
+    user_id: int,
+):
+    if user_id == token.get("user_id"):
+        await manager.connect(websocket, chatting_room_id, token.get("user_id"))
+        try:
+            for t_websocket in manager.active_connections[chatting_room_id]:
+                t_user_id = manager.active_connections[chatting_room_id][t_websocket][
+                    "user_id"
+                ]
+                if t_user_id != token.get("user_id"):
+                    await manager.send_personal_message(
+                        json_encoder.encode(o={"user_join": f"{t_user_id}"}), websocket
+                    )
+
+            for chat_query in chat_crud.get_chats(
+                data_base=data_base,
+                token=token,
+                chatting_room_id=chatting_room_id,
+                skip=0,
+                limit=0,
+            ).get("chats"):
                 await manager.send_personal_message(
-                    json_encoder.encode(o={"user_join": f"{for_user_id}"}), websocket
+                    json_encoder.encode(o={"message": f"{chat_query.content}"}), websocket
                 )
-        await manager.broadcast(
-            json_encoder.encode(o={"message": f"Client #{user_id} joined the chat"}),
-            chatting_room_id,
-        )
-        await manager.broadcast(
-            json_encoder.encode(o={"user_join": f"{user_id}"}), chatting_room_id
-        )
-        while True:
-            data = await websocket.receive_text()
-            print(data, websocket)
 
-            data = json_decoder.decode(data)
-            message = data["message"]
-
-            await manager.send_personal_message(
-                json_encoder.encode(o={"message": f"You wrote: {message}"}), websocket
-            )
             await manager.broadcast(
                 json_encoder.encode(
-                    o={"message": f"Client #{user_id} says: {message}"}
+                    o={"message": f'Client #{token.get("user_id")} joined the chat'}
                 ),
                 chatting_room_id,
             )
-    except WebSocketDisconnect:
-        manager.disconnect(websocket, chatting_room_id, user_id)
-        await manager.broadcast(
-            json_encoder.encode(o={"user_left": f"{user_id}"}), chatting_room_id
-        )
-    except Exception:
-        print("Error")
+            await manager.broadcast(
+                json_encoder.encode(o={"user_join": f'{token.get("user_id")}'}),
+                chatting_room_id,
+            )
+            while True:
+                data = await websocket.receive_text()
+                data = json_decoder.decode(data)
+                message = data["message"]
+                chat_crud.create_chat(
+                    data_base=data_base,
+                    token=token,
+                    chat_content=message,
+                    chatting_room_id=chatting_room_id,
+                )
+
+                await manager.send_personal_message(
+                    json_encoder.encode(o={"message": f"You wrote: {message}"}),
+                    websocket,
+                )
+                await manager.broadcast(
+                    json_encoder.encode(
+                        o={"message": f'Client #{token.get("user_id")} says: {message}'}
+                    ),
+                    chatting_room_id,
+                )
+        except WebSocketDisconnect:
+            manager.disconnect(websocket, chatting_room_id, token.get("user_id"))
+            await manager.broadcast(
+                json_encoder.encode(o={"user_left": f'{token.get("user_id")}'}),
+                chatting_room_id,
+            )
+        except Exception:
+            print("Error")
+
+
+# @router.websocket("/ws/test/{chatting_room_id}/{user_id}")
+# async def websocket_test_endpoint(
+#     websocket: WebSocket,
+#     token: current_user_payload,
+#     chatting_room_id: int,
+#     user_id: int,
+# ):
+#     if user_id == token.get("user_id"):
+#         await manager.connect(websocket, chatting_room_id, token.get("user_id"))
+#         try:
+#             for t_websocket in manager.active_connections[chatting_room_id]:
+#                 t_user_id = manager.active_connections[chatting_room_id][t_websocket][
+#                     "user_id"
+#                 ]
+#                 if t_user_id != token.get("user_id"):
+#                     await manager.send_personal_message(
+#                         json_encoder.encode(o={"user_join": f"{t_user_id}"}), websocket
+#                     )
+#             await manager.broadcast(
+#                 json_encoder.encode(
+#                     o={"message": f'Client #{token.get("user_id")} joined the chat'}
+#                 ),
+#                 chatting_room_id,
+#             )
+#             await manager.broadcast(
+#                 json_encoder.encode(o={"user_join": f'{token.get("user_id")}'}),
+#                 chatting_room_id,
+#             )
+#             while True:
+#                 data = await websocket.receive_text()
+#                 data = json_decoder.decode(data)
+#                 message = data["message"]
+
+#                 await manager.send_personal_message(
+#                     json_encoder.encode(o={"message": f"You wrote: {message}"}),
+#                     websocket,
+#                 )
+#                 await manager.broadcast(
+#                     json_encoder.encode(
+#                         o={"message": f'Client #{token.get("user_id")} says: {message}'}
+#                     ),
+#                     chatting_room_id,
+#                 )
+#         except WebSocketDisconnect:
+#             manager.disconnect(websocket, chatting_room_id, token.get("user_id"))
+#             await manager.broadcast(
+#                 json_encoder.encode(o={"user_left": f'{token.get("user_id")}'}),
+#                 chatting_room_id,
+#             )
+#         except Exception:
+#             print("Error")
