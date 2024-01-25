@@ -126,15 +126,15 @@
 alembic init migrations
 ```
 - `./alembic.ini` 에서 `sqlalchemy.url`를 아래와 같이 변경
-```
+```ini
 sqlalchemy.url = sqlite:///./test.sqlite
 ```
 - `./migrations/env.py` 에서 아래의 내용 추가
-```
+```python
 import models
 ```
 - `./migrations/env.py` 에서 `target_metadata`를 아래와 같이 변경
-```
+```python
 target_metadata = models.base.metadata
 ```
 - 터미널에서 아래의 명령어 입력
