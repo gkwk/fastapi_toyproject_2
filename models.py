@@ -1,4 +1,5 @@
 from datetime import datetime
+import inspect
 
 from typing import List, Optional
 from sqlalchemy import (
@@ -10,11 +11,11 @@ from sqlalchemy import (
     ForeignKey,
     Table,
     Column,
+    BigInteger
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
-
 
 user_chat_session_table = Table(
     "user_chat_session_table",
@@ -33,7 +34,8 @@ user_permisson_table = Table(
 
 class User(Base):
     __tablename__ = "user"
-
+    __table_args__ = {"sqlite_autoincrement": True}
+    
     id: Mapped[int] = mapped_column(primary_key=True)
     posts: Mapped[List["Post"]] = relationship(back_populates="user")  # 1 to N
     comments: Mapped[List["Comment"]] = relationship(back_populates="user")  # 1 to N
@@ -57,6 +59,7 @@ class User(Base):
 
 class Board(Base):
     __tablename__ = "board"
+    __table_args__ = {"sqlite_autoincrement": True}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(128), unique=True)
@@ -70,6 +73,7 @@ class Board(Base):
 
 class Post(Base):
     __tablename__ = "post"
+    __table_args__ = {"sqlite_autoincrement": True}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
@@ -91,6 +95,7 @@ class Post(Base):
 
 class Comment(Base):
     __tablename__ = "comment"
+    __table_args__ = {"sqlite_autoincrement": True}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
@@ -107,6 +112,7 @@ class Comment(Base):
 
 class ChatSession(Base):
     __tablename__ = "chat_session"
+    __table_args__ = {"sqlite_autoincrement": True}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     users: Mapped[List["User"]] = relationship(
@@ -122,6 +128,7 @@ class ChatSession(Base):
 
 class Chat(Base):
     __tablename__ = "chat"
+    __table_args__ = {"sqlite_autoincrement": True}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
@@ -136,6 +143,7 @@ class Chat(Base):
 
 class AI(Base):
     __tablename__ = "ai"
+    __table_args__ = {"sqlite_autoincrement": True}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     ai_logs: Mapped[List["AIlog"]] = relationship(back_populates="ai")
@@ -147,6 +155,7 @@ class AI(Base):
 
 class AIlog(Base):
     __tablename__ = "ai_log"
+    __table_args__ = {"sqlite_autoincrement": True}
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))

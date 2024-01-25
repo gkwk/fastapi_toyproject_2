@@ -55,13 +55,17 @@ def get_data_base_for_decorator():
     finally:
         data_base.close()
 
+
 json_encoder = json.JSONEncoder()
+
+
 def get_data_base_decorator(f):
     def wrapper(data_base, *args, **kwargs):
         with get_data_base_for_decorator() as data_base:
             if "data_base" in kwargs:
                 kwargs["data_base"] = data_base
             f(data_base, *args, **kwargs)
+
     return wrapper
 
 
