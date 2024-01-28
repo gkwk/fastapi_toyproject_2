@@ -1,15 +1,9 @@
-import json
-
-from celery_app import celery
-
 from fastapi import APIRouter, HTTPException
 from starlette import status
 
-from models import AI, AIlog
 from database import data_base_dependency
 from domain.ai import ai_crud, ai_schema
 from auth import current_user_payload
-from database import get_data_base_decorator
 
 
 router = APIRouter(
@@ -24,42 +18,118 @@ http_exception_params = {
 }
 
 
-json_encoder = json.JSONEncoder()
-
-
 @router.post("/train_ai", status_code=status.HTTP_201_CREATED)
 def train_ai(
     token: current_user_payload,
-    information: str,
-    is_visible: bool,
+    schema: ai_schema.AICreate,
 ):
-    async_task = celery.train_ai_task.delay(
-        data_base=None, information=information, is_visible=is_visible
+    async_task = ai_crud.create_ai(
+        data_base=None,
+        token=token,
+        information=schema.information,
+        is_visible=schema.is_visible,
     )
+
     return {"task_id": async_task.id}
+
+
+@router.get("/get_ai")
+def get_ai(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: ai_schema.AIRead,
+):
+    return ai_crud.get_ai(data_base=data_base, token=token, ai_id=schema.ai_id)
+
+
+@router.get("/get_ais")
+def get_ais(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: ai_schema.AIsRead,
+):
+    return ai_crud.get_ais(
+        data_base=data_base, token=token, skip=schema.skip, limit=schema.limit
+    )
+
+
+@router.put("/update_ai", status_code=status.HTTP_204_NO_CONTENT)
+def update_ai(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: ai_schema.AIUpdate,
+):
+    ai_crud.update_ai(
+        data_base=data_base,
+        token=token,
+        ai_id=schema.ai_id,
+        information=schema.information,
+        is_visible=schema.is_visible,
+    )
+
+
+@router.delete("/delete_ai", status_code=status.HTTP_204_NO_CONTENT)
+def delete_ai(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: ai_schema.AIDelete,
+):
+    ai_crud.delete_ai(data_base=data_base, token=token, ai_id=schema.ai_id)
 
 
 @router.post("/ai_infer", status_code=status.HTTP_201_CREATED)
-def train_ai(
+def ai_infer(
     data_base: data_base_dependency,
     token: current_user_payload,
-    ai_id: int,
-    information: str,
+    schema: ai_schema.AILogCreate,
 ):
-    ai = data_base.query(AI).filter_by(id=ai_id).first()
+    async_task = ai_crud.create_ailog(
+        data_base=data_base,
+        token=token,
+        ai_id=schema.ai_id,
+        information=schema.information,
+    )
+    return {"task_id": async_task.id}
 
-    if not ai:
-        raise HTTPException(**http_exception_params["ai_model_not_found"])
 
-    ai_log = AIlog(
-        user_id=token.get("user_id"),
-        ai_id=ai_id,
-        information=information,
-        result=json_encoder.encode({"result": None}),
+@router.get("/get_ailog")
+def get_ailog(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: ai_schema.AILogRead,
+):
+    return ai_crud.get_ailog(data_base=data_base, token=token, ailog_id=schema.ailog_id)
+
+
+@router.get("/get_ailogs")
+def get_ailogs(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: ai_schema.AILogsRead,
+):
+    return ai_crud.get_ailogs(
+        data_base=data_base, token=token, skip=schema.skip, limit=schema.limit
     )
 
-    data_base.add(ai_log)
-    data_base.commit()
 
-    async_task = celery.infer_ai_task.delay(data_base=None, ai_log_id=ai_log.id, ai_id=ai_id)
-    return {"task_id": async_task.id}
+@router.put("/update_ailog", status_code=status.HTTP_204_NO_CONTENT)
+def update_ailog(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: ai_schema.AILogUpdate,
+):
+    ai_crud.update_ailog(
+        data_base=data_base,
+        token=token,
+        ailog_id=schema.ailog_id,
+        information=schema.information,
+    )
+
+
+@router.delete("/delete_ailog", status_code=status.HTTP_204_NO_CONTENT)
+def delete_ailog(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: ai_schema.AILogDelete,
+):
+    ai_crud.delete_ailog(data_base=data_base, token=token, ailog_id=schema.ailog_id)
