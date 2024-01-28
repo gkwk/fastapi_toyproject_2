@@ -29,7 +29,7 @@ def create_chatsession(
     )
 
 
-@router.post("/get_chatsession")
+@router.get("/get_chatsession")
 def get_chatsession(
     token: current_user_payload,
     data_base: data_base_dependency,
@@ -42,7 +42,7 @@ def get_chatsession(
     )
 
 
-@router.post("/get_chatsessions")
+@router.get("/get_chatsessions")
 def get_chatsessions(
     token: current_user_payload,
     data_base: data_base_dependency,
@@ -53,7 +53,7 @@ def get_chatsessions(
     )
 
 
-@router.post("/update_chatsession", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/update_chatsession", status_code=status.HTTP_204_NO_CONTENT)
 def update_chatsession(
     token: current_user_payload,
     data_base: data_base_dependency,
@@ -68,7 +68,7 @@ def update_chatsession(
     )
 
 
-@router.post("/delete_chatsession", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete_chatsession", status_code=status.HTTP_204_NO_CONTENT)
 def delete_chatsession(
     token: current_user_payload,
     data_base: data_base_dependency,
@@ -93,7 +93,7 @@ def create_chat(
     )
 
 
-@router.post("/get_chats")
+@router.get("/get_chats")
 def get_chats(
     token: current_user_payload,
     data_base: data_base_dependency,
@@ -108,7 +108,7 @@ def get_chats(
     )
 
 
-@router.post("/update_chat", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/update_chat", status_code=status.HTTP_204_NO_CONTENT)
 def update_chat(
     token: current_user_payload,
     data_base: data_base_dependency,
@@ -124,7 +124,7 @@ def update_chat(
     )
 
 
-@router.post("/delete_chat", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete_chat", status_code=status.HTTP_204_NO_CONTENT)
 def delete_chat(
     token: current_user_payload,
     data_base: data_base_dependency,
