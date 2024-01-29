@@ -3,7 +3,7 @@ from starlette import status
 
 from database import data_base_dependency
 from domain.ai import ai_crud, ai_schema
-from auth import current_user_payload
+from auth import current_user_payload, current_admin_payload
 
 
 router = APIRouter(
@@ -21,7 +21,7 @@ http_exception_params = {
 @router.post("/train_ai", status_code=status.HTTP_201_CREATED)
 def train_ai(
     data_base: data_base_dependency,
-    token: current_user_payload,
+    token: current_admin_payload,
     schema: ai_schema.AICreate,
 ):
     async_task = ai_crud.create_ai(
@@ -51,14 +51,19 @@ def get_ais(
     schema: ai_schema.AIsRead = Depends(),
 ):
     return ai_crud.get_ais(
-        data_base=data_base, token=token, skip=schema.skip, limit=schema.limit
+        data_base=data_base,
+        token=token,
+        is_available=schema.is_available,
+        is_visible=schema.is_visible,
+        skip=schema.skip,
+        limit=schema.limit,
     )
 
 
 @router.put("/update_ai", status_code=status.HTTP_204_NO_CONTENT)
 def update_ai(
     data_base: data_base_dependency,
-    token: current_user_payload,
+    token: current_admin_payload,
     schema: ai_schema.AIUpdate,
 ):
     ai_crud.update_ai(
@@ -74,7 +79,7 @@ def update_ai(
 @router.delete("/delete_ai", status_code=status.HTTP_204_NO_CONTENT)
 def delete_ai(
     data_base: data_base_dependency,
-    token: current_user_payload,
+    token: current_admin_payload,
     schema: ai_schema.AIDelete,
 ):
     ai_crud.delete_ai(data_base=data_base, token=token, ai_id=schema.ai_id)
@@ -111,7 +116,12 @@ def get_ailogs(
     schema: ai_schema.AILogsRead = Depends(),
 ):
     return ai_crud.get_ailogs(
-        data_base=data_base, token=token, skip=schema.skip, limit=schema.limit
+        data_base=data_base,
+        token=token,
+        user_id=schema.user_id,
+        ai_id=schema.ai_id,
+        skip=schema.skip,
+        limit=schema.limit,
     )
 
 

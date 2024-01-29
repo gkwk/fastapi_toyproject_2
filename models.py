@@ -159,6 +159,7 @@ class AI(Base):
     finish_date: Mapped[Optional[DateTime]] = mapped_column(DateTime(), default=None)
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=False)
     is_available: Mapped[Boolean] = mapped_column(Boolean(), default=False)
+    celery_task_id : Mapped[str] = mapped_column(String(64))
 
 
 class AIlog(Base):
@@ -177,3 +178,4 @@ class AIlog(Base):
     update_date: Mapped[Optional[DateTime]] = mapped_column(DateTime(), default=None, onupdate=datetime.now)
     finish_date: Mapped[Optional[DateTime]] = mapped_column(DateTime(), default=None)
     is_finished: Mapped[Boolean] = mapped_column(Boolean(), default=False)
+    celery_task_id : Mapped[str] = mapped_column(String(64))

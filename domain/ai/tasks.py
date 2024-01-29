@@ -35,48 +35,54 @@ def save_model(path: str, model_object):
 @celery_app.task(name="train_ai_task")
 @get_data_base_decorator
 def train_ai_task(data_base: Session, ai_id, is_visible):
-    ai = data_base.query(AI).filter_by(id=ai_id).first()
+    try:
+        ai = data_base.query(AI).filter_by(id=ai_id).first()
 
-    data_frame = pd.read_csv("AI_test.CSV")
-    x = data_frame.drop("y", axis=1)
-    y = data_frame["y"]
+        data_frame = pd.read_csv("AI_test.CSV")
+        x = data_frame.drop("y", axis=1)
+        y = data_frame["y"]
 
-    x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.3)
+        x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.3)
 
-    model = LinearRegression()
-    model.fit(x_train, y_train)
-    y_pred = model.predict(x_val)
-    rmse = mean_squared_error(y_val, y_pred, squared=False)
-    print(rmse)
+        model = LinearRegression()
+        model.fit(x_train, y_train)
+        y_pred = model.predict(x_val)
+        rmse = mean_squared_error(y_val, y_pred, squared=False)
+        print(rmse)
 
-    save_model(f"models_store/{ai.name}_{ai.id}.pkl", model)
+        save_model(f"models_store/{ai.name}_{ai.id}.pkl", model)
 
-    ai.finish_date = datetime.now()
-    ai.is_available = True
-    ai.is_visible = is_visible
-    data_base.add(ai)
-    data_base.commit()
+        ai.finish_date = datetime.now()
+        ai.is_available = True
+        ai.is_visible = is_visible
+        data_base.add(ai)
+        data_base.commit()
+    except:
+        return None
 
 
 @celery_app.task(name="infer_ai_task")
 @get_data_base_decorator
 def infer_ai_task(data_base: Session, ai_log_id: int, ai_id: int):
-    data_frame = pd.read_csv("AI_test.CSV")
-    x = data_frame.drop("y", axis=1)
-    y = data_frame["y"]
+    try:
+        data_frame = pd.read_csv("AI_test.CSV")
+        x = data_frame.drop("y", axis=1)
+        y = data_frame["y"]
 
-    ai = data_base.query(AI).filter_by(id=ai_id).first()
-    model: LinearRegression = load_model(f"models_store/{ai.name}_{ai.id}.pkl")
-    y_pred = model.predict(x)
-    rmse = mean_squared_error(y, y_pred, squared=False)
+        ai = data_base.query(AI).filter_by(id=ai_id).first()
+        model: LinearRegression = load_model(f"models_store/{ai.name}_{ai.id}.pkl")
+        y_pred = model.predict(x)
+        rmse = mean_squared_error(y, y_pred, squared=False)
 
-    ai_log = data_base.query(AIlog).filter_by(id=ai_log_id).first()
+        ai_log = data_base.query(AIlog).filter_by(id=ai_log_id).first()
 
-    result = json_decoder.decode(ai_log.result)
-    result["result"] = rmse
-    ai_log.result = json_encoder.encode(result)
-    ai_log.finish_date = datetime.now()
-    ai_log.is_finished = True
+        result = json_decoder.decode(ai_log.result)
+        result["result"] = rmse
+        ai_log.result = json_encoder.encode(result)
+        ai_log.finish_date = datetime.now()
+        ai_log.is_finished = True
 
-    data_base.add(ai_log)
-    data_base.commit()
+        data_base.add(ai_log)
+        data_base.commit()
+    except:
+        return None
