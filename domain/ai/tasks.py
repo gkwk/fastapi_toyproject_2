@@ -4,7 +4,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 import pickle
-import uuid
+import uuid as UUID
 import json
 from datetime import datetime
 
@@ -34,8 +34,8 @@ def save_model(path: str, model_object):
 
 @celery_app.task(name="train_ai_task")
 @get_data_base_decorator
-def train_ai_task(data_base: Session, information, is_visible):
-    result_uuid = uuid.uuid4().hex
+def train_ai_task(data_base: Session, ai_id, is_visible):
+    ai = data_base.query(AI).filter_by(id=ai_id).first()
 
     data_frame = pd.read_csv("AI_test.CSV")
     x = data_frame.drop("y", axis=1)
@@ -49,8 +49,11 @@ def train_ai_task(data_base: Session, information, is_visible):
     rmse = mean_squared_error(y_val, y_pred, squared=False)
     print(rmse)
 
-    save_model(f"models_store/{result_uuid}.pkl", model)
-    ai = AI(name=result_uuid, information=information, is_visible=is_visible)
+    save_model(f"models_store/{ai.name}_{ai.id}.pkl", model)
+
+    ai.finish_date = datetime.now()
+    ai.is_available = True
+    ai.is_visible = is_visible
     data_base.add(ai)
     data_base.commit()
 
@@ -63,7 +66,7 @@ def infer_ai_task(data_base: Session, ai_log_id: int, ai_id: int):
     y = data_frame["y"]
 
     ai = data_base.query(AI).filter_by(id=ai_id).first()
-    model: LinearRegression = load_model(f"models_store/{ai.name}.pkl")
+    model: LinearRegression = load_model(f"models_store/{ai.name}_{ai.id}.pkl")
     y_pred = model.predict(x)
     rmse = mean_squared_error(y, y_pred, squared=False)
 

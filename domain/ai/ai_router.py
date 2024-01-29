@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from starlette import status
 
 from database import data_base_dependency
@@ -20,13 +20,15 @@ http_exception_params = {
 
 @router.post("/train_ai", status_code=status.HTTP_201_CREATED)
 def train_ai(
+    data_base: data_base_dependency,
     token: current_user_payload,
     schema: ai_schema.AICreate,
 ):
     async_task = ai_crud.create_ai(
-        data_base=None,
+        data_base=data_base,
         token=token,
-        information=schema.information,
+        name=schema.name,
+        description=schema.description,
         is_visible=schema.is_visible,
     )
 
@@ -37,7 +39,7 @@ def train_ai(
 def get_ai(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: ai_schema.AIRead,
+    schema: ai_schema.AIRead = Depends(),
 ):
     return ai_crud.get_ai(data_base=data_base, token=token, ai_id=schema.ai_id)
 
@@ -46,7 +48,7 @@ def get_ai(
 def get_ais(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: ai_schema.AIsRead,
+    schema: ai_schema.AIsRead = Depends(),
 ):
     return ai_crud.get_ais(
         data_base=data_base, token=token, skip=schema.skip, limit=schema.limit
@@ -63,8 +65,9 @@ def update_ai(
         data_base=data_base,
         token=token,
         ai_id=schema.ai_id,
-        information=schema.information,
+        description=schema.description,
         is_visible=schema.is_visible,
+        is_available=schema.is_available,
     )
 
 
@@ -87,7 +90,7 @@ def ai_infer(
         data_base=data_base,
         token=token,
         ai_id=schema.ai_id,
-        information=schema.information,
+        description=schema.description,
     )
     return {"task_id": async_task.id}
 
@@ -96,7 +99,7 @@ def ai_infer(
 def get_ailog(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: ai_schema.AILogRead,
+    schema: ai_schema.AILogRead = Depends(),
 ):
     return ai_crud.get_ailog(data_base=data_base, token=token, ailog_id=schema.ailog_id)
 
@@ -105,7 +108,7 @@ def get_ailog(
 def get_ailogs(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: ai_schema.AILogsRead,
+    schema: ai_schema.AILogsRead = Depends(),
 ):
     return ai_crud.get_ailogs(
         data_base=data_base, token=token, skip=schema.skip, limit=schema.limit
@@ -122,7 +125,7 @@ def update_ailog(
         data_base=data_base,
         token=token,
         ailog_id=schema.ailog_id,
-        information=schema.information,
+        description=schema.description,
     )
 
 

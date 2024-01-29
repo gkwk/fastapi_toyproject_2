@@ -46,7 +46,7 @@ class User(Base):
         secondary=user_permisson_table, back_populates="users"
     )  # N to M
     chats: Mapped[List["Chat"]] = relationship(back_populates="user")  # 1 to N
-    ai_logs: Mapped[List["AIlog"]] = relationship(back_populates="user")  # 1 to N
+    ai_logs: Mapped[List["AIlog"]] = relationship(back_populates="user", cascade="all, delete")  # 1 to N
 
     name: Mapped[str] = mapped_column(String(64), unique=True)
     email: Mapped[str] = mapped_column(String(256), unique=True)
@@ -120,10 +120,12 @@ class ChatSession(Base):
     )
     chats: Mapped[List["Chat"]] = relationship(back_populates="chat_session")
 
+    name: Mapped[str] = mapped_column(String(64))
     content: Mapped[str] = mapped_column(String(256))
     create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
     update_date: Mapped[Optional[DateTime]] = mapped_column(DateTime())
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
+    is_closed: Mapped[Boolean] = mapped_column(Boolean(), default=False)
 
 
 class Chat(Base):
@@ -136,8 +138,10 @@ class Chat(Base):
     chat_session_id: Mapped[int] = mapped_column(ForeignKey("chat_session.id"))
     chat_session: Mapped["ChatSession"] = relationship(back_populates="chats")
 
+
     content: Mapped[str] = mapped_column(String(256))
     create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
+    update_date: Mapped[Optional[DateTime]] = mapped_column(DateTime(), default=None, onupdate=datetime.now)
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
 
 
@@ -146,11 +150,15 @@ class AI(Base):
     __table_args__ = {"sqlite_autoincrement": True}
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    ai_logs: Mapped[List["AIlog"]] = relationship(back_populates="ai")
+    ai_logs: Mapped[List["AIlog"]] = relationship(back_populates="ai", cascade="all, delete")
 
-    name: Mapped[str] = mapped_column(String(64), unique=True)
-    information: Mapped[str] = mapped_column(String(256))
-    is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
+    name: Mapped[str] = mapped_column(String(64))
+    description: Mapped[str] = mapped_column(String(256))
+    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
+    update_date: Mapped[Optional[DateTime]] = mapped_column(DateTime(), default=None, onupdate=datetime.now)
+    finish_date: Mapped[Optional[DateTime]] = mapped_column(DateTime(), default=None)
+    is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=False)
+    is_available: Mapped[Boolean] = mapped_column(Boolean(), default=False)
 
 
 class AIlog(Base):
@@ -163,8 +171,9 @@ class AIlog(Base):
     ai_id: Mapped[int] = mapped_column(ForeignKey("ai.id"))
     ai: Mapped[AI] = relationship(back_populates="ai_logs")
 
-    information: Mapped[str] = mapped_column(String(256))
+    description: Mapped[str] = mapped_column(String(256))
     result: Mapped[str] = mapped_column(String(256))
     create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
-    finish_date: Mapped[Optional[DateTime]] = mapped_column(DateTime())
+    update_date: Mapped[Optional[DateTime]] = mapped_column(DateTime(), default=None, onupdate=datetime.now)
+    finish_date: Mapped[Optional[DateTime]] = mapped_column(DateTime(), default=None)
     is_finished: Mapped[Boolean] = mapped_column(Boolean(), default=False)

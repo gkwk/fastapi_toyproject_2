@@ -1,14 +1,15 @@
 import datetime
 from typing import List
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field
 
 
 class AICreate(BaseModel):
-    information: str
+    name: str
+    description: str
     is_visible: bool
 
-    @field_validator("information")
+    @field_validator("name", "description")
     def is_not_empty(cls, value: str):
         if not value.strip():
             raise ValueError("값이 공백일 수 없습니다.")
@@ -26,8 +27,9 @@ class AIsRead(BaseModel):
 
 class AIUpdate(BaseModel):
     ai_id: int
-    information: str | None
+    description: str | None
     is_visible: bool | None
+    is_available: bool | None
 
 
 class AIDelete(BaseModel):
@@ -36,9 +38,9 @@ class AIDelete(BaseModel):
 
 class AILogCreate(BaseModel):
     ai_id: int
-    information: str
+    description: str
 
-    @field_validator("information")
+    @field_validator("description")
     def is_not_empty(cls, value: str):
         if not value.strip():
             raise ValueError("값이 공백일 수 없습니다.")
@@ -56,7 +58,7 @@ class AILogsRead(BaseModel):
 
 class AILogUpdate(BaseModel):
     ailog_id: int
-    information: str | None
+    description: str | None
 
 
 class AILogDelete(BaseModel):
