@@ -25,8 +25,8 @@ data_base.commit()
 
 TEST_ADMIN_ID = "admin"
 TEST_ADMIN_EMAIL = "admin@test.com"
-TEST_ADMIN_PASSWORD1 = "1"
-TEST_ADMIN_PASSWORD2 = "1"
+TEST_ADMIN_PASSWORD1 = "12345678"
+TEST_ADMIN_PASSWORD2 = "12345678"
 
 TEST_AI_NAME = "AI_test_1_name"
 TEST_AI_DESCRIPTION = "AI_test_1_description"

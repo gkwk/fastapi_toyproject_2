@@ -15,11 +15,3 @@ celery_app = Celery(__name__, backend="db+sqlite:///celery.sqlite", broker="amqp
 # )
 
 celery_app.autodiscover_tasks(["domain.ai"])
-
-
-@celery_app.task(name="test_task")
-def create_task():
-    timer = datetime.datetime.now()
-    time.sleep(5)
-    timerend = datetime.datetime.now()
-    return (timerend - timer).seconds

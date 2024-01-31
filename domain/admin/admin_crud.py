@@ -105,7 +105,7 @@ def create_admin_with_terminal():
                 raise ValueError(
                     http_exception_params["already_user_email_existed"]["detail"]
                 )
-            UserCreate(name=name, password1="1", password2="1", email=email)
+            UserCreate(name=name, password1="12345678", password2="12345678", email=email)
             break
         except Exception as ex:
             print(ex)

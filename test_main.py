@@ -39,8 +39,8 @@ def test_create_user():
         "/api/v1/user/create",
         json={
             "name": "test_1",
-            "password1": "1",
-            "password2": "1",
+            "password1": "12345678",
+            "password2": "12345678",
             "email": "test_1@test.com",
         },
     )
@@ -51,7 +51,7 @@ def test_create_user():
 def test_login_user():
     response = client.post(
         "/api/v1/user/login",
-        data={"username": "test_1", "password": "1"},
+        data={"username": "test_1", "password": "12345678"},
         headers={"content-type": "application/x-www-form-urlencoded"},
     )
     assert response.status_code == 200

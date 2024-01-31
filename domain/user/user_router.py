@@ -3,7 +3,6 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
-from fastapi.responses import JSONResponse
 
 from database import data_base_dependency
 from domain.user import user_schema, user_crud
@@ -12,17 +11,10 @@ from auth import (
     current_user_payload,
 )
 
-from celery_app.celery import create_task
 
 router = APIRouter(
     prefix="/user",
 )
-
-
-@router.get("/test", status_code=status.HTTP_201_CREATED)
-def testing():
-    answer = create_task.delay()
-    return JSONResponse({"task_id": answer.id})
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT)
@@ -55,7 +47,7 @@ def update_user_detail(
 
 
 @router.put("/update_password", status_code=status.HTTP_204_NO_CONTENT)
-def update_user_detail(
+def update_user_password(
     schema: user_schema.UserUpdatePassword,
     token: current_user_payload,
     data_base: data_base_dependency,
