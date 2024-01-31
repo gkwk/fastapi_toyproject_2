@@ -180,10 +180,8 @@ with connectable.connect() as connection:
 
 # 개선을 위한 임시 목표 (개선 후 삭제)
 - admin, board, chat, user 기능 예외 처리 코드 추가
-- admin, board, chat, user 기능 테스트 코드 추가
-- admin, user의 사용자 생성 기능에 유효성 검사 기능 추가
-    - password 최소 및 최대 길이 추가
-- ai 기능 테스트 코드에 case 추가
+- admin, board, chat 기능 테스트 코드 추가
+- ai, user 기능 테스트 코드에 case 추가
 - 예외 메세지나 URL 경로 등은 하나의 파일에 정리하는 등의 조치로 중복 코드 정리
     - 테스트 코드에 URL 경로가 하드 코딩되어 있으므로 문제 해결 필요
 - chat의 채팅방 입장 권한 판별 기능 추가
