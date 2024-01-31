@@ -87,7 +87,8 @@ def create_admin_with_terminal():
 
     while True:
         try:
-            name = input("Admin name : ")
+            print("Admin name : ",end="")
+            name = input()
             if get_user_with_username(data_base=data_base, user_name=name):
                 raise ValueError(
                     http_exception_params["already_user_name_existed"]["detail"]
@@ -98,7 +99,8 @@ def create_admin_with_terminal():
 
     while True:
         try:
-            email = input("Admin email : ")
+            print("Admin email : ",end="")
+            email = input()
             if get_user_with_email(data_base=data_base, user_email=email):
                 raise ValueError(
                     http_exception_params["already_user_email_existed"]["detail"]
@@ -110,8 +112,10 @@ def create_admin_with_terminal():
 
     while True:
         try:
-            password1 = getpass.getpass("Password : ")
-            password2 = getpass.getpass("Password Confirm : ")
+            print("Password : ",end="")
+            password1 = getpass.getpass()
+            print("Password Confirm : ",end="")
+            password2 = getpass.getpass()
             schema = UserCreate(
                 name=name, password1=password1, password2=password2, email=email
             )

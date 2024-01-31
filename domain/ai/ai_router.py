@@ -80,7 +80,7 @@ def update_ai(
 def delete_ai(
     data_base: data_base_dependency,
     token: current_admin_payload,
-    schema: ai_schema.AIDelete,
+    schema: ai_schema.AIDelete = Depends(),
 ):
     ai_crud.delete_ai(data_base=data_base, token=token, ai_id=schema.ai_id)
 
@@ -143,6 +143,6 @@ def update_ailog(
 def delete_ailog(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: ai_schema.AILogDelete,
+    schema: ai_schema.AILogDelete = Depends(),
 ):
     ai_crud.delete_ailog(data_base=data_base, token=token, ailog_id=schema.ailog_id)
