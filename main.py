@@ -2,6 +2,7 @@ import sys
 import contextlib
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from starlette.middleware.cors import CORSMiddleware
 import uvicorn
@@ -20,6 +21,7 @@ async def app_lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=app_lifespan)
+app.mount("/static", StaticFiles(directory="staticfile"), name="static")
 
 origins = ["*"]
 
