@@ -89,7 +89,7 @@ def get_comments(data_base: Session, post_id: int, skip: int, limit: int):
 
 def get_comment_detail(data_base: Session, comment_id: int, post_id: int):
     comment_detail = (
-        data_base.query(Post).filter_by(id=comment_id, post_id=post_id).first()
+        data_base.query(Comment).filter_by(id=comment_id, post_id=post_id).first()
     )
 
     return comment_detail
