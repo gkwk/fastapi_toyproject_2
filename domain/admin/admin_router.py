@@ -11,7 +11,7 @@ router = APIRouter(
 
 
 @router.get(
-    "/users",
+    "/get_users",
     response_model=admin_schema.UserMoreDetailList,
     dependencies=[Depends(validate_and_decode_admin_access_token)],
 )

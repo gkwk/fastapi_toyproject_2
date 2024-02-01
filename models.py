@@ -24,12 +24,21 @@ user_chat_session_table = Table(
     Column("chat_session_id", ForeignKey("chat_session.id"), primary_key=True),
 )
 
-user_permisson_table = Table(
-    "user_board_table",
-    Base.metadata,
-    Column("user_id", ForeignKey("user.id"), primary_key=True),
-    Column("board_id", ForeignKey("board.id"), primary_key=True),
-)
+# user_permisson_table = Table(
+#     "user_board_table",
+#     Base.metadata,
+#     Column("user_id", ForeignKey("user.id"), primary_key=True),
+#     Column("board_id", ForeignKey("board.id"), primary_key=True),
+# )
+
+class UserPermissionTable(Base):
+    __tablename__ = "user_board_table"
+    # __table_args__ = {"sqlite_autoincrement": True}
+    
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), primary_key=True)
+    board_id: Mapped[int] = mapped_column(ForeignKey("board.id"), primary_key=True)
+
+
 
 
 class User(Base):
@@ -43,7 +52,7 @@ class User(Base):
         secondary=user_chat_session_table, back_populates="users"
     )  # N to M
     boards: Mapped[List["Board"]] = relationship(
-        secondary=user_permisson_table, back_populates="users"
+        secondary="user_board_table", back_populates="users"
     )  # N to M
     chats: Mapped[List["Chat"]] = relationship(back_populates="user")  # 1 to N
     ai_logs: Mapped[List["AIlog"]] = relationship(back_populates="user", cascade="all, delete")  # 1 to N
@@ -64,7 +73,8 @@ class Board(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(128), unique=True)
     users: Mapped[List["User"]] = relationship(
-        secondary=user_permisson_table, back_populates="boards"
+        # class는 table명을 사용한다. class 아닌 table을 사용하면 table 변수를 사용한다. 
+        secondary="user_board_table", back_populates="boards"
     )  # N to M
     posts: Mapped[List["Post"]] = relationship(back_populates="board")  # 1 to N
     information: Mapped[str] = mapped_column(String(512))

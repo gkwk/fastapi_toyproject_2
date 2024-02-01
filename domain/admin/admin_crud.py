@@ -4,7 +4,7 @@ import getpass
 
 from starlette import status
 
-from models import User, Board, user_permisson_table
+from models import User, Board, UserPermissionTable
 from domain.user.user_crud import (
     get_user_with_username,
     get_user_with_email,
@@ -68,16 +68,29 @@ def update_user_board_permission(
 ):
     user = data_base.query(User).filter_by(id=user_id).first()
     board = data_base.query(Board).filter_by(id=board_id).first()
-    query = user_permisson_table.select().where(
-        user_permisson_table.c.user_id == user_id,
-        user_permisson_table.c.board_id == board_id,
-    )
+    permission = data_base.query(UserPermissionTable).filter_by(user_id = user_id, board_id=board_id).first()
+    
     if is_visible:
-        if not data_base.execute(query).fetchall():
+        if not permission:
             user.boards.append(board)
     else:
-        if data_base.execute(query).fetchall():
+        if permission:
             user.boards.remove(board)
+    
+    
+    # user_permisson_table을 table로 사용시의 코드
+    # query = user_permisson_table.select().where(
+    #     user_permisson_table.c.user_id == user_id,
+    #     user_permisson_table.c.board_id == board_id,
+    # )
+    # if is_visible:
+    #     if not data_base.execute(query).fetchall():
+    #         user.boards.append(board)
+    # else:
+    #     if data_base.execute(query).fetchall():
+    #         user.boards.remove(board)
+    
+    
     data_base.commit()
 
 
