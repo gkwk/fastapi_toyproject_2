@@ -35,6 +35,10 @@ app.add_middleware(
 
 app.include_router(v1_router.router)
 
+@app.get("/",tags=["main"])
+def index_page():
+    return {"message" : "Hello, FastAPI!"}
+
 
 if __name__ == "__main__":
     argv = sys.argv[1:]
