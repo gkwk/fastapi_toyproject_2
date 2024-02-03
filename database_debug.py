@@ -1,5 +1,5 @@
 from models import User
-from domain.user.user_schema import UserCreate
+from domain.user.user_schema import RequestUserCreate
 from domain.user.user_crud import create_user
 from datetime import datetime
 from database import session_local
@@ -16,7 +16,7 @@ try:
         name = f"test{i}"
         email = f"test{i}@test.com"
         password = f"{i}"
-        schema = UserCreate(
+        schema = RequestUserCreate(
             name=name, password1=password, password2=password, email=email
         )
 

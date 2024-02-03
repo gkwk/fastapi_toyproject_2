@@ -11,21 +11,7 @@ from domain.ai import tasks
 from celery import uuid
 from celery_app.celery import celery_app
 from celery.result import AsyncResult
-
-http_exception_params = {
-    "ai_model_not_found": {
-        "status_code": status.HTTP_404_NOT_FOUND,
-        "detail": "AI 모델이 존재하지 않습니다.",
-    },
-    "ai_log_not_found": {
-        "status_code": status.HTTP_404_NOT_FOUND,
-        "detail": "AI 로그가 존재하지 않습니다.",
-    },
-    "user_not_matched": {
-        "status_code": status.HTTP_403_FORBIDDEN,
-        "detail": "권한이 없습니다.",
-    },
-}
+from http_execption_params import http_exception_params
 
 json_encoder = json.JSONEncoder()
 json_decoder = json.JSONDecoder()
@@ -131,7 +117,7 @@ def delete_ai(
 
     if not ai:
         raise HTTPException(**http_exception_params["ai_model_not_found"])
-    
+
     if not ai.is_available:
         celery_task = AsyncResult(ai.celery_task_id, app=celery_app)
         celery_task.revoke(terminate=True)

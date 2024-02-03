@@ -5,7 +5,7 @@ from pydantic import BaseModel, field_validator, EmailStr, Field
 from pydantic_core.core_schema import ValidationInfo
 
 
-class UserCreate(BaseModel):
+class RequestUserCreate(BaseModel):
     name: str = Field(min_length=1, max_length=64)
     password1: str = Field(min_length=8, max_length=32)
     password2: str = Field(min_length=8, max_length=32)
@@ -24,18 +24,7 @@ class UserCreate(BaseModel):
         return value
 
 
-class UserReadWithEmailAndName(BaseModel):
-    name: str = Field(min_length=1, max_length=64)
-    email: EmailStr = Field(min_length=1, max_length=256)
-
-    @field_validator("name", "email")
-    def is_not_empty(cls, value: str):
-        if not value.strip():
-            raise ValueError("값이 공백일 수 없습니다.")
-        return value
-
-
-class UserUpdate(BaseModel):
+class RequestUserUpdate(BaseModel):
     email: EmailStr = Field(min_length=1, max_length=256)
 
     @field_validator("email")
@@ -45,7 +34,7 @@ class UserUpdate(BaseModel):
         return value
 
 
-class UserUpdatePassword(BaseModel):
+class RequestUserUpdatePassword(BaseModel):
     password1: str = Field(min_length=8, max_length=32)
     password2: str = Field(min_length=8, max_length=32)
 
@@ -62,24 +51,24 @@ class UserUpdatePassword(BaseModel):
         return value
 
 
-class UserToken(BaseModel):
+class ResponseUserToken(BaseModel):
     access_token: str
     token_type: str
 
 
-class BoardID(BaseModel):
+class UserDetailBoard(BaseModel):
     id: int = Field(ge=1)
 
 
-class PostID(BaseModel):
+class UserDetailPost(BaseModel):
+    id: int = Field(ge=1)
     name: str
     board_id: int = Field(ge=1)
-    id: int = Field(ge=1)
 
 
-class UserDetail(BaseModel):
+class ResponseUserDetail(BaseModel):
     name: str = Field(min_length=1, max_length=64)
     email: EmailStr = Field(min_length=1, max_length=256)
     join_date: datetime.datetime
-    boards: List["BoardID"]
-    posts: List["PostID"]
+    boards: List["UserDetailBoard"]
+    posts: List["UserDetailPost"]

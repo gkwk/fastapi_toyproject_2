@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends
 from starlette import status
 
@@ -5,110 +7,159 @@ from database import data_base_dependency
 from domain.board import board_crud, board_schema
 from auth import current_user_payload
 
-router = APIRouter(
-    prefix="/board",
-)
+router = APIRouter(prefix="/board", tags=["board"])
 
 
-@router.post("/create_post", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/create_post", status_code=status.HTTP_201_CREATED)
 def create_post(
-    schema: board_schema.PostCreate,
-    token: current_user_payload,
     data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: board_schema.RequestPostCreate,
 ):
-    board_crud.create_post(data_base=data_base, schema=schema, token_payload=token)
+    board_crud.create_post(
+        data_base=data_base,
+        token=token,
+        name=schema.name,
+        board_id=schema.board_id,
+        content=schema.content,
+        is_file_attached=schema.is_file_attached,
+        is_visible=schema.is_visible,
+    )
+
+    return {"result": "success"}
 
 
-@router.get("/get_post/", response_model=board_schema.PostRead)
+@router.get("/get_post/", response_model=board_schema.ResponsePostRead)
 def get_post(
-    board_id: int,
-    post_id: int,
-    token: current_user_payload,
     data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: Annotated[board_schema.RequestPostRead, Depends()],
 ):
     return board_crud.get_post_detail(
-        data_base=data_base, post_id=post_id, board_id=board_id
+        data_base=data_base,
+        token=token,
+        id=schema.id,
+        board_id=schema.board_id,
     )
 
 
-@router.get("/get_posts/", response_model=board_schema.PostsRead)
+@router.get("/get_posts/", response_model=board_schema.ResponsePostsRead)
 def get_posts(
-    token: current_user_payload,
     data_base: data_base_dependency,
-    board_id: int,
-    skip: int = 10,
-    limit: int = 20,
+    token: current_user_payload,
+    schema: Annotated[board_schema.RequestPostsRead, Depends()],
 ):
     return board_crud.get_posts(
-        data_base=data_base, board_id=board_id, skip=skip, limit=limit
+        data_base=data_base,
+        board_id=schema.board_id,
+        skip=schema.skip,
+        limit=schema.limit,
     )
 
 
 @router.put("/update_post", status_code=status.HTTP_204_NO_CONTENT)
 def update_post(
-    schema: board_schema.PostUpdate,
-    token: current_user_payload,
     data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: board_schema.RequestPostUpdate,
 ):
-    board_crud.update_post(data_base=data_base, schema=schema, token_payload=token)
+    board_crud.update_post(
+        data_base=data_base,
+        token=token,
+        id=schema.id,
+        board_id=schema.board_id,
+        name=schema.name,
+        content=schema.content,
+        is_file_attached=schema.is_file_attached,
+        is_visible=schema.is_visible,
+    )
 
 
 @router.delete("/delete_post", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(
     token: current_user_payload,
     data_base: data_base_dependency,
-    schema: board_schema.PostDelete = Depends(),
+    schema: Annotated[board_schema.RequestPostDelete, Depends()],
 ):
-    board_crud.delete_post(data_base=data_base, schema=schema, token_payload=token)
-
-
-@router.post("/create_comment", status_code=status.HTTP_204_NO_CONTENT)
-def create_comment(
-    schema: board_schema.CommentCreate,
-    token: current_user_payload,
-    data_base: data_base_dependency,
-):
-    board_crud.create_comment(data_base=data_base, schema=schema, token_payload=token)
-
-
-@router.get("/get_comment", response_model=board_schema.CommentRead)
-def get_comment(
-    post_id: int,
-    comment_id: int,
-    token: current_user_payload,
-    data_base: data_base_dependency,
-):
-    return board_crud.get_comment_detail(
-        data_base=data_base, post_id=post_id, comment_id=comment_id
+    board_crud.delete_post(
+        data_base=data_base,
+        token=token,
+        id=schema.id,
+        board_id=schema.board_id,
     )
 
 
-@router.get("/get_comments", response_model=board_schema.CommentsRead)
+@router.post("/create_comment", status_code=status.HTTP_201_CREATED)
+def create_comment(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: board_schema.RequestCommentCreate,
+):
+    board_crud.create_comment(
+        data_base=data_base,
+        token=token,
+        post_id=schema.post_id,
+        content=schema.content,
+        is_file_attached=schema.is_file_attached,
+        is_visible=schema.is_visible,
+    )
+
+
+@router.get("/get_comment", response_model=board_schema.ResponseCommentRead)
+def get_comment(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: Annotated[board_schema.RequestCommentRead, Depends()],
+):
+    return board_crud.get_comment_detail(
+        data_base=data_base,
+        token=token,
+        id=schema.id,
+        post_id=schema.post_id,
+    )
+
+
+@router.get("/get_comments", response_model=board_schema.ResponseCommentsRead)
 def get_comments(
     token: current_user_payload,
     data_base: data_base_dependency,
-    post_id: int,
-    skip: int = 0,
-    limit: int = 10,
+    schema: Annotated[board_schema.RequestCommentsRead, Depends()],
 ):
     return board_crud.get_comments(
-        data_base=data_base, post_id=post_id, skip=skip, limit=limit
+        data_base=data_base,
+        token=token,
+        post_id=schema.post_id,
+        skip=schema.skip,
+        limit=schema.limit,
     )
 
 
 @router.put("/update_comment", status_code=status.HTTP_204_NO_CONTENT)
 def update_comment(
-    schema: board_schema.CommentUpdate,
-    token: current_user_payload,
     data_base: data_base_dependency,
+    token: current_user_payload,
+    schema: board_schema.RequestCommentUpdate,
 ):
-    board_crud.update_comment(data_base=data_base, schema=schema, token_payload=token)
+    board_crud.update_comment(
+        data_base=data_base,
+        token=token,
+        id=schema.id,
+        post_id=schema.post_id,
+        content=schema.content,
+        is_file_attached=schema.is_file_attached,
+        is_visible=schema.is_visible,
+    )
 
 
 @router.delete("/delete_comment", status_code=status.HTTP_204_NO_CONTENT)
 def delete_comment(
-    token: current_user_payload,
     data_base: data_base_dependency,
-    schema: board_schema.CommentDelete = Depends(),
+    token: current_user_payload,
+    schema: Annotated[board_schema.CommentDelete, Depends()],
 ):
-    board_crud.delete_comment(data_base=data_base, schema=schema, token_payload=token)
+    board_crud.delete_comment(
+        data_base=data_base,
+        token=token,
+        id=schema.id,
+        post_id=schema.post_id,
+    )

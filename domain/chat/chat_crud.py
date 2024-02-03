@@ -35,18 +35,31 @@ def get_chatsession(
 def get_chatsessions(
     data_base: data_base_dependency,
     token: current_user_payload,
-    skip: int,
-    limit: int,
+    user_id: int | None,
+    skip: int | None,
+    limit: int | None,
 ):
+    filter_kwargs = {}
+
+    if skip == None:
+        skip = 0
+    if limit == None:
+        limit = 10
+
+    if token.get("is_admin"):
+        if user_id != None:
+            filter_kwargs["user_id"] = user_id
+    else:
+        filter_kwargs["user_id"] = user_id
+
     chat_sesstion = (
         data_base.query(ChatSession)
-        .filter_by()
+        .filter_by(**filter_kwargs)
         .order_by(Chat.create_date.asc(), Chat.id.asc())
     )
     total = chat_sesstion.count()
-    # chats = chats.offset(skip).limit(limit).all()
-    chat_sesstion = chat_sesstion.all()
-    return {"total": total, "chats": chat_sesstion}
+    chat_sesstion = chat_sesstion.offset(skip).limit(limit).all()
+    return {"total": total, "chat_sesstion": chat_sesstion}
 
 
 def update_chatsession(
@@ -97,17 +110,23 @@ def get_chats(
     data_base: data_base_dependency,
     token: current_user_payload,
     chatting_room_id: int,
-    skip: int,
-    limit: int,
+    skip: int | None,
+    limit: int | None,
 ):
+    filter_kwargs = {"chat_session_id": chatting_room_id}
+
+    if skip == None:
+        skip = 0
+    if limit == None:
+        limit = 10
+
     chats = (
         data_base.query(Chat)
-        .filter_by(chat_session_id=chatting_room_id)
+        .filter_by(**filter_kwargs)
         .order_by(Chat.create_date.asc(), Chat.id.asc())
     )
     total = chats.count()
-    # chats = chats.offset(skip).limit(limit).all()
-    chats = chats.all()
+    chats = chats.offset(skip).limit(limit).all()
     return {"total": total, "chats": chats}
 
 

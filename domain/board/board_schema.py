@@ -1,13 +1,13 @@
-import datetime
+from datetime import datetime
 from typing import List
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field
 
 
-class PostCreate(BaseModel):
-    name: str
-    content: str
-    board_id: int
+class RequestPostCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=64)
+    content: str = Field(min_length=1, max_length=1024)
+    board_id: int = Field(ge=1)
     is_file_attached: bool
     is_visible: bool
 
@@ -18,37 +18,48 @@ class PostCreate(BaseModel):
         return value
 
 
-class PostRead(BaseModel):
-    id: int
-    name: str
-    content: str
-    board_id: int
-    create_date: datetime.datetime
-    update_date: datetime.datetime | None
-    number_of_view: int
-    number_of_comment: int
-    number_of_like: int
+class RequestPostRead(BaseModel):
+    id: int = Field(ge=1)
+    board_id: int = Field(ge=1)
+
+
+class RequestPostsRead(BaseModel):
+    board_id: int = Field(ge=1)
+    skip: int | None = Field(default=None, ge=0)
+    limit: int | None = Field(default=None, ge=1)
+
+
+class ResponsePostRead(BaseModel):
+    id: int = Field(ge=1)
+    name: str = Field(min_length=1, max_length=64)
+    content: str = Field(min_length=1, max_length=1024)
+    board_id: int = Field(ge=1)
+    create_date: datetime
+    update_date: datetime | None
+    number_of_view: int = Field(ge=0)
+    number_of_comment: int = Field(ge=0)
+    number_of_like: int = Field(ge=0)
     is_file_attached: bool
     is_visible: bool
 
 
-class PostsRead(BaseModel):
-    total: int
-    posts: List["PostRead"]
+class ResponsePostsRead(BaseModel):
+    total: int = Field(ge=0)
+    posts: List["ResponsePostRead"]
 
 
-class PostUpdate(PostCreate):
-    id: int
+class RequestPostUpdate(RequestPostCreate):
+    id: int = Field(ge=1)
 
 
-class PostDelete(BaseModel):
-    id: int
-    board_id: int
+class RequestPostDelete(BaseModel):
+    id: int = Field(ge=1)
+    board_id: int = Field(ge=1)
 
 
-class CommentCreate(BaseModel):
-    content: str
-    post_id: int
+class RequestCommentCreate(BaseModel):
+    content: str = Field(min_length=1, max_length=256)
+    post_id: int = Field(ge=1)
     is_file_attached: bool
     is_visible: bool
 
@@ -59,26 +70,37 @@ class CommentCreate(BaseModel):
         return value
 
 
-class CommentRead(BaseModel):
-    id: int
-    content: str
-    post_id: int
-    user_id: int
-    create_date: datetime.datetime
-    update_date: datetime.datetime | None
+class RequestCommentRead(BaseModel):
+    id: int = Field(ge=1)
+    post_id: int = Field(ge=1)
+
+
+class RequestCommentsRead(BaseModel):
+    post_id: int = Field(ge=1)
+    skip: int | None = Field(default=None, ge=0)
+    limit: int | None = Field(default=None, ge=1)
+
+
+class ResponseCommentRead(BaseModel):
+    id: int = Field(ge=1)
+    content: str = Field(min_length=1, max_length=256)
+    post_id: int = Field(ge=1)
+    user_id: int = Field(ge=1)
+    create_date: datetime
+    update_date: datetime | None
     is_file_attached: bool
     is_visible: bool
 
 
-class CommentsRead(BaseModel):
-    total: int
-    comments: List["CommentRead"]
+class ResponseCommentsRead(BaseModel):
+    total: int = Field(ge=0)
+    comments: List["ResponseCommentRead"]
 
 
-class CommentUpdate(CommentCreate):
-    id: int
+class RequestCommentUpdate(RequestCommentCreate):
+    id: int = Field(ge=1)
 
 
 class CommentDelete(BaseModel):
-    id: int
-    post_id: int
+    id: int = Field(ge=1)
+    post_id: int = Field(ge=1)

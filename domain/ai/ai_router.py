@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
 from starlette import status
 
 from database import data_base_dependency
@@ -6,23 +8,14 @@ from domain.ai import ai_crud, ai_schema
 from auth import current_user_payload, current_admin_payload
 
 
-router = APIRouter(
-    prefix="/ai",
-)
-
-http_exception_params = {
-    "ai_model_not_found": {
-        "status_code": status.HTTP_404_NOT_FOUND,
-        "detail": "AI 모델이 존재하지 않습니다.",
-    },
-}
+router = APIRouter(prefix="/ai", tags=["ai"])
 
 
 @router.post("/train_ai", status_code=status.HTTP_201_CREATED)
 def train_ai(
     data_base: data_base_dependency,
     token: current_admin_payload,
-    schema: ai_schema.AICreate,
+    schema: ai_schema.RequestAICreate,
 ):
     async_task = ai_crud.create_ai(
         data_base=data_base,
@@ -39,16 +32,20 @@ def train_ai(
 def get_ai(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: ai_schema.AIRead = Depends(),
+    schema: Annotated[ai_schema.RequestAIRead, Depends()],
 ):
-    return ai_crud.get_ai(data_base=data_base, token=token, ai_id=schema.ai_id)
+    return ai_crud.get_ai(
+        data_base=data_base,
+        token=token,
+        ai_id=schema.ai_id,
+    )
 
 
 @router.get("/get_ais")
 def get_ais(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: ai_schema.AIsRead = Depends(),
+    schema: Annotated[ai_schema.RequestAIsRead, Depends()],
 ):
     return ai_crud.get_ais(
         data_base=data_base,
@@ -64,7 +61,7 @@ def get_ais(
 def update_ai(
     data_base: data_base_dependency,
     token: current_admin_payload,
-    schema: ai_schema.AIUpdate,
+    schema: ai_schema.RequestAIUpdate,
 ):
     ai_crud.update_ai(
         data_base=data_base,
@@ -80,16 +77,20 @@ def update_ai(
 def delete_ai(
     data_base: data_base_dependency,
     token: current_admin_payload,
-    schema: ai_schema.AIDelete = Depends(),
+    schema: Annotated[ai_schema.RequestAIDelete, Depends()],
 ):
-    ai_crud.delete_ai(data_base=data_base, token=token, ai_id=schema.ai_id)
+    ai_crud.delete_ai(
+        data_base=data_base,
+        token=token,
+        ai_id=schema.ai_id,
+    )
 
 
 @router.post("/ai_infer", status_code=status.HTTP_201_CREATED)
 def ai_infer(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: ai_schema.AILogCreate,
+    schema: ai_schema.RequestAILogCreate,
 ):
     async_task = ai_crud.create_ailog(
         data_base=data_base,
@@ -104,16 +105,20 @@ def ai_infer(
 def get_ailog(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: ai_schema.AILogRead = Depends(),
+    schema: Annotated[ai_schema.RequestAILogRead, Depends()],
 ):
-    return ai_crud.get_ailog(data_base=data_base, token=token, ailog_id=schema.ailog_id)
+    return ai_crud.get_ailog(
+        data_base=data_base,
+        token=token,
+        ailog_id=schema.ailog_id,
+    )
 
 
 @router.get("/get_ailogs")
 def get_ailogs(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: ai_schema.AILogsRead = Depends(),
+    schema: Annotated[ai_schema.RequestAILogsRead, Depends()],
 ):
     return ai_crud.get_ailogs(
         data_base=data_base,
@@ -129,7 +134,7 @@ def get_ailogs(
 def update_ailog(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: ai_schema.AILogUpdate,
+    schema: ai_schema.RequestAILogUpdate,
 ):
     ai_crud.update_ailog(
         data_base=data_base,
@@ -143,6 +148,10 @@ def update_ailog(
 def delete_ailog(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: ai_schema.AILogDelete = Depends(),
+    schema: Annotated[ai_schema.RequestAILogDelete, Depends()],
 ):
-    ai_crud.delete_ailog(data_base=data_base, token=token, ailog_id=schema.ailog_id)
+    ai_crud.delete_ailog(
+        data_base=data_base,
+        token=token,
+        ailog_id=schema.ailog_id,
+    )

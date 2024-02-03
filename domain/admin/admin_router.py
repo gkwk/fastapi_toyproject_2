@@ -7,12 +7,13 @@ from auth import current_admin_payload, validate_and_decode_admin_access_token
 
 router = APIRouter(
     prefix="/admin",
+    tags=["admin"]
 )
 
 
 @router.get(
     "/get_users",
-    response_model=admin_schema.UserMoreDetailList,
+    response_model=admin_schema.ResponseUserDetailList,
     dependencies=[Depends(validate_and_decode_admin_access_token)],
 )
 def get_users(
@@ -26,9 +27,9 @@ def get_users(
 
 @router.put("/update_user_board_permission", status_code=status.HTTP_204_NO_CONTENT)
 def update_user_board_permission(
-    schema: admin_schema.UserBoardPermissionSwitch,
     token: current_admin_payload,
     data_base: data_base_dependency,
+    schema: admin_schema.RequestUserBoardPermissionUpdate,
 ):
     admin_crud.update_user_board_permission(
         data_base=data_base,
@@ -40,24 +41,28 @@ def update_user_board_permission(
 
 @router.put("/update_user_is_banned", status_code=status.HTTP_204_NO_CONTENT)
 def update_user_is_banned(
-    schema: admin_schema.UserBanOption,
     token: current_admin_payload,
     data_base: data_base_dependency,
+    schema: admin_schema.RequestUserBanUpdate,
 ):
     admin_crud.update_user_is_banned(
-        data_base=data_base, user_id=schema.user_id, is_banned=schema.is_banned
+        data_base=data_base,
+        id=schema.user_id,
+        is_banned=schema.is_banned,
     )
 
 
-@router.post("/create_board", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/create_board", status_code=status.HTTP_201_CREATED)
 def create_board(
-    schema: admin_schema.BoradCreate,
     token: current_admin_payload,
     data_base: data_base_dependency,
+    schema: admin_schema.RequestBoradCreate,
 ):
     admin_crud.create_board(
         data_base=data_base,
-        board_name=schema.name,
-        board_information=schema.information,
-        board_is_visible=schema.is_visible,
+        name=schema.name,
+        information=schema.information,
+        is_visible=schema.is_visible,
     )
+
+    return {"result": "success"}

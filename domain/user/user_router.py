@@ -12,46 +12,65 @@ from auth import (
 )
 
 
-router = APIRouter(
-    prefix="/user",
-)
+router = APIRouter(prefix="/user", tags=["user"])
 
 
-@router.post("/create", status_code=status.HTTP_204_NO_CONTENT)
-def create_user(schema: user_schema.UserCreate, data_base: data_base_dependency):
-    user_crud.create_user(data_base=data_base, schema=schema)
-
-
-@router.post("/login", response_model=user_schema.UserToken)
-def login_user(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+@router.post("/create", status_code=status.HTTP_201_CREATED)
+def create_user(
     data_base: data_base_dependency,
+    schema: user_schema.RequestUserCreate,
+):
+    user_crud.create_user(
+        data_base=data_base,
+        name=schema.name,
+        password=schema.password1,
+        email=schema.email,
+    )
+
+    return {"result": "success"}
+
+
+@router.post("/login", response_model=user_schema.ResponseUserToken)
+def login_user(
+    data_base: data_base_dependency,
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):
     return generate_access_token(form_data=form_data, data_base=data_base)
 
 
-@router.get("/detail", response_model=user_schema.UserDetail)
-def get_user_detail(token: current_user_payload, data_base: data_base_dependency):
-    return user_crud.get_user_with_id_and_name(
-        data_base=data_base, user_name=token["user_name"], user_id=token["user_id"]
+@router.get("/get_user_detail", response_model=user_schema.ResponseUserDetail)
+def get_user_detail(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+):
+    return user_crud.get_user_detail(
+        data_base=data_base,
+        name=token.get("user_name"),
+        id=token.get("user_id"),
     )
 
 
-@router.put("/update_detail", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/update_user_detail", status_code=status.HTTP_204_NO_CONTENT)
 def update_user_detail(
-    schema: user_schema.UserUpdate,
     token: current_user_payload,
     data_base: data_base_dependency,
+    schema: user_schema.RequestUserUpdate,
 ):
-    user_crud.update_user(data_base=data_base, schema=schema, decoded_token=token)
+    user_crud.update_user(
+        data_base=data_base,
+        token=token,
+        email=schema.email,
+    )
 
 
 @router.put("/update_password", status_code=status.HTTP_204_NO_CONTENT)
 def update_user_password(
-    schema: user_schema.UserUpdatePassword,
     token: current_user_payload,
     data_base: data_base_dependency,
+    schema: user_schema.RequestUserUpdatePassword,
 ):
     user_crud.update_user_password(
-        data_base=data_base, schema=schema, decoded_token=token
+        data_base=data_base,
+        token=token,
+        password=schema.password1,
     )

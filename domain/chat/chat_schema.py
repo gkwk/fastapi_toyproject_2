@@ -1,11 +1,11 @@
 import datetime
 from typing import List
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field
 
 
-class ChatSessionCreate(BaseModel):
-    content: str
+class RequestChatSessionCreate(BaseModel):
+    content: str = Field(min_length=1, max_length=256)
     is_visible: bool
 
     @field_validator("content")
@@ -15,28 +15,29 @@ class ChatSessionCreate(BaseModel):
         return value
 
 
-class ChatSessionRead(BaseModel):
-    chatting_room_id: int
+class RequestChatSessionRead(BaseModel):
+    chatting_room_id: int = Field(ge=1)
 
 
-class ChatSessionsRead(BaseModel):
-    skip: int
-    limit: int
+class RequestChatSessionsRead(BaseModel):
+    user_id: int | None = Field(ge=1)
+    skip: int = Field(ge=0)
+    limit: int = Field(ge=0)
 
 
-class ChatSessionUpdate(BaseModel):
-    chatting_room_id: int
-    content: str | None
+class RequestChatSessionUpdate(BaseModel):
+    chatting_room_id: int = Field(ge=1)
+    content: str | None = Field(max_length=256)
     is_visible: bool | None
 
 
-class ChatSessionDelete(BaseModel):
-    chatting_room_id: int
+class RequestChatSessionDelete(BaseModel):
+    chatting_room_id: int = Field(ge=1)
 
 
-class ChatCreate(BaseModel):
-    chat_content: str
-    chatting_room_id: int
+class RequestChatCreate(BaseModel):
+    chat_content: str = Field(max_length=256)
+    chatting_room_id: int = Field(ge=1)
 
     @field_validator("chat_content")
     def is_not_empty(cls, value: str):
@@ -45,19 +46,19 @@ class ChatCreate(BaseModel):
         return value
 
 
-class ChatsRead(BaseModel):
-    chatting_room_id: int
-    skip: int | None
-    limit: int | None
+class RequestChatsRead(BaseModel):
+    chatting_room_id: int = Field(ge=1)
+    skip: int | None = Field(ge=0)
+    limit: int | None = Field(ge=0)
 
 
-class ChatUpdate(BaseModel):
-    chat_id: int
-    chatting_room_id: int
-    content: str | None
+class RequestChatUpdate(BaseModel):
+    chat_id: int = Field(ge=1)
+    chatting_room_id: int = Field(ge=1)
+    content: str | None = Field(max_length=256)
     is_visible: bool | None
 
 
-class ChatDelete(BaseModel):
-    chat_id: int
-    chatting_room_id: int
+class RequestChatDelete(BaseModel):
+    chat_id: int = Field(ge=1)
+    chatting_room_id: int = Field(ge=1)

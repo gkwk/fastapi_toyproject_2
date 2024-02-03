@@ -4,9 +4,9 @@ from typing import List, Optional
 from pydantic import BaseModel, field_validator, Field
 
 
-class AICreate(BaseModel):
-    name: str = Field(min_length=1)
-    description: str = Field(min_length=1)
+class RequestAICreate(BaseModel):
+    name: str = Field(min_length=1, max_length=64)
+    description: str = Field(min_length=1, max_length=256)
     is_visible: bool = Field(default=True)
 
     @field_validator("name", "description")
@@ -16,31 +16,31 @@ class AICreate(BaseModel):
         return value
 
 
-class AIRead(BaseModel):
+class RequestAIRead(BaseModel):
     ai_id: int = Field(ge=1)
 
 
-class AIsRead(BaseModel):
+class RequestAIsRead(BaseModel):
     is_visible: bool | None = Field(default=None)
     is_available: bool | None = Field(default=None)
     skip: int | None = Field(default=None, ge=0)
     limit: int | None = Field(default=None, ge=1)
 
 
-class AIUpdate(BaseModel):
+class RequestAIUpdate(BaseModel):
     ai_id: int = Field(ge=1)
-    description: str | None = Field(default=None)
+    description: str | None = Field(default=None, max_length=256)
     is_visible: bool | None = Field(default=None)
     is_available: bool | None = Field(default=None)
 
 
-class AIDelete(BaseModel):
+class RequestAIDelete(BaseModel):
     ai_id: int = Field(ge=1)
 
 
-class AILogCreate(BaseModel):
+class RequestAILogCreate(BaseModel):
     ai_id: int = Field(ge=1)
-    description: str = Field(min_length=1)
+    description: str = Field(min_length=1, max_length=256)
 
     @field_validator("description")
     def is_not_empty(cls, value: str):
@@ -49,21 +49,21 @@ class AILogCreate(BaseModel):
         return value
 
 
-class AILogRead(BaseModel):
+class RequestAILogRead(BaseModel):
     ailog_id: int = Field(ge=1)
 
 
-class AILogsRead(BaseModel):
+class RequestAILogsRead(BaseModel):
     user_id: int | None = Field(default=None, ge=1)
     ai_id: int | None = Field(default=None, ge=1)
     skip: int | None = Field(default=None, ge=0)
     limit: int | None = Field(default=None, ge=1)
 
 
-class AILogUpdate(BaseModel):
+class RequestAILogUpdate(BaseModel):
     ailog_id: int = Field(ge=1)
-    description: str | None = Field(default=None)
+    description: str | None = Field(default=None, max_length=256)
 
 
-class AILogDelete(BaseModel):
+class RequestAILogDelete(BaseModel):
     ailog_id: int = Field(ge=1)

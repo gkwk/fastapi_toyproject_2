@@ -1,40 +1,33 @@
 import datetime
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from domain.user.user_schema import UserDetail
+from domain.user.user_schema import ResponseUserDetail
 
 
-class UserMoreDetail(UserDetail):
-    id: int
+class UserDetail(ResponseUserDetail):
+    id: int = Field(ge=1)
     is_banned: bool
     is_superuser: bool
 
 
-class UserMoreDetailList(BaseModel):
-    users: List["UserMoreDetail"]
+class ResponseUserDetailList(BaseModel):
+    users: List["UserDetail"]
 
 
-class AdminToken(BaseModel):
-    access_token: str
-    token_type: str
-    user_name: str
-    is_admin: bool
-
-
-class UserBanOption(BaseModel):
-    user_id: int
+class RequestUserBanUpdate(BaseModel):
+    user_id: int = Field(ge=1)
     is_banned: bool
 
 
-class BoradCreate(BaseModel):
-    name: str
-    information: str
+class RequestBoradCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=128)
+    information: str = Field(min_length=1, max_length=512)
     is_visible: bool
 
 
-class UserBoardPermissionSwitch(BaseModel):
-    user_id: int
-    board_id: int
+class RequestUserBoardPermissionUpdate(BaseModel):
+    user_id: int = Field(ge=1)
+    board_id: int = Field(ge=1)
     is_permitted: bool
