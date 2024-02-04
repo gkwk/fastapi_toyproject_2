@@ -47,4 +47,4 @@ if __name__ == "__main__":
         uvicorn.run("main:app", reload=True, log_level="debug")
     else:
         if "createsuperuser" in argv:
-            admin_crud.create_admin_with_terminal()
+            admin_crud.create_admin_with_terminal(data_base=None)

@@ -15,7 +15,7 @@ from auth import (
 router = APIRouter(prefix="/user", tags=["user"])
 
 
-@router.post("/create", status_code=status.HTTP_201_CREATED)
+@router.post("/create_user", status_code=status.HTTP_201_CREATED)
 def create_user(
     data_base: data_base_dependency,
     schema: user_schema.RequestUserCreate,
@@ -30,7 +30,7 @@ def create_user(
     return {"result": "success"}
 
 
-@router.post("/login", response_model=user_schema.ResponseUserToken)
+@router.post("/login_user", response_model=user_schema.ResponseUserToken)
 def login_user(
     data_base: data_base_dependency,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
@@ -63,7 +63,7 @@ def update_user_detail(
     )
 
 
-@router.put("/update_password", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/update_user_password", status_code=status.HTTP_204_NO_CONTENT)
 def update_user_password(
     token: current_user_payload,
     data_base: data_base_dependency,

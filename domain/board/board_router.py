@@ -51,6 +51,7 @@ def get_posts(
 ):
     return board_crud.get_posts(
         data_base=data_base,
+        token=token,
         board_id=schema.board_id,
         skip=schema.skip,
         limit=schema.limit,
@@ -104,6 +105,7 @@ def create_comment(
         is_visible=schema.is_visible,
     )
 
+    return {"result": "success"}
 
 @router.get("/get_comment", response_model=board_schema.ResponseCommentRead)
 def get_comment(

@@ -58,7 +58,9 @@ class User(Base):
     password: Mapped[str] = mapped_column(String())
     password_salt: Mapped[str] = mapped_column(String())
     join_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
-    update_date: Mapped[Optional[DateTime]] = mapped_column(DateTime(), onupdate=datetime.now)
+    update_date: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(), onupdate=datetime.now
+    )
     is_superuser: Mapped[Boolean] = mapped_column(Boolean(), default=False)
     is_banned: Mapped[Boolean] = mapped_column(Boolean(), default=False)
 
@@ -93,7 +95,9 @@ class Post(Base):
     name: Mapped[str] = mapped_column(String(64))
     content: Mapped[str] = mapped_column(String(1024))
     create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
-    update_date: Mapped[Optional[DateTime]] = mapped_column(DateTime())
+    update_date: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(), onupdate=datetime.now
+    )
     number_of_view: Mapped[int] = mapped_column(Integer(), default=0)
     number_of_comment: Mapped[int] = mapped_column(Integer(), default=0)
     number_of_like: Mapped[int] = mapped_column(Integer(), default=0)
@@ -113,7 +117,9 @@ class Comment(Base):
 
     content: Mapped[str] = mapped_column(String(256))
     create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
-    update_date: Mapped[Optional[DateTime]] = mapped_column(DateTime())
+    update_date: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(), onupdate=datetime.now
+    )
     is_file_attached: Mapped[Boolean] = mapped_column(Boolean(), default=False)
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
 
@@ -131,7 +137,9 @@ class ChatSession(Base):
     name: Mapped[str] = mapped_column(String(64))
     content: Mapped[str] = mapped_column(String(256))
     create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
-    update_date: Mapped[Optional[DateTime]] = mapped_column(DateTime())
+    update_date: Mapped[Optional[DateTime]] = mapped_column(
+        DateTime(), onupdate=datetime.now
+    )
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
     is_closed: Mapped[Boolean] = mapped_column(Boolean(), default=False)
 
@@ -149,7 +157,7 @@ class Chat(Base):
     content: Mapped[str] = mapped_column(String(256))
     create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
     update_date: Mapped[Optional[DateTime]] = mapped_column(
-        DateTime(), default=None, onupdate=datetime.now
+        DateTime(), onupdate=datetime.now
     )
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
 
@@ -167,7 +175,7 @@ class AI(Base):
     description: Mapped[str] = mapped_column(String(256))
     create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
     update_date: Mapped[Optional[DateTime]] = mapped_column(
-        DateTime(), default=None, onupdate=datetime.now
+        DateTime(), onupdate=datetime.now
     )
     finish_date: Mapped[Optional[DateTime]] = mapped_column(DateTime(), default=None)
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=False)
@@ -189,7 +197,7 @@ class AIlog(Base):
     result: Mapped[str] = mapped_column(String(256))
     create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
     update_date: Mapped[Optional[DateTime]] = mapped_column(
-        DateTime(), default=None, onupdate=datetime.now
+        DateTime(), onupdate=datetime.now
     )
     finish_date: Mapped[Optional[DateTime]] = mapped_column(DateTime(), default=None)
     is_finished: Mapped[Boolean] = mapped_column(Boolean(), default=False)
