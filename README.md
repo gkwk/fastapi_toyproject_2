@@ -175,9 +175,6 @@ with connectable.connect() as connection:
     )
 ```
 
-# AI, AILOG 테스트 관련 사항
-- 현재 수동으로 celery를 구동시켜야 테스트를 정상적으로 진행할 수 있음.
-
 # 개선을 위한 임시 목표 (개선 후 삭제)
 - admin, board, chat, user 기능 예외 처리 코드 추가
 - chat 기능 테스트 코드 추가
