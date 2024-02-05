@@ -1,7 +1,8 @@
 import sys
 import contextlib
+from typing import Optional
 
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 
 from starlette.middleware.cors import CORSMiddleware
@@ -35,9 +36,21 @@ app.add_middleware(
 
 app.include_router(v1_router.router)
 
-@app.get("/",tags=["main"])
+
+@app.get("/", tags=["main"])
 def index_page():
-    return {"message" : "Hello, FastAPI!"}
+    return {"message": "Hello, FastAPI!"}
+
+
+@app.post("/uploadfile/")
+async def create_upload_file(files: list[Optional[UploadFile]] = File(None)):
+    if files != None:
+        for i, file in enumerate(files):
+            if file != None:
+                file_location = f"staticfile/{i}_{file.filename}"
+                with open(file_location, "wb+") as file_object:
+                    file_object.write(file.file.read())
+    return {"filename": "success"}
 
 
 if __name__ == "__main__":
