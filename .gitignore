@@ -165,3 +165,4 @@ alembic.ini
 test.py
 *.sqlite
 models_store/*
+staticfile/*
