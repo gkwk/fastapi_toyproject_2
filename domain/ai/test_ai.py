@@ -387,7 +387,7 @@ class TestAIlog:
             time.sleep(0.5)
 
         user_id = validate_and_decode_user_access_token(
-            response_login_json.get("access_token")
+            data_base=data_base, token=response_login_json.get("access_token")
         ).get("user_id")
 
         ailog = (
@@ -435,7 +435,7 @@ class TestAIlog:
         assert response_test.status_code == 200
         response_test_json: dict = response_test.json()
 
-        user_id = validate_and_decode_user_access_token(
+        user_id = validate_and_decode_user_access_token(data_base=data_base, token=
             response_login_json.get("access_token")
         ).get("user_id")
 
@@ -468,7 +468,7 @@ class TestAIlog:
 
         ai = data_base.query(AIlog).first()
 
-        user_id = validate_and_decode_user_access_token(
+        user_id = validate_and_decode_user_access_token(data_base=data_base, token=
             response_login_json.get("access_token")
         ).get("user_id")
 
@@ -537,7 +537,7 @@ class TestAIlog:
 
         assert response_test.status_code == 204
 
-        user_id = validate_and_decode_user_access_token(
+        user_id = validate_and_decode_user_access_token(data_base=data_base, token=
             response_login_json.get("access_token")
         ).get("user_id")
 

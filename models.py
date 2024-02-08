@@ -17,6 +17,54 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
 
 
+class JWTAccessTokenBlackList(Base):
+    __tablename__ = "jwt_access_token_blacklist"
+    # __table_args__ = {"sqlite_autoincrement": True}
+
+    user_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=False)
+    access_token: Mapped[str] = mapped_column(String(), primary_key=True)
+    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now, onupdate=datetime.now)
+    expired_date: Mapped[DateTime] = mapped_column(DateTime())
+
+
+class JWTRefreshTokenList(Base):
+    __tablename__ = "jwt_refresh_token_list"
+    # __table_args__ = {"sqlite_autoincrement": True}
+
+    user_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=False)
+    refresh_token: Mapped[str] = mapped_column(String())
+    access_token: Mapped[Optional[str]] = mapped_column(String())
+    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now, onupdate=datetime.now)
+    expired_date: Mapped[DateTime] = mapped_column(DateTime())
+
+
+class PostFile(Base):
+    __tablename__ = "post_file"
+    # __table_args__ = {"sqlite_autoincrement": True}
+
+    post: Mapped["Post"] = relationship(back_populates="attached_files")
+    post_id: Mapped[int] = mapped_column(ForeignKey("post.id"), primary_key=True)
+    board_id: Mapped[int] = mapped_column(ForeignKey("board.id"), primary_key=True)
+    file_uuid_name: Mapped[str] = mapped_column(String(), unique=True)
+    file_original_name: Mapped[str] = mapped_column(String())
+    file_path: Mapped[str] = mapped_column(String())
+    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
+
+
+class CommentFile(Base):
+    __tablename__ = "comment_file"
+    # __table_args__ = {"sqlite_autoincrement": True}
+
+    comment: Mapped["Comment"] = relationship(back_populates="attached_files")
+    comment_id: Mapped[int] = mapped_column(ForeignKey("comment.id"), primary_key=True)
+    post_id: Mapped[int] = mapped_column(ForeignKey("post.id"), primary_key=True)
+    board_id: Mapped[int] = mapped_column(ForeignKey("board.id"), primary_key=True)
+    file_uuid_name: Mapped[str] = mapped_column(String(), unique=True)
+    file_original_name: Mapped[str] = mapped_column(String())
+    file_path: Mapped[str] = mapped_column(String())
+    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
+
+
 class UserChatSessionTable(Base):
     __tablename__ = "user_chat_session_table"
     # __table_args__ = {"sqlite_autoincrement": True}
@@ -25,6 +73,7 @@ class UserChatSessionTable(Base):
     chat_session_id: Mapped[int] = mapped_column(
         ForeignKey("chat_session.id"), primary_key=True
     )
+    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
 
 
 class UserPermissionTable(Base):
@@ -33,6 +82,7 @@ class UserPermissionTable(Base):
 
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), primary_key=True)
     board_id: Mapped[int] = mapped_column(ForeignKey("board.id"), primary_key=True)
+    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
 
 
 class User(Base):
@@ -63,6 +113,7 @@ class User(Base):
     )
     is_superuser: Mapped[Boolean] = mapped_column(Boolean(), default=False)
     is_banned: Mapped[Boolean] = mapped_column(Boolean(), default=False)
+    is_active: Mapped[Boolean] = mapped_column(Boolean(), default=True)
 
 
 class Board(Base):
@@ -102,6 +153,7 @@ class Post(Base):
     number_of_comment: Mapped[int] = mapped_column(Integer(), default=0)
     number_of_like: Mapped[int] = mapped_column(Integer(), default=0)
     is_file_attached: Mapped[Boolean] = mapped_column(Boolean(), default=False)
+    attached_files: Mapped[List["PostFile"]] = relationship(back_populates="post")
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
 
 
@@ -121,6 +173,7 @@ class Comment(Base):
         DateTime(), onupdate=datetime.now
     )
     is_file_attached: Mapped[Boolean] = mapped_column(Boolean(), default=False)
+    attached_files: Mapped[List["CommentFile"]] = relationship(back_populates="comment")
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
 
 
@@ -135,7 +188,7 @@ class ChatSession(Base):
     chats: Mapped[List["Chat"]] = relationship(back_populates="chat_session")
 
     name: Mapped[str] = mapped_column(String(64))
-    content: Mapped[str] = mapped_column(String(256))
+    information: Mapped[str] = mapped_column(String(256))
     create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
     update_date: Mapped[Optional[DateTime]] = mapped_column(
         DateTime(), onupdate=datetime.now

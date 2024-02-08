@@ -58,6 +58,8 @@ class TestUser:
         data_base.close()
 
     def test_login_user(self):
+        data_base = session_local()
+        
         response_login = client.post(
             "/api/v1/user/login_user",
             data={"username": TEST_USER_ID, "password": TEST_USER_PASSWORD1},
@@ -70,12 +72,14 @@ class TestUser:
         assert response_login_json.get("token_type") == "bearer"
 
         user_payload = validate_and_decode_user_access_token(
-            response_login_json.get("access_token")
+            data_base=data_base, token=response_login_json.get("access_token")
         )
 
         assert user_payload.get("user_id") >= 1
         assert user_payload.get("user_name") == TEST_USER_ID
         assert user_payload.get("is_admin") == False
+        
+        data_base.close()
 
     def test_get_user_detail(self):
         response_login = client.post(
@@ -121,7 +125,7 @@ class TestUser:
         assert response_login_json.get("token_type")
 
         user_id = validate_and_decode_user_access_token(
-            response_login_json.get("access_token")
+            data_base=data_base, token=response_login_json.get("access_token")
         ).get("user_id")
         user = data_base.query(User).filter_by(id=user_id).first()
 
@@ -165,7 +169,7 @@ class TestUser:
         assert response_login_json.get("token_type")
 
         user_id = validate_and_decode_user_access_token(
-            response_login_json.get("access_token")
+            data_base=data_base, token=response_login_json.get("access_token")
         ).get("user_id")
 
         user = data_base.query(User).filter_by(id=user_id).first()
@@ -197,10 +201,8 @@ class TestUser:
         assert response_login_json.get("token_type")
 
         user_id = validate_and_decode_user_access_token(
-            response_login_json.get("access_token")
+            data_base=data_base, token=response_login_json.get("access_token")
         ).get("user_id")
-
-
 
         user = data_base.query(User).filter_by(id=user_id).first()
         user_password_salt_new = user.password_salt

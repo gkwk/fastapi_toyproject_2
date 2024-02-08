@@ -72,7 +72,7 @@ def update_chatsession(
     chatsession = data_base.query(ChatSession).filter_by(id=chatting_room_id).first()
 
     if content:
-        chatsession.content = content
+        chatsession.information = content
     if is_visible:
         chatsession.is_visible = is_visible
     chatsession.update_date = datetime.now()

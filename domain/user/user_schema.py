@@ -53,6 +53,12 @@ class RequestUserUpdatePassword(BaseModel):
 
 class ResponseUserToken(BaseModel):
     access_token: str
+    refresh_token: str
+    token_type: str
+
+
+class ResponseAccessToken(BaseModel):
+    access_token: str
     token_type: str
 
 
