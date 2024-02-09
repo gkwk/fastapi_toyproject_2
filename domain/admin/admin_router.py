@@ -63,6 +63,7 @@ def create_board(
         name=schema.name,
         information=schema.information,
         is_visible=schema.is_visible,
+        user_id_list=schema.user_id_list
     )
 
     return {"result": "success"}

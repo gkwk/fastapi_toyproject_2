@@ -6,14 +6,14 @@ from starlette import status
 
 from sqlalchemy.orm import Session
 
-from models import User, Board, UserPermissionTable
+from models import User, Board, UserPermissionTable, JWTRefreshTokenList
 from domain.user.user_crud import (
     get_user_with_username,
     get_user_with_email,
 )
 from domain.user.user_schema import RequestUserCreate
 from database import data_base_dependency, get_data_base_decorator
-from auth import get_password_context
+from auth import get_password_context, ban_access_token
 from http_execption_params import http_exception_params
 
 
@@ -33,21 +33,61 @@ def create_board(
     name: str,
     information: str,
     is_visible: bool,
+    user_id_list: list[int] = None,
 ):
     board = Board(name=name, information=information, is_visible=is_visible)
     data_base.add(board)
     data_base.commit()
+    
+    users = []
+    board.permission_verified_user_id_range = (
+        data_base.query(User).order_by(User.id.desc()).first().id
+    )
 
     if board.is_visible:
-        users = data_base.query(User).all()
+        if not user_id_list:
+            users = data_base.query(User).order_by(User.id.asc()).all()
+        else:
+            users = (
+                data_base.query(User)
+                .filter(User.id.in_(user_id_list))
+                .order_by(User.id.asc())
+                .all()
+            )
+    else:
+        if not user_id_list:
+            users = (
+                data_base.query(User)
+                .filter_by(is_superuser=True)
+                .order_by(User.id.asc())
+                .all()
+            )
+        else:
+            users = (
+                data_base.query(User)
+                .filter(User.id.in_(user_id_list))
+                .order_by(User.id.asc())
+                .all()
+            )
+
+    if users:
         for user in users:
             user.boards.append(board)
-    else:
-        superusers = data_base.query(User).filter_by(is_superuser=True).all()
-        for superuser in superusers:
-            superuser.boards.append(board)
 
     data_base.commit()
+
+    users_refresh_token_table = (
+        data_base.query(JWTRefreshTokenList)
+        .filter(JWTRefreshTokenList.user_id <= board.permission_verified_user_id_range)
+        .all()
+    )
+
+    for user in users_refresh_token_table:
+        ban_access_token(
+            data_base=data_base,
+            user_id=user.user_id,
+            user_access_token=user.access_token,
+        )
 
 
 def update_user_board_permission(

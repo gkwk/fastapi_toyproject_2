@@ -129,7 +129,9 @@ class Board(Base):
     )  # N to M
     posts: Mapped[List["Post"]] = relationship(back_populates="board")  # 1 to N
     information: Mapped[str] = mapped_column(String(512))
-    is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
+    is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=False)
+    is_available: Mapped[Boolean] = mapped_column(Boolean(), default=False)
+    permission_verified_user_id_range: Mapped[int] = mapped_column(default=0)
 
 
 class Post(Base):
