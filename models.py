@@ -127,7 +127,7 @@ class Board(Base):
         secondary="user_board_table",
         back_populates="boards",
     )  # N to M
-    posts: Mapped[List["Post"]] = relationship(back_populates="board")  # 1 to N
+    posts: Mapped[List["Post"]] = relationship(back_populates="board", cascade="all, delete")  # 1 to N
     information: Mapped[str] = mapped_column(String(512))
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=False)
     is_available: Mapped[Boolean] = mapped_column(Boolean(), default=False)
@@ -143,7 +143,7 @@ class Post(Base):
     user: Mapped["User"] = relationship(back_populates="posts")
     board_id: Mapped[int] = mapped_column(ForeignKey("board.id"))
     board: Mapped["Board"] = relationship(back_populates="posts")
-    comments: Mapped[List["Comment"]] = relationship(back_populates="post")
+    comments: Mapped[List["Comment"]] = relationship(back_populates="post", cascade="all, delete")
 
     name: Mapped[str] = mapped_column(String(64))
     content: Mapped[str] = mapped_column(String(1024))
@@ -175,7 +175,7 @@ class Comment(Base):
         DateTime(), onupdate=datetime.now
     )
     is_file_attached: Mapped[Boolean] = mapped_column(Boolean(), default=False)
-    attached_files: Mapped[List["CommentFile"]] = relationship(back_populates="comment")
+    attached_files: Mapped[List["CommentFile"]] = relationship(back_populates="comment", cascade="all, delete")
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
 
 
