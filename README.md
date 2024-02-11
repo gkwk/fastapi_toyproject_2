@@ -18,6 +18,8 @@
     - [x] 사용자 정보 수정
     - [x] 게시판 접근 권한 보기
     - [x] 비밀번호 초기화 기능
+    - [x] JWT refresh token 기능
+    - [x] JWT access token 블랙리스트
     - [ ] 예외 처리
     - [x] 테스트 코드 작성
     - [ ] 코드 품질 개선
@@ -180,7 +182,7 @@ with connectable.connect() as connection:
 - chat 기능 테스트 코드 추가
 - ai, user, admin, board 기능 테스트 코드에 case 추가
 - 예외 메세지나 URL 경로 등은 하나의 파일에 정리하는 등의 조치로 중복 코드 정리
-    - 테스트 코드에 URL 경로가 하드 코딩되어 있으므로 문제 해결 필요
+    - 테스트 코드의 중복 코드(로그인 등) 정리
 - chat의 채팅방 입장 권한 판별 기능 추가
 - jwt의 scope 기능 등을 활용하여 permission 제한 기능 추가
 - post에 파일 첨부 기능 추가
