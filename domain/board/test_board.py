@@ -7,16 +7,9 @@ from domain.admin.admin_crud import create_admin_with_terminal
 from models import User, Board, Post, Comment
 from database import session_local
 from auth import validate_and_decode_user_access_token
+import v1_urn
 
 client = TestClient(app)
-
-data_base = session_local()
-
-data_base.query(User).delete()
-data_base.query(Board).delete()
-data_base.query(Post).delete()
-data_base.query(Comment).delete()
-data_base.commit()
 
 
 TEST_ADMIN_ID = "admin"
@@ -48,6 +41,48 @@ TEST_COMMENT_IS_VISIBLE = True
 TEST_COMMENT_CONTENT_UPDATE = "comment_content_update"
 
 
+URL_USER_CREATE_USER = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_CREATE_USER]
+)
+
+URL_USER_LOGIN_USER = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_LOGIN_USER]
+)
+URL_ADMIN_CREATE_BOARD = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.ADMIN_PREFIX, v1_urn.ADMIN_CREATE_BOARD]
+)
+URL_BOARD_CREATE_POST = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.BOARD_PREFIX, v1_urn.BOARD_CREATE_POST]
+)
+URL_BOARD_GET_POST = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.BOARD_PREFIX, v1_urn.BOARD_GET_POST]
+)
+URL_BOARD_GET_POSTS = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.BOARD_PREFIX, v1_urn.BOARD_GET_POSTS]
+)
+URL_BOARD_UPDATE_POST = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.BOARD_PREFIX, v1_urn.BOARD_UPDATE_POST]
+)
+URL_BOARD_DELETE_POST = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.BOARD_PREFIX, v1_urn.BOARD_DELETE_POST]
+)
+URL_BOARD_CREATE_COMMNET = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.BOARD_PREFIX, v1_urn.BOARD_CREATE_COMMNET]
+)
+URL_BOARD_GET_COMMENT = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.BOARD_PREFIX, v1_urn.BOARD_GET_COMMENT]
+)
+URL_BOARD_GET_COMMENTS = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.BOARD_PREFIX, v1_urn.BOARD_GET_COMMENTS]
+)
+URL_BOARD_UPDATE_COMMENT = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.BOARD_PREFIX, v1_urn.BOARD_UPDATE_COMMENT]
+)
+URL_BOARD_DELETE_COMMENT = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.BOARD_PREFIX, v1_urn.BOARD_DELETE_COMMENT]
+)
+
+
 class TestPost:
     def test_data_base_init(self):
         data_base = session_local()
@@ -72,7 +107,7 @@ class TestPost:
         data_base = session_local()
 
         response_test = client.post(
-            "/api/v1/user/create_user",
+            URL_USER_CREATE_USER,
             json={
                 "name": TEST_USER_ID,
                 "password1": TEST_USER_PASSWORD1,
@@ -103,7 +138,7 @@ class TestPost:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -114,7 +149,7 @@ class TestPost:
         assert response_login_json.get("token_type")
 
         response_test = client.post(
-            "/api/v1/admin/create_board",
+            URL_ADMIN_CREATE_BOARD,
             json={
                 "name": TEST_BOARD_NAME,
                 "information": TEST_BOARD_INFORMATION,
@@ -144,7 +179,7 @@ class TestPost:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -166,7 +201,7 @@ class TestPost:
         )
 
         response_test = client.post(
-            "/api/v1/board/create_post",
+            URL_BOARD_CREATE_POST,
             json={
                 "name": TEST_POST_NAME,
                 "content": TEST_POST_CONTENT,
@@ -201,7 +236,7 @@ class TestPost:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -219,7 +254,7 @@ class TestPost:
         post = data_base.query(Post).filter_by(name=TEST_POST_NAME).first()
 
         response_test = client.get(
-            "/api/v1/board/get_post",
+            URL_BOARD_GET_POST,
             params={
                 "id": post.id,
                 "board_id": board.id,
@@ -249,7 +284,7 @@ class TestPost:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -266,7 +301,7 @@ class TestPost:
         )
 
         response_test = client.get(
-            "/api/v1/board/get_posts",
+            URL_BOARD_GET_POSTS,
             params={
                 "board_id": board.id,
                 "skip": 0,
@@ -303,7 +338,7 @@ class TestPost:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -321,7 +356,7 @@ class TestPost:
         post = data_base.query(Post).filter_by(name=TEST_POST_NAME).first()
 
         response_test = client.put(
-            "/api/v1/board/update_post",
+            URL_BOARD_UPDATE_POST,
             json={
                 "id": post.id,
                 "name": TEST_POST_NAME_UPDATE,
@@ -347,7 +382,7 @@ class TestPost:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -365,7 +400,7 @@ class TestPost:
         post = data_base.query(Post).filter_by(name=TEST_POST_NAME_UPDATE).first()
 
         response_test = client.delete(
-            "/api/v1/board/delete_post",
+            URL_BOARD_DELETE_POST,
             params={
                 "id": post.id,
                 "board_id": board.id,
@@ -410,7 +445,7 @@ class TestComment:
         data_base = session_local()
 
         response_test = client.post(
-            "/api/v1/user/create_user",
+            URL_USER_CREATE_USER,
             json={
                 "name": TEST_USER_ID,
                 "password1": TEST_USER_PASSWORD1,
@@ -441,7 +476,7 @@ class TestComment:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -452,7 +487,7 @@ class TestComment:
         assert response_login_json.get("token_type")
 
         response_test = client.post(
-            "/api/v1/admin/create_board",
+            URL_ADMIN_CREATE_BOARD,
             json={
                 "name": TEST_BOARD_NAME,
                 "information": TEST_BOARD_INFORMATION,
@@ -482,7 +517,7 @@ class TestComment:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -504,7 +539,7 @@ class TestComment:
         )
 
         response_test = client.post(
-            "/api/v1/board/create_post",
+            URL_BOARD_CREATE_POST,
             json={
                 "name": TEST_POST_NAME,
                 "content": TEST_POST_CONTENT,
@@ -539,7 +574,7 @@ class TestComment:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -557,7 +592,7 @@ class TestComment:
         post = data_base.query(Post).filter_by(name=TEST_POST_NAME).first()
 
         response_test = client.post(
-            "/api/v1/board/create_comment",
+            URL_BOARD_CREATE_COMMNET,
             json={
                 "content": TEST_COMMENT_CONTENT,
                 "post_id": post.id,
@@ -591,7 +626,7 @@ class TestComment:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -609,7 +644,7 @@ class TestComment:
         )
 
         response_test = client.get(
-            "/api/v1/board/get_comment",
+            URL_BOARD_GET_COMMENT,
             params={
                 "id": comment.id,
                 "post_id": post.id,
@@ -635,7 +670,7 @@ class TestComment:
     def test_get_comments(self):
         data_base = session_local()
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -648,7 +683,7 @@ class TestComment:
         post = data_base.query(Post).filter_by(name=TEST_POST_NAME).first()
 
         response_test = client.get(
-            "/api/v1/board/get_comments",
+            URL_BOARD_GET_COMMENTS,
             params={
                 "post_id": post.id,
                 "skip": 0,
@@ -680,7 +715,7 @@ class TestComment:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -698,7 +733,7 @@ class TestComment:
         )
 
         response_test = client.put(
-            "/api/v1/board/update_comment",
+            URL_BOARD_UPDATE_COMMENT,
             json={
                 "id": comment.id,
                 "content": TEST_COMMENT_CONTENT_UPDATE,
@@ -723,7 +758,7 @@ class TestComment:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -741,7 +776,7 @@ class TestComment:
         )
 
         response_test = client.delete(
-            "/api/v1/board/delete_comment",
+            URL_BOARD_DELETE_COMMENT,
             params={
                 "id": comment.id,
                 "post_id": post.id,
@@ -762,5 +797,5 @@ class TestComment:
         )
 
         assert comment == None
-        
+
         data_base.close()

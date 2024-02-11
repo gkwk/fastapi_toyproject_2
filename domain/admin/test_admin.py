@@ -6,6 +6,7 @@ from main import app
 from domain.admin.admin_crud import create_admin_with_terminal
 from models import User, Board, UserPermissionTable
 from database import session_local
+import v1_urn
 
 client = TestClient(app)
 
@@ -25,6 +26,34 @@ TEST_USER_IS_BANNED_UPDATE = True
 TEST_BOARD_NAME = "board"
 TEST_BOARD_INFORMATION = "board_create_test"
 TEST_BOARD_IS_VISIBLE = True
+
+
+URL_USER_CREATE_USER = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_CREATE_USER]
+)
+URL_USER_LOGIN_USER = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_LOGIN_USER]
+)
+URL_ADMIN_GET_USERS = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.ADMIN_PREFIX, v1_urn.ADMIN_GET_USERS]
+)
+URL_ADMIN_CREATE_BOARD = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.ADMIN_PREFIX, v1_urn.ADMIN_CREATE_BOARD]
+)
+URL_ADMIN_UPDATE_USER_BOARD_PERMISSION = "".join(
+    [
+        v1_urn.API_V1_ROUTER_PREFIX,
+        v1_urn.ADMIN_PREFIX,
+        v1_urn.ADMIN_UPDATE_USER_BOARD_PERMISSION,
+    ]
+)
+URL_ADMIN_UPDATE_USER_IS_BANNED = "".join(
+    [
+        v1_urn.API_V1_ROUTER_PREFIX,
+        v1_urn.ADMIN_PREFIX,
+        v1_urn.ADMIN_UPDATE_USER_IS_BANNED,
+    ]
+)
 
 
 class TestAdmin:
@@ -50,7 +79,7 @@ class TestAdmin:
         data_base = session_local()
 
         response_test = client.post(
-            "/api/v1/user/create_user",
+            URL_USER_CREATE_USER,
             json={
                 "name": TEST_USER_ID,
                 "password1": TEST_USER_PASSWORD1,
@@ -79,7 +108,7 @@ class TestAdmin:
 
     def test_get_users(self):
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -90,7 +119,7 @@ class TestAdmin:
         assert response_login_json.get("token_type")
 
         response_test = client.get(
-            "/api/v1/admin/get_users",
+            URL_ADMIN_GET_USERS,
             headers={
                 "Authorization": f"Bearer {response_login_json.get('access_token')}"
             },
@@ -113,7 +142,7 @@ class TestAdmin:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -124,7 +153,7 @@ class TestAdmin:
         assert response_login_json.get("token_type")
 
         response_test = client.post(
-            "/api/v1/admin/create_board",
+            URL_ADMIN_CREATE_BOARD,
             json={
                 "name": TEST_BOARD_NAME,
                 "information": TEST_BOARD_INFORMATION,
@@ -154,7 +183,7 @@ class TestAdmin:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -176,7 +205,7 @@ class TestAdmin:
         )
 
         response_test = client.put(
-            "/api/v1/admin/update_user_board_permission",
+            URL_ADMIN_UPDATE_USER_BOARD_PERMISSION,
             json={
                 "user_id": user.id,
                 "board_id": board.id,
@@ -205,7 +234,7 @@ class TestAdmin:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -222,7 +251,7 @@ class TestAdmin:
         )
 
         response_test = client.put(
-            "/api/v1/admin/update_user_is_banned",
+            URL_ADMIN_UPDATE_USER_IS_BANNED,
             json={
                 "user_id": user.id,
                 "is_banned": TEST_USER_IS_BANNED_UPDATE,

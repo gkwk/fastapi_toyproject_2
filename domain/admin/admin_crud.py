@@ -13,8 +13,66 @@ from domain.user.user_crud import (
 )
 from domain.user.user_schema import RequestUserCreate
 from database import data_base_dependency, get_data_base_decorator
-from auth import get_password_context, ban_access_token
+from auth import get_password_context, ban_access_token,current_user_payload,current_admin_payload
 from http_execption_params import http_exception_params
+
+
+@get_data_base_decorator
+def create_admin_with_terminal(data_base: Session):
+    generated_password_salt = secrets.token_hex(4)
+
+    while True:
+        try:
+            print("Admin name : ", end="")
+            name = input()
+            if get_user_with_username(data_base=data_base, name=name):
+                raise ValueError(
+                    http_exception_params["already_user_name_existed"]["detail"]
+                )
+            break
+        except Exception as ex:
+            print(ex)
+
+    while True:
+        try:
+            print("Admin email : ", end="")
+            email = input()
+            if get_user_with_email(data_base=data_base, eamil=email):
+                raise ValueError(
+                    http_exception_params["already_user_email_existed"]["detail"]
+                )
+            RequestUserCreate(
+                name=name, password1="12345678", password2="12345678", email=email
+            )
+            break
+        except Exception as ex:
+            print(ex)
+
+    while True:
+        try:
+            print("Password : ", end="")
+            password1 = getpass.getpass()
+            print("Password Confirm : ", end="")
+            password2 = getpass.getpass()
+            schema = RequestUserCreate(
+                name=name, password1=password1, password2=password2, email=email
+            )
+            break
+        except Exception as ex:
+            print(ex)
+
+    user = User(
+        name=schema.name,
+        password=get_password_context().hash(
+            schema.password1 + generated_password_salt
+        ),
+        password_salt=generated_password_salt,
+        join_date=datetime.now(),
+        email=schema.email,
+        is_superuser=True,
+    )
+    data_base.add(user)
+    data_base.commit()
 
 
 def get_users(data_base: data_base_dependency):
@@ -38,7 +96,7 @@ def create_board(
     board = Board(name=name, information=information, is_visible=is_visible)
     data_base.add(board)
     data_base.commit()
-    
+
     users = []
     board.permission_verified_user_id_range = (
         data_base.query(User).order_by(User.id.desc()).first().id
@@ -123,59 +181,81 @@ def update_user_board_permission(
     data_base.commit()
 
 
-@get_data_base_decorator
-def create_admin_with_terminal(data_base: Session):
-    generated_password_salt = secrets.token_hex(4)
+def get_board(
+    data_base: data_base_dependency,
+    board_id: int,
+):
+    return data_base.query(Board).filter_by(id=board_id).first()
 
-    while True:
-        try:
-            print("Admin name : ", end="")
-            name = input()
-            if get_user_with_username(data_base=data_base, name=name):
-                raise ValueError(
-                    http_exception_params["already_user_name_existed"]["detail"]
-                )
-            break
-        except Exception as ex:
-            print(ex)
 
-    while True:
-        try:
-            print("Admin email : ", end="")
-            email = input()
-            if get_user_with_email(data_base=data_base, eamil=email):
-                raise ValueError(
-                    http_exception_params["already_user_email_existed"]["detail"]
-                )
-            RequestUserCreate(
-                name=name, password1="12345678", password2="12345678", email=email
-            )
-            break
-        except Exception as ex:
-            print(ex)
+def get_boards(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+    is_visible: bool | None,
+    is_available: bool | None,
+    skip: int | None,
+    limit: int | None,
+):
 
-    while True:
-        try:
-            print("Password : ", end="")
-            password1 = getpass.getpass()
-            print("Password Confirm : ", end="")
-            password2 = getpass.getpass()
-            schema = RequestUserCreate(
-                name=name, password1=password1, password2=password2, email=email
-            )
-            break
-        except Exception as ex:
-            print(ex)
+    filter_kwargs = {}
 
-    user = User(
-        name=schema.name,
-        password=get_password_context().hash(
-            schema.password1 + generated_password_salt
-        ),
-        password_salt=generated_password_salt,
-        join_date=datetime.now(),
-        email=schema.email,
-        is_superuser=True,
-    )
-    data_base.add(user)
+    if skip == None:
+        skip = 0
+    if limit == None:
+        limit = 10
+
+    if token.get("is_admin"):
+        if is_visible != None:
+            filter_kwargs["is_visible"] = is_visible
+        if is_available != None:
+            filter_kwargs["is_available"] = is_available
+    else:
+        filter_kwargs["is_visible"] = True
+        filter_kwargs["is_available"] = True
+
+    boards = data_base.query(Board).filter_by(**filter_kwargs).order_by(Board.id.asc())
+    total = boards.count()
+    boards = boards.offset(skip).limit(limit).all()
+    return {"total": total, "boards": boards}
+
+
+def update_board(
+    data_base: data_base_dependency,
+    token: current_admin_payload,
+    id: int,
+    name : str | None,
+    information : str| None,
+    is_visible: bool| None,
+    is_available:bool| None,
+):
+    board = data_base.query(Board).filter_by(id=id).first()
+
+    # if not ai:
+    #     raise HTTPException(**http_exception_params["ai_model_not_found"])
+
+    if name != None:
+        board.name = name
+    if information != None:
+        board.information = information
+    if is_visible != None:
+        board.is_visible = is_visible
+    if is_available != None:
+        board.is_available = is_available
+
+    data_base.add(board)
+    data_base.commit()
+
+
+def delete_board(
+    data_base: data_base_dependency,
+    token: current_admin_payload,
+    id: int,
+):
+    board = data_base.query(Board).filter_by(id=id).first()
+
+    # if not board:
+    #     raise HTTPException(**http_exception_params["ai_model_not_found"])
+
+
+    data_base.delete(board)
     data_base.commit()

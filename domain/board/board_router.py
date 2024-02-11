@@ -6,11 +6,12 @@ from starlette import status
 from database import data_base_dependency
 from domain.board import board_crud, board_schema
 from auth import current_user_payload
+import v1_urn
 
-router = APIRouter(prefix="/board", tags=["board"])
+router = APIRouter(prefix=v1_urn.BOARD_PREFIX, tags=["board"])
 
 
-@router.post("/create_post", status_code=status.HTTP_201_CREATED)
+@router.post(v1_urn.BOARD_CREATE_POST, status_code=status.HTTP_201_CREATED)
 def create_post(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -29,7 +30,7 @@ def create_post(
     return {"result": "success"}
 
 
-@router.get("/get_post/", response_model=board_schema.ResponsePostRead)
+@router.get(v1_urn.BOARD_GET_POST, response_model=board_schema.ResponsePostRead)
 def get_post(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -43,7 +44,7 @@ def get_post(
     )
 
 
-@router.get("/get_posts/", response_model=board_schema.ResponsePostsRead)
+@router.get(v1_urn.BOARD_GET_POSTS, response_model=board_schema.ResponsePostsRead)
 def get_posts(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -58,7 +59,7 @@ def get_posts(
     )
 
 
-@router.put("/update_post", status_code=status.HTTP_204_NO_CONTENT)
+@router.put(v1_urn.BOARD_UPDATE_POST, status_code=status.HTTP_204_NO_CONTENT)
 def update_post(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -76,7 +77,7 @@ def update_post(
     )
 
 
-@router.delete("/delete_post", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(v1_urn.BOARD_DELETE_POST, status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(
     token: current_user_payload,
     data_base: data_base_dependency,
@@ -90,7 +91,7 @@ def delete_post(
     )
 
 
-@router.post("/create_comment", status_code=status.HTTP_201_CREATED)
+@router.post(v1_urn.BOARD_CREATE_COMMNET, status_code=status.HTTP_201_CREATED)
 def create_comment(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -107,7 +108,7 @@ def create_comment(
 
     return {"result": "success"}
 
-@router.get("/get_comment", response_model=board_schema.ResponseCommentRead)
+@router.get(v1_urn.BOARD_GET_COMMENT, response_model=board_schema.ResponseCommentRead)
 def get_comment(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -121,7 +122,7 @@ def get_comment(
     )
 
 
-@router.get("/get_comments", response_model=board_schema.ResponseCommentsRead)
+@router.get(v1_urn.BOARD_GET_COMMENTS, response_model=board_schema.ResponseCommentsRead)
 def get_comments(
     token: current_user_payload,
     data_base: data_base_dependency,
@@ -136,7 +137,7 @@ def get_comments(
     )
 
 
-@router.put("/update_comment", status_code=status.HTTP_204_NO_CONTENT)
+@router.put(v1_urn.BOARD_UPDATE_COMMENT, status_code=status.HTTP_204_NO_CONTENT)
 def update_comment(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -153,7 +154,7 @@ def update_comment(
     )
 
 
-@router.delete("/delete_comment", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(v1_urn.BOARD_DELETE_COMMENT, status_code=status.HTTP_204_NO_CONTENT)
 def delete_comment(
     data_base: data_base_dependency,
     token: current_user_payload,
