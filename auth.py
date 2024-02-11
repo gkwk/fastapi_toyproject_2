@@ -198,7 +198,7 @@ def validate_and_decode_user_access_token(
             values[0]
             for values in data_base.query(JWTAccessTokenBlackList)
             .filter_by(user_id=user_id)
-            .values(column("access_token"))
+            .with_entities(JWTAccessTokenBlackList.access_token)
         ]
 
         if (
