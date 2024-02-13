@@ -154,7 +154,7 @@ async def websocket_test_endpoint(
     chatting_room_id: int,
     user_id: int,
 ):
-    if user_id == token.get("user_id"):
+    if user_id == token.get("user_id") or token.get("is_admin"):
         await manager.connect(websocket, chatting_room_id, token.get("user_id"))
         try:
             for t_websocket in manager.active_connections[chatting_room_id]:

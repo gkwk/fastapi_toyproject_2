@@ -9,6 +9,7 @@ from auth import (
     current_admin_payload,
     current_user_payload,
     validate_and_decode_admin_access_token,
+    scope_checker
 )
 import v1_urn
 
@@ -82,6 +83,8 @@ def get_board(
     # schema: Annotated[ai_schema.RequestAIRead, Depends()],
     board_id: int,
 ):
+    scope_checker(token=token,target_scopes=[board_id])
+    
     return admin_crud.get_board(
         data_base=data_base,
         board_id=board_id,

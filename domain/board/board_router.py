@@ -5,7 +5,7 @@ from starlette import status
 
 from database import data_base_dependency
 from domain.board import board_crud, board_schema
-from auth import current_user_payload
+from auth import current_user_payload, scope_checker
 import v1_urn
 
 router = APIRouter(prefix=v1_urn.BOARD_PREFIX, tags=["board"])

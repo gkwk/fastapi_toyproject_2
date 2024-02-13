@@ -9,9 +9,15 @@ from starlette import status
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 
-from models import User, JWTAccessTokenBlackList, JWTRefreshTokenList
+from models import (
+    User,
+    JWTAccessTokenBlackList,
+    JWTRefreshTokenList,
+    UserPermissionTable,
+)
 from database import data_base_dependency
 from config import get_settings
+from http_execption_params import http_exception_params
 
 ACCESS_TOKEN_EXPIRE_MINUTES = get_settings().APP_JWT_EXPIRE_MINUTES
 SECRET_KEY = get_settings().APP_JWT_SECRET_KEY
@@ -32,33 +38,6 @@ def get_password_context():
 
 
 token_dependency = Annotated[str, Depends(get_oauth2_scheme_v1())]
-http_exception_params = {
-    "not_user": {
-        "status_code": status.HTTP_401_UNAUTHORIZED,
-        "detail": "유저가 존재하지 않습니다.",
-        "headers": {"WWW-Authenticate": "Bearer"},
-    },
-    "not_admin": {
-        "status_code": status.HTTP_403_FORBIDDEN,
-        "detail": "관리자 권한이 존재하지 않습니다.",
-        "headers": {"WWW-Authenticate": "Bearer"},
-    },
-    "not_verified_password": {
-        "status_code": status.HTTP_401_UNAUTHORIZED,
-        "detail": "패스워드가 일치하지 않습니다.",
-        "headers": {"WWW-Authenticate": "Bearer"},
-    },
-    "not_verified_token": {
-        "status_code": status.HTTP_401_UNAUTHORIZED,
-        "detail": "토큰이 유효하지 않습니다.",
-        "headers": {"WWW-Authenticate": "Bearer"},
-    },
-    "banned": {
-        "status_code": status.HTTP_403_FORBIDDEN,
-        "detail": "차단되었습니다.",
-        "headers": {"WWW-Authenticate": "Bearer"},
-    },
-}
 
 
 def ban_access_token(
@@ -134,6 +113,12 @@ def generate_access_token(
     user_id: int,
 ):
     user = data_base.query(User).filter_by(id=user_id).first()
+    board_scopes = [
+        values[0]
+        for values in data_base.query(UserPermissionTable)
+        .filter_by(user_id=user_id)
+        .with_entities(UserPermissionTable.board_id)
+    ]
 
     data = {
         "sub": "access_token",
@@ -142,7 +127,7 @@ def generate_access_token(
         "user_name": user.name,
         "user_id": user.id,
         "is_admin": user.is_superuser,
-        "scope": [],
+        "scopes": board_scopes,
         "uuid": str(uuid.uuid4()),
     }
 
@@ -302,3 +287,11 @@ def delete_refresh_token(
     )
     data_base.delete(user_refresh_token)
     data_base.commit()
+
+
+def scope_checker(token: current_user_payload, target_scopes: list):
+    token_scopes_set = set(token.get("scopes", []))
+    target_scopes_set = set(target_scopes)
+
+    if not target_scopes_set.issubset(token_scopes_set):
+        raise HTTPException(**http_exception_params["scopes_not_matched"])
