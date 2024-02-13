@@ -39,7 +39,7 @@
     - [x] 댓글 갯수 표시
     - [x] 조회수 표시
     - [x] 추천수 표시
-    - [ ] 파일 첨부 기능
+    - [x] 파일 첨부 기능
     - [ ] 예외 처리
     - [x] 테스트 코드 작성
     - [ ] 코드 품질 개선
@@ -177,7 +177,7 @@
     - post_id : int (post.id) (pk, fk)
     - post : Post (1 to N)
     - board_id : int (board.id) (pk, fk)
-    - file_uuid_name : str (unique=True)
+    - file_uuid_name : str (pk)
     - file_original_name : str
     - file_path : str
     - create_date : datetime (Not null, default=datetime.now())
@@ -185,8 +185,7 @@
     - comment_id : int (comment.id) (pk, fk)
     - comment : Comment (1 to N)
     - post_id : int (post.id) (pk, fk)
-    - board_id : int (board.id) (pk, fk)
-    - file_uuid_name : str (unique=True)
+    - file_uuid_name : str (pk)
     - file_original_name : str
     - file_path : str
     - create_date : datetime (Not null, default=datetime.now())
@@ -236,4 +235,3 @@ with connectable.connect() as connection:
 - ai, user, admin, board 기능 테스트 코드에 case 추가
 - 예외 메세지나 URL 경로 등은 하나의 파일에 정리하는 등의 조치로 중복 코드 정리
     - 테스트 코드의 중복 코드(로그인 등) 정리
-- post에 파일 첨부 기능 추가
