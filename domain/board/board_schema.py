@@ -104,3 +104,22 @@ class RequestCommentUpdate(RequestCommentCreate):
 class CommentDelete(BaseModel):
     id: int = Field(ge=1)
     post_id: int = Field(ge=1)
+
+
+# class RequestPostCreateForm:
+#     def __init__(
+#         self,
+#         *,
+#         name: Annotated[str, Form(min_length=0, max_length=64)] = None,
+#         content: Annotated[str, Form(min_length=0, max_length=1024)] = None,
+#         board_id: Annotated[int, Form(ge=1)],
+#         is_file_attached: Annotated[bool, Form()],
+#         is_visible: Annotated[bool, Form()],
+#         file: Optional[List[UploadFile]] = File(None),
+#     ):
+#         self.name = name
+#         self.content = content
+#         self.board_id = board_id
+#         self.is_file_attached = is_file_attached
+#         self.is_visible = is_visible
+#         self.file = file
