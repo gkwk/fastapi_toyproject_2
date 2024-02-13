@@ -10,6 +10,7 @@ from domain.admin.admin_crud import create_admin_with_terminal
 from models import User, AI, AIlog
 from database import session_local, engine
 from auth import validate_and_decode_user_access_token
+import v1_urn
 
 client = TestClient(app)
 
@@ -28,6 +29,41 @@ TEST_AI_IS_AVAILABLE_UPDATE = True
 
 TEST_AI_LOG_DESCRIPTION = "AIlog_test_1_description"
 TEST_AI_LOG_DESCRIPTION_UPDATE = "AIlog_test_1_description_update"
+
+
+URL_USER_LOGIN_USER = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_LOGIN_USER]
+)
+URL_AI_TRAIN_AI = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.AI_PREFIX, v1_urn.AI_TRAIN_AI]
+)
+URL_AI_GET_AI = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.AI_PREFIX, v1_urn.AI_GET_AI]
+)
+URL_AI_GET_AIS = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.AI_PREFIX, v1_urn.AI_GET_AIS]
+)
+URL_AI_UPDATE_AI = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.AI_PREFIX, v1_urn.AI_UPDATE_AI]
+)
+URL_AI_DELETE_AI = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.AI_PREFIX, v1_urn.AI_DELETE_AI]
+)
+URL_AI_AI_INFER = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.AI_PREFIX, v1_urn.AI_AI_INFER]
+)
+URL_AI_GET_AILOG = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.AI_PREFIX, v1_urn.AI_GET_AILOG]
+)
+URL_AI_GET_AILOGS = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.AI_PREFIX, v1_urn.AI_GET_AILOGS]
+)
+URL_AI_UPDATE_AILOG = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.AI_PREFIX, v1_urn.AI_UPDATE_AILOG]
+)
+URL_AI_DELETE_AILOG = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.AI_PREFIX, v1_urn.AI_DELETE_AILOG]
+)
 
 
 class TestAI:
@@ -54,7 +90,7 @@ class TestAI:
         data_base = session_local()
 
         response_admin_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -65,7 +101,7 @@ class TestAI:
         assert response_admin_login_json.get("token_type")
 
         response_train_ai = client.post(
-            "/api/v1/ai/train_ai",
+            URL_AI_TRAIN_AI,
             json={
                 "name": TEST_AI_NAME,
                 "description": TEST_AI_DESCRIPTION,
@@ -106,7 +142,7 @@ class TestAI:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -119,7 +155,7 @@ class TestAI:
         ai = data_base.query(AI).first()
 
         response_test = client.get(
-            "/api/v1/ai/get_ai",
+            URL_AI_GET_AI,
             params={
                 "ai_id": ai.id,
             },
@@ -151,7 +187,7 @@ class TestAI:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -162,7 +198,7 @@ class TestAI:
         assert response_login_json.get("token_type")
 
         response_test = client.get(
-            "/api/v1/ai/get_ais",
+            URL_AI_GET_AIS,
             params={
                 # "is_available" : True,
                 # "is_visible" : True,
@@ -199,7 +235,7 @@ class TestAI:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -212,7 +248,7 @@ class TestAI:
         ai = data_base.query(AI).first()
 
         response_test = client.put(
-            "/api/v1/ai/update_ai",
+            URL_AI_UPDATE_AI,
             json={
                 "ai_id": ai.id,
                 "description": TEST_AI_DESCRIPTION_UPDATE,
@@ -245,7 +281,7 @@ class TestAI:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -258,7 +294,7 @@ class TestAI:
         ai = data_base.query(AI).first()
 
         response_test = client.delete(
-            "/api/v1/ai/delete_ai",
+            URL_AI_DELETE_AI,
             params={
                 "ai_id": ai.id,
             },
@@ -302,7 +338,7 @@ class TestAIlog:
         data_base = session_local()
 
         response_admin_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -313,7 +349,7 @@ class TestAIlog:
         assert response_admin_login_json.get("token_type")
 
         response_train_ai = client.post(
-            "/api/v1/ai/train_ai",
+            URL_AI_TRAIN_AI,
             json={
                 "name": TEST_AI_NAME,
                 "description": TEST_AI_DESCRIPTION,
@@ -355,7 +391,7 @@ class TestAIlog:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -367,7 +403,7 @@ class TestAIlog:
 
         ai = data_base.query(AI).first()
         response_test = client.post(
-            "/api/v1/ai/ai_infer",
+            URL_AI_AI_INFER,
             json={
                 "ai_id": ai.id,
                 "description": TEST_AI_LOG_DESCRIPTION,
@@ -387,7 +423,7 @@ class TestAIlog:
             time.sleep(0.5)
 
         user_id = validate_and_decode_user_access_token(
-            response_login_json.get("access_token")
+            data_base=data_base, token=response_login_json.get("access_token")
         ).get("user_id")
 
         ailog = (
@@ -410,7 +446,7 @@ class TestAIlog:
     def test_get_ailog(self):
         data_base = session_local()
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -423,7 +459,7 @@ class TestAIlog:
         ailog = data_base.query(AIlog).first()
 
         response_test = client.get(
-            "/api/v1/ai/get_ailog",
+            URL_AI_GET_AILOG,
             params={
                 "ailog_id": ailog.id,
             },
@@ -436,7 +472,7 @@ class TestAIlog:
         response_test_json: dict = response_test.json()
 
         user_id = validate_and_decode_user_access_token(
-            response_login_json.get("access_token")
+            data_base=data_base, token=response_login_json.get("access_token")
         ).get("user_id")
 
         assert response_test_json.get("user_id") == user_id
@@ -456,7 +492,7 @@ class TestAIlog:
     def test_get_ailogs(self):
         data_base = session_local()
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -469,11 +505,11 @@ class TestAIlog:
         ai = data_base.query(AIlog).first()
 
         user_id = validate_and_decode_user_access_token(
-            response_login_json.get("access_token")
+            data_base=data_base, token=response_login_json.get("access_token")
         ).get("user_id")
 
         response_test = client.get(
-            "/api/v1/ai/get_ailogs",
+            URL_AI_GET_AILOGS,
             params={
                 # "user_id" : user_id,
                 # "ai_id" : ai.id,
@@ -510,7 +546,7 @@ class TestAIlog:
     def test_update_ailog(self):
         data_base = session_local()
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -523,7 +559,7 @@ class TestAIlog:
         ailog = data_base.query(AIlog).first()
 
         response_test = client.put(
-            "/api/v1/ai/update_ailog",
+            URL_AI_UPDATE_AILOG,
             json={
                 "ailog_id": ailog.id,
                 "description": TEST_AI_LOG_DESCRIPTION_UPDATE,
@@ -538,7 +574,7 @@ class TestAIlog:
         assert response_test.status_code == 204
 
         user_id = validate_and_decode_user_access_token(
-            response_login_json.get("access_token")
+            data_base=data_base, token=response_login_json.get("access_token")
         ).get("user_id")
 
         assert ailog.user_id > 0
@@ -558,7 +594,7 @@ class TestAIlog:
     def test_delete_ailog(self):
         data_base = session_local()
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_ADMIN_ID, "password": TEST_ADMIN_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -571,7 +607,7 @@ class TestAIlog:
         ailog = data_base.query(AIlog).first()
 
         response_test = client.delete(
-            "/api/v1/ai/delete_ailog",
+            URL_AI_DELETE_AILOG,
             params={
                 "ailog_id": ailog.id,
             },

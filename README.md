@@ -18,6 +18,8 @@
     - [x] 사용자 정보 수정
     - [x] 게시판 접근 권한 보기
     - [x] 비밀번호 초기화 기능
+    - [x] JWT refresh token 기능
+    - [x] JWT access token 블랙리스트
     - [ ] 예외 처리
     - [x] 테스트 코드 작성
     - [ ] 코드 품질 개선
@@ -37,12 +39,12 @@
     - [x] 댓글 갯수 표시
     - [x] 조회수 표시
     - [x] 추천수 표시
-    - [ ] 파일 첨부 기능
+    - [x] 파일 첨부 기능
     - [ ] 예외 처리
     - [x] 테스트 코드 작성
     - [ ] 코드 품질 개선
 - [ ] 대화
-    - [ ] WebSocket활용한 관리자와의 대화
+    - [x] WebSocket활용한 관리자와의 대화
     - [x] 대화 로그 DB 저장
     - [ ] 예외 처리
     - [ ] 테스트 코드 작성
@@ -72,12 +74,15 @@
     - join_date : datetime (Not null)
     - is_superuser : boolean (Not null, default = False)
     - is_banned : boolean (Not null, defalut = False)
+    - is_active : boolean (Not null, defalut = True)
 - Board
     - id : int (pk)
     - name : str (unique, Not null, length=128)
     - users : List["User"] (N to M)
     - information : str (Not null, length=512)
-    - is_visible : boolean (Not null, defalut = True)
+    - is_visible : boolean (Not null, defalut = False)
+    - is_available : boolean (Not null, defalut = False)
+    - permission_verified_user_id_range : int (defalut = 0)
 - Post
     - id : int (pk)
     - user_id : int (user.id) (fk)
@@ -86,11 +91,12 @@
     - name : str (unique, Not null, length=64)
     - content : str (Not null, length=1024)
     - create_date : datetime (Not null, default=datetime.now())
-    - update_date : datetime (Not null)
+    - update_date : datetime (onupdate=datetime.now)
     - number_of_view : int (Not null, defalut = 0)
     - number_of_comment : int (Not null, defalut = 0)
     - number_of_like : int (Not null, defalut = 0)
     - is_file_attached : boolean (Not null, defalut = False)
+    - attached_files : List["PostFile"] (1 to N)
     - is_visible : boolean (Not null, defalut = True)
 - Comment
     - id : int (pk)
@@ -100,16 +106,20 @@
     - post : Post (1 to N)
     - content : str (Not null, length=256)
     - create_date : datetime (Not null, default=datetime.now())
-    - update_date : datetime (Not null)
+    - update_date : datetime (onupdate=datetime.now)
     - is_file_attached : boolean (Not null, defalut = False)
+    - attached_files : List["PostFile"] (1 to N)
     - is_visible : boolean (Not null, defalut = True)
 - ChatSession
     - id : int (pk)
     - users : List["User"] (N to M)
     - chats : List["Chat"] (1 to N)
     - name : str (Not null, length=256)
+    - information : str (Not null, length=256)
     - create_date : datetime (Not null, default=datetime.now())
-    - update_date : datetime (Not null)
+    - update_date : datetime (onupdate=datetime.now)
+    - is_visible : boolean (Not null, defalut = True)
+    - is_closed : boolean (Not null, defalut = False)
 - Chat
     - id : int (pk)
     - user_id : int (user.id) (fk)
@@ -118,23 +128,67 @@
     - chat_session : ChatSession (1 to N)
     - content : str (Not null, length=256)
     - create_date : datetime (Not null, default=datetime.now())
+    - update_date : datetime (onupdate=datetime.now)
     - is_visible : boolean (Not null, defalut = True)
 - AI
     - id : int (pk)
     - ai_logs : List["AIlog"] (1 to N)
     - name : str (unique, Not null, length=64)
-    - information : str (Not null, length=256)
-    - is_visible : boolean (Not null, defalut = True)
+    - description : str (Not null, length=256)
+    - create_date : datetime (Not null, default=datetime.now())
+    - update_date : datetime (onupdate=datetime.now)
+    - finish_date : datetime
+    - is_visible : boolean (Not null, defalut = False)
+    - is_available : boolean (Not null, defalut = False)
+    - celery_task_id : str (Not null, length=64)
 - AIlog
     - id : int (pk)
     - user_id : int (user.id) (fk)
     - user : User (1 to N)
     - ai_id : int (AI.id) (fk)
     - ai : AI (1 to N)
-    - content : str (Not null, length=256)
+    - description : str (Not null, length=256)
+    - result : str (Not null, length=256)
     - create_date : datetime (Not null, default=datetime.now())
-    - finish_date : datetime (Not null)
+    - update_date : datetime (onupdate=datetime.now)
+    - finish_date : datetime
     - is_finished : boolean (Not null, defalut = False)
+    - celery_task_id : str (Not null, length=64)
+- UserChatSessionTable
+    - user_id : int (user.id) (pk, fk)
+    - chat_session_id : int (chat_session.id) (pk, fk)
+    - create_date : datetime (Not null, default=datetime.now())
+- UserPermissionTable
+    - user_id : int (user.id) (pk, fk)
+    - board_id : int (board.id) (pk, fk)
+    - create_date : datetime (Not null, default=datetime.now())
+- JWTAccessTokenBlackList
+    - user_id : int (pk, autoincrement=False)
+    - access_token : str (pk)
+    - create_date : datetime (Not null, default=datetime.now(), onupdate=datetime.now)
+    - expired_date : datetime
+- JWTRefreshTokenList
+    - user_id : int (pk, autoincrement=False)
+    - refresh_token : str (Not null)
+    - access_token : str
+    - create_date : datetime (Not null, default=datetime.now(), onupdate=datetime.now)
+    - expired_date : datetime
+- PostFile
+    - post_id : int (post.id) (pk, fk)
+    - post : Post (1 to N)
+    - board_id : int (board.id) (pk, fk)
+    - file_uuid_name : str (pk)
+    - file_original_name : str
+    - file_path : str
+    - create_date : datetime (Not null, default=datetime.now())
+- CommentFile
+    - comment_id : int (comment.id) (pk, fk)
+    - comment : Comment (1 to N)
+    - post_id : int (post.id) (pk, fk)
+    - file_uuid_name : str (pk)
+    - file_original_name : str
+    - file_path : str
+    - create_date : datetime (Not null, default=datetime.now())
 
 # 실행방법
 - 터미널에서 아래의 명령어 입력
@@ -180,8 +234,4 @@ with connectable.connect() as connection:
 - chat 기능 테스트 코드 추가
 - ai, user, admin, board 기능 테스트 코드에 case 추가
 - 예외 메세지나 URL 경로 등은 하나의 파일에 정리하는 등의 조치로 중복 코드 정리
-    - 테스트 코드에 URL 경로가 하드 코딩되어 있으므로 문제 해결 필요
-- chat의 채팅방 입장 권한 판별 기능 추가
-- jwt의 scope 기능 등을 활용하여 permission 제한 기능 추가
-- post에 파일 첨부 기능 추가
-- readme 내 DB 테이블 구조 최신화
+    - 테스트 코드의 중복 코드(로그인 등) 정리

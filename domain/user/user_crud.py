@@ -114,3 +114,17 @@ def update_user_password(
 
     data_base.add(user)
     data_base.commit()
+
+
+def delete_user(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+):
+    user = (
+        data_base.query(User)
+        .filter_by(id=token.get("user_id"), name=token.get("user_name"))
+        .first()
+    )
+
+    data_base.delete(user)
+    data_base.commit()

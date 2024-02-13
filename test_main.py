@@ -2,9 +2,11 @@ from pytest import MonkeyPatch
 
 from fastapi.testclient import TestClient
 
+from sqlalchemy import select,delete,text
+
 from main import app
-from models import User
-from database import session_local
+import models
+from database import session_local,engine
 
 
 client = TestClient(app)
@@ -34,7 +36,24 @@ class TestMain:
 
     def test_data_base_init(self):
         data_base = session_local()
-        data_base.query(User).delete()
+        data_base.execute(delete(models.JWTAccessTokenBlackList))
+        data_base.execute(delete(models.JWTRefreshTokenList))
+        data_base.execute(delete(models.PostFile))
+        data_base.execute(delete(models.CommentFile))
+        data_base.execute(delete(models.UserChatSessionTable))
+        data_base.execute(delete(models.UserPermissionTable))
+        data_base.execute(delete(models.AIlog))
+        data_base.execute(delete(models.AI))
+        data_base.execute(delete(models.Chat))
+        data_base.execute(delete(models.ChatSession))
+        data_base.execute(delete(models.Comment))
+        data_base.execute(delete(models.Post))
+        data_base.execute(delete(models.Board))
+        data_base.execute(delete(models.User))
+        
+        for value in data_base.execute(text('SELECT * FROM sqlite_sequence')).all():
+            data_base.execute(text(f'UPDATE sqlite_sequence SET seq = 0 WHERE name = "{value[0]}"'))
+
         data_base.commit()
         data_base.close()
 

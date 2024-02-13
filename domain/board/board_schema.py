@@ -1,7 +1,20 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
+from dataclasses import dataclass
+
+from fastapi import Form, File, UploadFile
 
 from pydantic import BaseModel, field_validator, Field
+
+
+@dataclass
+class RequestFormPostCreate:
+    name: str = Form(min_length=1, max_length=64)
+    content: str = Form(min_length=1, max_length=1024)
+    board_id: int = Form(ge=1)
+    is_file_attached: bool = Form(...)
+    is_visible: bool = Form(...)
+    files: list[Optional[UploadFile]] = File(None)
 
 
 class RequestPostCreate(BaseModel):
@@ -55,6 +68,15 @@ class RequestPostUpdate(RequestPostCreate):
 class RequestPostDelete(BaseModel):
     id: int = Field(ge=1)
     board_id: int = Field(ge=1)
+
+
+@dataclass
+class RequestFormCommentCreate:
+    content: str = Form(min_length=1, max_length=256)
+    post_id: int = Form(ge=1)
+    is_file_attached: bool = Form(...)
+    is_visible: bool = Form(...)
+    files: list[Optional[UploadFile]] = File(None)
 
 
 class RequestCommentCreate(BaseModel):

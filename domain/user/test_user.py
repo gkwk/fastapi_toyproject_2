@@ -4,6 +4,7 @@ from main import app
 from models import User
 from database import session_local
 from auth import validate_and_decode_user_access_token
+import v1_urn
 
 client = TestClient(app)
 
@@ -15,6 +16,22 @@ TEST_USER_PASSWORD2 = "12345678"
 TEST_USER_EMAIL_UPDATE = "user_update@test.com"
 TEST_USER_PASSWORD1_UPDATE = "123456789"
 TEST_USER_PASSWORD2_UPDATE = "123456789"
+
+URL_USER_CREATE_USER = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_CREATE_USER]
+)
+URL_USER_LOGIN_USER = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_LOGIN_USER]
+)
+URL_USER_GET_USER_DETAIL = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_GET_USER_DETAIL]
+)
+URL_USER_UPDATE_USER_DETAIL = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_UPDATE_USER_DETAIL]
+)
+URL_USER_UPDATE_USER_PASSWORD = "".join(
+    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_UPDATE_USER_PASSWORD]
+)
 
 
 class TestUser:
@@ -28,7 +45,7 @@ class TestUser:
         data_base = session_local()
 
         response_test = client.post(
-            "/api/v1/user/create_user",
+            URL_USER_CREATE_USER,
             json={
                 "name": TEST_USER_ID,
                 "password1": TEST_USER_PASSWORD1,
@@ -58,8 +75,10 @@ class TestUser:
         data_base.close()
 
     def test_login_user(self):
+        data_base = session_local()
+
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_USER_ID, "password": TEST_USER_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -70,16 +89,18 @@ class TestUser:
         assert response_login_json.get("token_type") == "bearer"
 
         user_payload = validate_and_decode_user_access_token(
-            response_login_json.get("access_token")
+            data_base=data_base, token=response_login_json.get("access_token")
         )
 
         assert user_payload.get("user_id") >= 1
         assert user_payload.get("user_name") == TEST_USER_ID
         assert user_payload.get("is_admin") == False
 
+        data_base.close()
+
     def test_get_user_detail(self):
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_USER_ID, "password": TEST_USER_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -90,7 +111,7 @@ class TestUser:
         assert response_login_json.get("token_type")
 
         response_test = client.get(
-            "/api/v1/user/get_user_detail",
+            URL_USER_GET_USER_DETAIL,
             headers={
                 "Authorization": f"Bearer {response_login_json.get('access_token')}"
             },
@@ -110,7 +131,7 @@ class TestUser:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_USER_ID, "password": TEST_USER_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -121,12 +142,12 @@ class TestUser:
         assert response_login_json.get("token_type")
 
         user_id = validate_and_decode_user_access_token(
-            response_login_json.get("access_token")
+            data_base=data_base, token=response_login_json.get("access_token")
         ).get("user_id")
         user = data_base.query(User).filter_by(id=user_id).first()
 
         response_test = client.put(
-            "/api/v1/user/update_user_detail",
+            URL_USER_UPDATE_USER_DETAIL,
             json={
                 "email": TEST_USER_EMAIL_UPDATE,
             },
@@ -154,7 +175,7 @@ class TestUser:
         data_base = session_local()
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_USER_ID, "password": TEST_USER_PASSWORD1},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -165,14 +186,14 @@ class TestUser:
         assert response_login_json.get("token_type")
 
         user_id = validate_and_decode_user_access_token(
-            response_login_json.get("access_token")
+            data_base=data_base, token=response_login_json.get("access_token")
         ).get("user_id")
 
         user = data_base.query(User).filter_by(id=user_id).first()
         user_password_salt_old = user.password_salt
 
         response_test = client.put(
-            "/api/v1/user/update_user_password",
+            URL_USER_UPDATE_USER_PASSWORD,
             json={
                 "password1": TEST_USER_PASSWORD1_UPDATE,
                 "password2": TEST_USER_PASSWORD2_UPDATE,
@@ -186,7 +207,7 @@ class TestUser:
         assert response_test.status_code == 204
 
         response_login = client.post(
-            "/api/v1/user/login_user",
+            URL_USER_LOGIN_USER,
             data={"username": TEST_USER_ID, "password": TEST_USER_PASSWORD1_UPDATE},
             headers={"content-type": "application/x-www-form-urlencoded"},
         )
@@ -197,10 +218,8 @@ class TestUser:
         assert response_login_json.get("token_type")
 
         user_id = validate_and_decode_user_access_token(
-            response_login_json.get("access_token")
+            data_base=data_base, token=response_login_json.get("access_token")
         ).get("user_id")
-
-
 
         user = data_base.query(User).filter_by(id=user_id).first()
         user_password_salt_new = user.password_salt

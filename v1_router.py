@@ -5,11 +5,11 @@ from domain.admin import admin_router
 from domain.board import board_router
 from domain.chat import chat_router, chat_router_debug
 from domain.ai import ai_router
+import v1_urn
 
-from domain import ai
 
 router = APIRouter(
-    prefix="/api/v1",
+    prefix=v1_urn.API_V1_ROUTER_PREFIX,
 )
 
 router.include_router(user_router.router)

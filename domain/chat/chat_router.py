@@ -7,8 +7,9 @@ from starlette import status
 from database import data_base_dependency
 from domain.chat import chat_crud, chat_schema
 from auth import current_user_payload
+import v1_urn
 
-router = APIRouter(prefix="/chat", tags=["chat"])
+router = APIRouter(prefix=v1_urn.CHAT_PREFIX, tags=["chat"])
 
 
 manager = chat_crud.ConnectionManager()
@@ -16,7 +17,7 @@ json_encoder = json.JSONEncoder()
 json_decoder = json.JSONDecoder()
 
 
-@router.post("/create_chatsession", status_code=status.HTTP_204_NO_CONTENT)
+@router.post(v1_urn.CHAT_CREATE_CHATSESSION, status_code=status.HTTP_204_NO_CONTENT)
 def create_chatsession(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -30,7 +31,7 @@ def create_chatsession(
     )
 
 
-@router.get("/get_chatsession")
+@router.get(v1_urn.CHAT_GET_CHATSESSION)
 def get_chatsession(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -43,7 +44,7 @@ def get_chatsession(
     )
 
 
-@router.get("/get_chatsessions")
+@router.get(v1_urn.CHAT_GET_CHATSESSIONS)
 def get_chatsessions(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -58,7 +59,7 @@ def get_chatsessions(
     )
 
 
-@router.put("/update_chatsession", status_code=status.HTTP_204_NO_CONTENT)
+@router.put(v1_urn.CHAT_UPDATE_CHATSESSION, status_code=status.HTTP_204_NO_CONTENT)
 def update_chatsession(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -73,7 +74,7 @@ def update_chatsession(
     )
 
 
-@router.delete("/delete_chatsession", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(v1_urn.CHAT_DELETE_CHATSESSION, status_code=status.HTTP_204_NO_CONTENT)
 def delete_chatsession(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -86,7 +87,7 @@ def delete_chatsession(
     )
 
 
-@router.post("/create_chat", status_code=status.HTTP_204_NO_CONTENT)
+@router.post(v1_urn.CHAT_CREATE_CHAT, status_code=status.HTTP_204_NO_CONTENT)
 def create_chat(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -100,7 +101,7 @@ def create_chat(
     )
 
 
-@router.get("/get_chats")
+@router.get(v1_urn.CHAT_GET_CHATS)
 def get_chats(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -115,7 +116,7 @@ def get_chats(
     )
 
 
-@router.put("/update_chat", status_code=status.HTTP_204_NO_CONTENT)
+@router.put(v1_urn.CHAT_UPDATE_CHAT, status_code=status.HTTP_204_NO_CONTENT)
 def update_chat(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -131,7 +132,7 @@ def update_chat(
     )
 
 
-@router.delete("/delete_chat", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(v1_urn.CHAT_DELETE_CHAT, status_code=status.HTTP_204_NO_CONTENT)
 def delete_chat(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -145,7 +146,7 @@ def delete_chat(
     )
 
 
-@router.websocket("/ws/chat/{chatting_room_id}/{user_id}")
+@router.websocket(v1_urn.CHAT_WEBSOCKET)
 async def websocket_test_endpoint(
     websocket: WebSocket,
     data_base: data_base_dependency,
@@ -153,7 +154,7 @@ async def websocket_test_endpoint(
     chatting_room_id: int,
     user_id: int,
 ):
-    if user_id == token.get("user_id"):
+    if user_id == token.get("user_id") or token.get("is_admin"):
         await manager.connect(websocket, chatting_room_id, token.get("user_id"))
         try:
             for t_websocket in manager.active_connections[chatting_room_id]:
