@@ -1,5 +1,5 @@
 import datetime
-from typing import List,Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
@@ -26,7 +26,7 @@ class RequestBoradCreate(BaseModel):
     information: str = Field(min_length=1, max_length=512)
     is_visible: bool
     user_id_list: Optional[List[int]] = None
-    
+
     @field_validator("user_id_list")
     def id_validate(cls, value, info: ValidationInfo):
         for id in value:

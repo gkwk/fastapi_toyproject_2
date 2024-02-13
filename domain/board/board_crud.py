@@ -1,7 +1,10 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
+import uuid
 
-from models import Post, User, Board, Comment
+from fastapi import UploadFile
+
+from models import Post, User, Board, Comment, PostFile, CommentFile
 from domain.board import board_schema
 from database import data_base_dependency
 from auth import current_user_payload
@@ -16,6 +19,7 @@ def create_post(
     content: str,
     is_file_attached: bool,
     is_visible: bool,
+    files: list[UploadFile],
 ):
     post: Post = Post(
         name=name,
@@ -27,6 +31,23 @@ def create_post(
     )
     data_base.add(post)
     data_base.commit()
+
+    if files != None:
+        for i, file in enumerate(files):
+            if file != None:
+                file_uuid_name = str(uuid.uuid4())
+                file_path = f"staticfile/{file_uuid_name}_{file.filename}"
+                with open(file_path, "wb+") as file_object:
+                    file_object.write(file.file.read())
+                    post_file = PostFile(
+                        post_id=post.id,
+                        board_id=board_id,
+                        file_uuid_name=file_uuid_name,
+                        file_original_name=file.filename,
+                        file_path=file_path,
+                    )
+                    data_base.add(post_file)
+                    data_base.commit()
 
 
 def get_posts(
@@ -115,6 +136,43 @@ def delete_post(
     data_base.commit()
 
 
+def create_comment(
+    data_base: data_base_dependency,
+    token: current_user_payload,
+    post_id: int,
+    content: str,
+    is_file_attached: bool,
+    is_visible: bool,
+    files: list[UploadFile],
+):
+    comment = Comment(
+        user_id=token.get("user_id"),
+        post_id=post_id,
+        content=content,
+        is_file_attached=is_file_attached,
+        is_visible=is_visible,
+    )
+    data_base.add(comment)
+    data_base.commit()
+
+    if files != None:
+        for i, file in enumerate(files):
+            if file != None:
+                file_uuid_name = str(uuid.uuid4())
+                file_path = f"staticfile/{file_uuid_name}_{file.filename}"
+                with open(file_path, "wb+") as file_object:
+                    file_object.write(file.file.read())
+                    comment_file = CommentFile(
+                        comment_id = comment.id,
+                        post_id=post_id,
+                        file_uuid_name=file_uuid_name,
+                        file_original_name=file.filename,
+                        file_path=file_path,
+                    )
+                    data_base.add(comment_file)
+                    data_base.commit()
+
+
 def get_comments(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -149,25 +207,6 @@ def get_comment_detail(
     comment_detail = data_base.query(Comment).filter_by(id=id, post_id=post_id).first()
 
     return comment_detail
-
-
-def create_comment(
-    data_base: data_base_dependency,
-    token: current_user_payload,
-    post_id: int,
-    content: str,
-    is_file_attached: bool,
-    is_visible: bool,
-):
-    post = Comment(
-        user_id=token.get("user_id"),
-        post_id=post_id,
-        content=content,
-        is_file_attached=is_file_attached,
-        is_visible=is_visible,
-    )
-    data_base.add(post)
-    data_base.commit()
 
 
 def update_comment(

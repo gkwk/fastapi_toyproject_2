@@ -3,6 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from starlette import status
 
+from pydantic import ValidationError
+
 from database import data_base_dependency
 from domain.board import board_crud, board_schema
 from auth import current_user_payload, scope_checker
@@ -15,8 +17,19 @@ router = APIRouter(prefix=v1_urn.BOARD_PREFIX, tags=["board"])
 def create_post(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: board_schema.RequestPostCreate,
+    schema: Annotated[board_schema.RequestFormPostCreate, Depends()],
 ):
+    try:
+        board_schema.RequestPostCreate(
+            name=schema.name,
+            content=schema.content,
+            board_id=schema.board_id,
+            is_file_attached=schema.is_file_attached,
+            is_visible=schema.is_visible,
+        )
+    except ValidationError as e:
+        return e.errors()
+
     board_crud.create_post(
         data_base=data_base,
         token=token,
@@ -25,6 +38,7 @@ def create_post(
         content=schema.content,
         is_file_attached=schema.is_file_attached,
         is_visible=schema.is_visible,
+        files=schema.files,
     )
 
     return {"result": "success"}
@@ -95,8 +109,18 @@ def delete_post(
 def create_comment(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: board_schema.RequestCommentCreate,
+    schema: Annotated[board_schema.RequestFormCommentCreate, Depends()],
 ):
+    try:
+        board_schema.RequestCommentCreate(
+            post_id=schema.post_id,
+            content=schema.content,
+            is_file_attached=schema.is_file_attached,
+            is_visible=schema.is_visible,
+        )
+    except ValidationError as e:
+        return e.errors()
+
     board_crud.create_comment(
         data_base=data_base,
         token=token,
@@ -104,9 +128,11 @@ def create_comment(
         content=schema.content,
         is_file_attached=schema.is_file_attached,
         is_visible=schema.is_visible,
+        files=schema.files,
     )
 
     return {"result": "success"}
+
 
 @router.get(v1_urn.BOARD_GET_COMMENT, response_model=board_schema.ResponseCommentRead)
 def get_comment(
