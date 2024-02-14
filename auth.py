@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 from typing import Annotated
 import uuid
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, HTTPException, Request, WebSocket
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy import column
 from starlette import status
@@ -19,6 +19,12 @@ from database import data_base_dependency
 from config import get_settings
 from http_execption_params import http_exception_params
 
+
+class CustomOAuth2PasswordBearer(OAuth2PasswordBearer):
+    async def __call__(self, request: Request = None, websocket: WebSocket = None):
+        return await super().__call__(request or websocket)
+
+
 ACCESS_TOKEN_EXPIRE_MINUTES = get_settings().APP_JWT_EXPIRE_MINUTES
 SECRET_KEY = get_settings().APP_JWT_SECRET_KEY
 ALGORITHM = get_settings().PASSWORD_ALGORITHM
@@ -26,11 +32,17 @@ oauth2_scheme_v1 = OAuth2PasswordBearer(
     tokenUrl=get_settings().APP_JWT_USER_URL, scheme_name="v1_oauth2_schema"
 )
 
+oauth2_scheme_v1_test = CustomOAuth2PasswordBearer(
+    tokenUrl=get_settings().APP_JWT_USER_URL, scheme_name="v1_oauth2_schema"
+)
+
+
 password_context = CryptContext(schemes=["bcrypt"])
 
 
 def get_oauth2_scheme_v1():
-    return oauth2_scheme_v1
+    # return oauth2_scheme_v1
+    return oauth2_scheme_v1_test
 
 
 def get_password_context():
