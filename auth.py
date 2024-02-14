@@ -19,7 +19,7 @@ from database import data_base_dependency
 from config import get_settings
 from http_execption_params import http_exception_params
 
-
+# ref : https://github.com/tiangolo/fastapi/issues/2031
 class CustomOAuth2PasswordBearer(OAuth2PasswordBearer):
     async def __call__(self, request: Request = None, websocket: WebSocket = None):
         return await super().__call__(request or websocket)
