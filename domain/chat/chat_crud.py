@@ -4,7 +4,7 @@ from typing import Any, Dict
 from fastapi import HTTPException, WebSocket
 from starlette import status
 
-from models import Chat, ChatSession
+from models import Chat, ChatSession, UserChatSessionTable
 from auth import current_user_payload
 from database import data_base_dependency
 
@@ -12,12 +12,17 @@ from database import data_base_dependency
 def create_chatsession(
     data_base: data_base_dependency,
     token: current_user_payload,
-    content: str,
+    name: str,
+    information: str,
     is_visible: bool,
+    is_closed: bool,
 ):
     chat_session = ChatSession(
-        content=content,
+        name=name,
+        user_create_id=token.get("user_id"),
+        information=information,
         is_visible=is_visible,
+        is_closed=is_closed,
     )
     data_base.add(chat_session)
     data_base.commit()
@@ -28,14 +33,14 @@ def get_chatsession(
     token: current_user_payload,
     chatting_room_id: int,
 ):
-    chat_sesstion = data_base.query(ChatSession).filter_by(id=chatting_room_id).first()
-    return chat_sesstion
+    chat_session = data_base.query(ChatSession).filter_by(id=chatting_room_id).first()
+    return chat_session
 
 
 def get_chatsessions(
     data_base: data_base_dependency,
     token: current_user_payload,
-    user_id: int | None,
+    user_create_id: int | None,
     skip: int | None,
     limit: int | None,
 ):
@@ -47,46 +52,51 @@ def get_chatsessions(
         limit = 10
 
     if token.get("is_admin"):
-        if user_id != None:
-            filter_kwargs["user_id"] = user_id
+        if user_create_id != None:
+            filter_kwargs["user_create_id"] = user_create_id
     else:
-        filter_kwargs["user_id"] = user_id
+        filter_kwargs["user_create_id"] = user_create_id
 
-    chat_sesstion = (
+    chat_sessions = (
         data_base.query(ChatSession)
         .filter_by(**filter_kwargs)
-        .order_by(Chat.create_date.asc(), Chat.id.asc())
+        .order_by(ChatSession.create_date.asc(), ChatSession.id.asc())
     )
-    total = chat_sesstion.count()
-    chat_sesstion = chat_sesstion.offset(skip).limit(limit).all()
-    return {"total": total, "chat_sesstion": chat_sesstion}
+    total = chat_sessions.count()
+    chat_sessions = chat_sessions.offset(skip).limit(limit).all()
+    return {"total": total, "chat_sesstions": chat_sessions}
 
 
 def update_chatsession(
     data_base: data_base_dependency,
     token: current_user_payload,
-    chatting_room_id: int,
-    content: str = None,
-    is_visible: bool = None,
+    id: int,
+    name: str | None,
+    information: str | None,
+    is_visible: bool | None,
+    is_closed: bool | None,
 ):
-    chatsession = data_base.query(ChatSession).filter_by(id=chatting_room_id).first()
+    chat_session = data_base.query(ChatSession).filter_by(id=id).first()
 
-    if content:
-        chatsession.information = content
-    if is_visible:
-        chatsession.is_visible = is_visible
-    chatsession.update_date = datetime.now()
+    if name != None:
+        chat_session.name = name
+    if information != None:
+        chat_session.information = information
+    if is_visible != None:
+        chat_session.is_visible = is_visible
+    if is_closed != None:
+        chat_session.is_closed = is_closed
 
-    data_base.add(chatsession)
+    data_base.add(chat_session)
     data_base.commit()
 
 
 def delete_chatsession(
     data_base: data_base_dependency,
     token: current_user_payload,
-    chatting_room_id: int,
+    id: int,
 ):
-    chatsession = data_base.query(ChatSession).filter_by(id=chatting_room_id).first()
+    chatsession = data_base.query(ChatSession).filter_by(id=id).first()
     data_base.delete(chatsession)
     data_base.commit()
 
@@ -94,13 +104,13 @@ def delete_chatsession(
 def create_chat(
     data_base: data_base_dependency,
     token: current_user_payload,
-    chat_content: str,
-    chatting_room_id: int,
+    content: str,
+    chat_session_id: int,
 ):
     chat = Chat(
         user_id=token.get("user_id"),
-        chat_session_id=chatting_room_id,
-        content=chat_content,
+        chat_session_id=chat_session_id,
+        content=content,
     )
     data_base.add(chat)
     data_base.commit()
@@ -109,11 +119,11 @@ def create_chat(
 def get_chats(
     data_base: data_base_dependency,
     token: current_user_payload,
-    chatting_room_id: int,
+    chat_session_id: int,
     skip: int | None,
     limit: int | None,
 ):
-    filter_kwargs = {"chat_session_id": chatting_room_id}
+    filter_kwargs = {"chat_session_id": chat_session_id}
 
     if skip == None:
         skip = 0
@@ -133,24 +143,24 @@ def get_chats(
 def update_chat(
     data_base: data_base_dependency,
     token: current_user_payload,
-    chat_id: int,
-    chatting_room_id: int,
+    id: int,
+    chat_session_id: int,
     content: str = None,
     is_visible: bool = None,
 ):
     chat = (
         data_base.query(Chat)
         .filter_by(
-            id=chat_id,
+            id=id,
             user_id=token.get("user_id"),
-            chat_session_id=chatting_room_id,
+            chat_session_id=chat_session_id,
         )
         .first()
     )
 
-    if content:
+    if content != None:
         chat.content = content
-    if is_visible:
+    if is_visible != None:
         chat.is_visible = is_visible
 
     data_base.add(chat)

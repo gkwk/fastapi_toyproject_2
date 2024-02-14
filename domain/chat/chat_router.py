@@ -1,4 +1,5 @@
 import json
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
@@ -17,7 +18,7 @@ json_encoder = json.JSONEncoder()
 json_decoder = json.JSONDecoder()
 
 
-@router.post(v1_urn.CHAT_CREATE_CHATSESSION, status_code=status.HTTP_204_NO_CONTENT)
+@router.post(v1_urn.CHAT_CREATE_CHATSESSION, status_code=status.HTTP_201_CREATED)
 def create_chatsession(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -26,16 +27,20 @@ def create_chatsession(
     chat_crud.create_chatsession(
         data_base=data_base,
         token=token,
-        content=schema.content,
+        name=schema.name,
+        information=schema.information,
         is_visible=schema.is_visible,
+        is_closed=schema.is_closed,
     )
+
+    return {"result": "success"}
 
 
 @router.get(v1_urn.CHAT_GET_CHATSESSION)
 def get_chatsession(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: chat_schema.RequestChatSessionRead,
+    schema: Annotated[chat_schema.RequestChatSessionRead, Depends()],
 ):
     return chat_crud.get_chatsession(
         data_base=data_base,
@@ -48,12 +53,12 @@ def get_chatsession(
 def get_chatsessions(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: chat_schema.RequestChatSessionsRead,
+    schema: Annotated[chat_schema.RequestChatSessionsRead, Depends()],
 ):
     return chat_crud.get_chatsessions(
         data_base=data_base,
         token=token,
-        user_id=schema.user_id,
+        user_create_id=schema.user_create_id,
         skip=schema.skip,
         limit=schema.limit,
     )
@@ -68,9 +73,11 @@ def update_chatsession(
     chat_crud.update_chatsession(
         data_base=data_base,
         token=token,
-        chatting_room_id=schema.chatting_room_id,
-        content=schema.content,
+        id=schema.id,
+        name=schema.name,
+        information=schema.information,
         is_visible=schema.is_visible,
+        is_closed=schema.is_closed,
     )
 
 
@@ -78,16 +85,16 @@ def update_chatsession(
 def delete_chatsession(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: chat_schema.RequestChatSessionDelete,
+    schema: Annotated[chat_schema.RequestChatSessionDelete, Depends()],
 ):
     chat_crud.delete_chatsession(
         data_base=data_base,
         token=token,
-        chatting_room_id=schema.chatting_room_id,
+        id=schema.id,
     )
 
 
-@router.post(v1_urn.CHAT_CREATE_CHAT, status_code=status.HTTP_204_NO_CONTENT)
+@router.post(v1_urn.CHAT_CREATE_CHAT, status_code=status.HTTP_201_CREATED)
 def create_chat(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -96,21 +103,23 @@ def create_chat(
     chat_crud.create_chat(
         data_base=data_base,
         token=token,
-        chat_content=schema.chat_content,
-        chatting_room_id=schema.chatting_room_id,
+        content=schema.content,
+        chat_session_id=schema.chat_session_id,
     )
+
+    return {"result": "success"}
 
 
 @router.get(v1_urn.CHAT_GET_CHATS)
 def get_chats(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: chat_schema.RequestChatsRead,
+    schema: Annotated[chat_schema.RequestChatsRead, Depends()],
 ):
     return chat_crud.get_chats(
         data_base=data_base,
         token=token,
-        chatting_room_id=schema.chatting_room_id,
+        chat_session_id=schema.chat_session_id,
         skip=schema.skip,
         limit=schema.limit,
     )
@@ -125,8 +134,8 @@ def update_chat(
     chat_crud.update_chat(
         data_base=data_base,
         token=token,
-        chat_id=schema.chat_id,
-        chatting_room_id=schema.chatting_room_id,
+        id=schema.id,
+        chat_session_id=schema.chat_session_id,
         content=schema.content,
         is_visible=schema.is_visible,
     )
@@ -136,17 +145,17 @@ def update_chat(
 def delete_chat(
     data_base: data_base_dependency,
     token: current_user_payload,
-    schema: chat_schema.RequestChatDelete,
+    schema: Annotated[chat_schema.RequestChatDelete, Depends()],
 ):
     chat_crud.delete_chat(
         data_base=data_base,
         token=token,
-        chat_id=schema.chat_id,
-        chatting_room_id=schema.chatting_room_id,
+        chat_id=schema.id,
+        chatting_room_id=schema.chat_session_id,
     )
 
 
-@router.websocket(v1_urn.CHAT_WEBSOCKET)
+@router.websocket(v1_urn.CHAT_WEBSOCKET+"/{chatting_room_id}/{user_id}")
 async def websocket_test_endpoint(
     websocket: WebSocket,
     data_base: data_base_dependency,
@@ -169,7 +178,7 @@ async def websocket_test_endpoint(
             for chat_query in chat_crud.get_chats(
                 data_base=data_base,
                 token=token,
-                chatting_room_id=chatting_room_id,
+                chat_session_id=chatting_room_id,
                 skip=0,
                 limit=0,
             ).get("chats"):
@@ -195,8 +204,8 @@ async def websocket_test_endpoint(
                 chat_crud.create_chat(
                     data_base=data_base,
                     token=token,
-                    chat_content=message,
-                    chatting_room_id=chatting_room_id,
+                    content=message,
+                    chat_session_id=chatting_room_id,
                 )
 
                 await manager.send_personal_message(

@@ -5,10 +5,12 @@ from pydantic import BaseModel, field_validator, Field
 
 
 class RequestChatSessionCreate(BaseModel):
-    content: str = Field(min_length=1, max_length=256)
+    name: str = Field(min_length=1, max_length=64)
+    information: str = Field(min_length=1, max_length=256)
     is_visible: bool
+    is_closed: bool
 
-    @field_validator("content")
+    @field_validator("name", "information")
     def is_not_empty(cls, value: str):
         if not value.strip():
             raise ValueError("값이 공백일 수 없습니다.")
@@ -20,26 +22,35 @@ class RequestChatSessionRead(BaseModel):
 
 
 class RequestChatSessionsRead(BaseModel):
-    user_id: int | None = Field(ge=1)
-    skip: int = Field(ge=0)
-    limit: int = Field(ge=0)
+    user_create_id: int | None = Field(ge=1)
+    skip: int | None = Field(default=None, ge=0)
+    limit: int | None = Field(default=None, ge=0)
 
 
 class RequestChatSessionUpdate(BaseModel):
-    chatting_room_id: int = Field(ge=1)
-    content: str | None = Field(max_length=256)
-    is_visible: bool | None
+    id: int = Field(ge=1)
+    name: str | None = Field(default=None, min_length=1, max_length=64)
+    information: str | None = Field(default=None, min_length=1, max_length=256)
+    is_visible: bool | None = Field(default=None)
+    is_closed: bool | None = Field(default=None)
+
+    @field_validator("name", "information")
+    def is_not_empty(cls, value: str):
+        if value != None:
+            if not value.strip():
+                raise ValueError("값이 공백일 수 없습니다.")
+        return value
 
 
 class RequestChatSessionDelete(BaseModel):
-    chatting_room_id: int = Field(ge=1)
+    id: int = Field(ge=1)
 
 
 class RequestChatCreate(BaseModel):
-    chat_content: str = Field(max_length=256)
-    chatting_room_id: int = Field(ge=1)
+    content: str = Field(max_length=256)
+    chat_session_id: int = Field(ge=1)
 
-    @field_validator("chat_content")
+    @field_validator("content")
     def is_not_empty(cls, value: str):
         if not value.strip():
             raise ValueError("값이 공백일 수 없습니다.")
@@ -47,18 +58,18 @@ class RequestChatCreate(BaseModel):
 
 
 class RequestChatsRead(BaseModel):
-    chatting_room_id: int = Field(ge=1)
-    skip: int | None = Field(ge=0)
-    limit: int | None = Field(ge=0)
+    chat_session_id: int = Field(ge=1)
+    skip: int | None = Field(default=None, ge=0)
+    limit: int | None = Field(default=None, ge=0)
 
 
 class RequestChatUpdate(BaseModel):
-    chat_id: int = Field(ge=1)
-    chatting_room_id: int = Field(ge=1)
-    content: str | None = Field(max_length=256)
-    is_visible: bool | None
+    id: int = Field(ge=1)
+    chat_session_id: int = Field(ge=1)
+    content: str | None = Field(default=None, max_length=256)
+    is_visible: bool | None = Field(default=None)
 
 
 class RequestChatDelete(BaseModel):
-    chat_id: int = Field(ge=1)
-    chatting_room_id: int = Field(ge=1)
+    id: int = Field(ge=1)
+    chat_session_id: int = Field(ge=1)

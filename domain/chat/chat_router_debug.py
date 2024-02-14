@@ -88,7 +88,7 @@ async def websocket_test_endpoint(
         for chat_query in chat_crud.get_chats(
             data_base=data_base,
             token=user_id,
-            chatting_room_id=chatting_room_id,
+            chat_session_id=chatting_room_id,
             skip=0,
             limit=0,
         ).get("chats"):

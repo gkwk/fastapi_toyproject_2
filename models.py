@@ -23,7 +23,9 @@ class JWTAccessTokenBlackList(Base):
 
     user_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=False)
     access_token: Mapped[str] = mapped_column(String(), primary_key=True)
-    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now, onupdate=datetime.now)
+    create_date: Mapped[DateTime] = mapped_column(
+        DateTime(), default=datetime.now, onupdate=datetime.now
+    )
     expired_date: Mapped[DateTime] = mapped_column(DateTime())
 
 
@@ -34,7 +36,9 @@ class JWTRefreshTokenList(Base):
     user_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=False)
     refresh_token: Mapped[str] = mapped_column(String())
     access_token: Mapped[Optional[str]] = mapped_column(String())
-    create_date: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now, onupdate=datetime.now)
+    create_date: Mapped[DateTime] = mapped_column(
+        DateTime(), default=datetime.now, onupdate=datetime.now
+    )
     expired_date: Mapped[DateTime] = mapped_column(DateTime())
 
 
@@ -91,8 +95,12 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     posts: Mapped[List["Post"]] = relationship(back_populates="user")  # 1 to N
     comments: Mapped[List["Comment"]] = relationship(back_populates="user")  # 1 to N
-    chat_sessions: Mapped[List["ChatSession"]] = relationship(
-        secondary="user_chat_session_table", back_populates="users"
+
+    chat_sessions_create: Mapped[List["ChatSession"]] = relationship(
+        back_populates="user_create"
+    )  # 1 to N
+    chat_sessions_connect: Mapped[List["ChatSession"]] = relationship(
+        secondary="user_chat_session_table", back_populates="users_connect"
     )  # N to M
     boards: Mapped[List["Board"]] = relationship(
         secondary="user_board_table", back_populates="users"
@@ -126,7 +134,9 @@ class Board(Base):
         secondary="user_board_table",
         back_populates="boards",
     )  # N to M
-    posts: Mapped[List["Post"]] = relationship(back_populates="board", cascade="all, delete")  # 1 to N
+    posts: Mapped[List["Post"]] = relationship(
+        back_populates="board", cascade="all, delete"
+    )  # 1 to N
     information: Mapped[str] = mapped_column(String(512))
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=False)
     is_available: Mapped[Boolean] = mapped_column(Boolean(), default=False)
@@ -142,7 +152,9 @@ class Post(Base):
     user: Mapped["User"] = relationship(back_populates="posts")
     board_id: Mapped[int] = mapped_column(ForeignKey("board.id"))
     board: Mapped["Board"] = relationship(back_populates="posts")
-    comments: Mapped[List["Comment"]] = relationship(back_populates="post", cascade="all, delete")
+    comments: Mapped[List["Comment"]] = relationship(
+        back_populates="post", cascade="all, delete"
+    )
 
     name: Mapped[str] = mapped_column(String(64))
     content: Mapped[str] = mapped_column(String(1024))
@@ -174,7 +186,9 @@ class Comment(Base):
         DateTime(), onupdate=datetime.now
     )
     is_file_attached: Mapped[Boolean] = mapped_column(Boolean(), default=False)
-    attached_files: Mapped[List["CommentFile"]] = relationship(back_populates="comment", cascade="all, delete")
+    attached_files: Mapped[List["CommentFile"]] = relationship(
+        back_populates="comment", cascade="all, delete"
+    )
     is_visible: Mapped[Boolean] = mapped_column(Boolean(), default=True)
 
 
@@ -183,10 +197,12 @@ class ChatSession(Base):
     __table_args__ = {"sqlite_autoincrement": True}
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    users: Mapped[List["User"]] = relationship(
-        secondary="user_chat_session_table", back_populates="chat_sessions"
+    user_create_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user_create: Mapped["User"] = relationship(back_populates="chat_sessions_create")
+    users_connect: Mapped[List["User"]] = relationship(
+        secondary="user_chat_session_table", back_populates="chat_sessions_connect"
     )
-    chats: Mapped[List["Chat"]] = relationship(back_populates="chat_session")
+    chats: Mapped[List["Chat"]] = relationship(back_populates="chat_session", cascade="all, delete")
 
     name: Mapped[str] = mapped_column(String(64))
     information: Mapped[str] = mapped_column(String(256))
