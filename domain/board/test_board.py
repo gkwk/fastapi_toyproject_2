@@ -202,7 +202,7 @@ class TestPost:
 
         response_test = client.post(
             URL_BOARD_CREATE_POST,
-            json={
+            data={
                 "name": TEST_POST_NAME,
                 "content": TEST_POST_CONTENT,
                 "board_id": board.id,
@@ -213,7 +213,7 @@ class TestPost:
                 "Authorization": f"Bearer {response_login_json.get('access_token')}"
             },
         )
-
+        
         assert response_test.status_code == 201
         assert response_test.json() == {"result": "success"}
 
@@ -540,7 +540,7 @@ class TestComment:
 
         response_test = client.post(
             URL_BOARD_CREATE_POST,
-            json={
+            data={
                 "name": TEST_POST_NAME,
                 "content": TEST_POST_CONTENT,
                 "board_id": board.id,
@@ -593,7 +593,7 @@ class TestComment:
 
         response_test = client.post(
             URL_BOARD_CREATE_COMMNET,
-            json={
+            data={
                 "content": TEST_COMMENT_CONTENT,
                 "post_id": post.id,
                 "is_file_attached": TEST_COMMENT_IS_FILE_ATTACHED,
