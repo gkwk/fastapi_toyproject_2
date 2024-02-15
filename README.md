@@ -190,6 +190,11 @@
     - file_path : str
     - create_date : datetime (Not null, default=datetime.now())
 
+# AI_test.csv
+```math
+y = 4x_0 + 5x_1 + 2x_2 + 7x_3 + 0.1x_4 + 15x_5 + 0.05x_6+ x_7
+```
+
 # 실행방법
 - 터미널에서 아래의 명령어 입력
 ```bash
