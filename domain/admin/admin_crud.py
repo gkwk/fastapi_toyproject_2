@@ -18,13 +18,12 @@ from http_execption_params import http_exception_params
 
 
 @get_data_base_decorator
-def create_admin_with_terminal(data_base: Session):
+def create_admin_with_terminal(data_base: Session = None):
     generated_password_salt = secrets.token_hex(4)
 
     while True:
         try:
-            print("Admin name : ", end="")
-            name = input()
+            name = input("Admin name : ")
             if get_user_with_username(data_base=data_base, name=name):
                 raise ValueError(
                     http_exception_params["already_user_name_existed"]["detail"]
@@ -35,8 +34,7 @@ def create_admin_with_terminal(data_base: Session):
 
     while True:
         try:
-            print("Admin email : ", end="")
-            email = input()
+            email = input("Admin email : ")
             if get_user_with_email(data_base=data_base, eamil=email):
                 raise ValueError(
                     http_exception_params["already_user_email_existed"]["detail"]
@@ -50,10 +48,8 @@ def create_admin_with_terminal(data_base: Session):
 
     while True:
         try:
-            print("Password : ", end="")
-            password1 = getpass.getpass()
-            print("Password Confirm : ", end="")
-            password2 = getpass.getpass()
+            password1 = getpass.getpass("Password : ")
+            password2 = getpass.getpass("Password Confirm : ")
             schema = RequestUserCreate(
                 name=name, password1=password1, password2=password2, email=email
             )

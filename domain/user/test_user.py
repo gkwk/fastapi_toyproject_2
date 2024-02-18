@@ -12,33 +12,54 @@ from test_main import main_test_methods
 
 client = TestClient(app)
 
-TEST_USER_ID = "user"
-TEST_USER_EMAIL = "user@test.com"
-TEST_USER_PASSWORD1 = "12345678"
-TEST_USER_PASSWORD2 = "12345678"
+url_dict = {
+    "URL_USER_CREATE_USER": [
+        v1_urn.API_V1_ROUTER_PREFIX,
+        v1_urn.USER_PREFIX,
+        v1_urn.USER_CREATE_USER,
+    ],
+    "URL_USER_LOGIN_USER": [
+        v1_urn.API_V1_ROUTER_PREFIX,
+        v1_urn.USER_PREFIX,
+        v1_urn.USER_LOGIN_USER,
+    ],
+    "URL_USER_GET_USER_DETAIL": [
+        v1_urn.API_V1_ROUTER_PREFIX,
+        v1_urn.USER_PREFIX,
+        v1_urn.USER_GET_USER_DETAIL,
+    ],
+    "URL_USER_UPDATE_USER_DETAIL": [
+        v1_urn.API_V1_ROUTER_PREFIX,
+        v1_urn.USER_PREFIX,
+        v1_urn.USER_UPDATE_USER_DETAIL,
+    ],
+    "URL_USER_UPDATE_USER_PASSWORD": [
+        v1_urn.API_V1_ROUTER_PREFIX,
+        v1_urn.USER_PREFIX,
+        v1_urn.USER_UPDATE_USER_PASSWORD,
+    ],
+}
 
-TEST_USER_EMAIL_UPDATE = "user_update@test.com"
-TEST_USER_PASSWORD1_UPDATE = "123456789"
-TEST_USER_PASSWORD2_UPDATE = "123456789"
 
-URL_USER_CREATE_USER = "".join(
-    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_CREATE_USER]
-)
-URL_USER_LOGIN_USER = "".join(
-    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_LOGIN_USER]
-)
-URL_USER_GET_USER_DETAIL = "".join(
-    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_GET_USER_DETAIL]
-)
-URL_USER_UPDATE_USER_DETAIL = "".join(
-    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_UPDATE_USER_DETAIL]
-)
-URL_USER_UPDATE_USER_PASSWORD = "".join(
-    [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.USER_PREFIX, v1_urn.USER_UPDATE_USER_PASSWORD]
-)
+URL_USER_CREATE_USER = "".join(url_dict.get("URL_USER_CREATE_USER"))
+URL_USER_LOGIN_USER = "".join(url_dict.get("URL_USER_LOGIN_USER"))
+URL_USER_GET_USER_DETAIL = "".join(url_dict.get("URL_USER_GET_USER_DETAIL"))
+URL_USER_UPDATE_USER_DETAIL = "".join(url_dict.get("URL_USER_UPDATE_USER_DETAIL"))
+URL_USER_UPDATE_USER_PASSWORD = "".join(url_dict.get("URL_USER_UPDATE_USER_PASSWORD"))
 
 
 class UserTestMethods:
+    def access_token_validate(self, access_token):
+        data_base = session_local()
+
+        user_payload = validate_and_decode_user_access_token(
+            data_base=data_base, token=access_token
+        )
+
+        data_base.close()
+
+        return user_payload
+
     def create_user(self, name, password1, password2, email):
         response_test = client.post(
             URL_USER_CREATE_USER,
@@ -52,7 +73,7 @@ class UserTestMethods:
 
         return response_test
 
-    def create_user_test(self, response_test: Response, name, password1, email):
+    def create_user_test_success(self, response_test: Response, name, password1, email):
         data_base = session_local()
         assert response_test.status_code == 201
         assert response_test.json() == {"result": "success"}
@@ -68,6 +89,11 @@ class UserTestMethods:
         assert user.is_superuser == False
         assert user.is_banned == False
 
+        data_base.close()
+        
+    def create_user_test_fail(self, response_test: Response):
+        data_base = session_local()
+        assert response_test.status_code != 201
         data_base.close()
 
     def login_user(self, name, password1):
@@ -233,7 +259,7 @@ class TestUser:
     )
     def test_create_user(self, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
-        user_test_methods.create_user_test(response_test, name, password1, email)
+        user_test_methods.create_user_test_success(response_test, name, password1, email)
 
     @pytest.mark.parametrize(
         "name, password1",
