@@ -236,6 +236,6 @@ with connectable.connect() as connection:
 
 # 개선을 위한 임시 목표 (개선 후 삭제)
 - admin, board, chat, user 기능 예외 처리 코드 추가
-- ai, admin, board, chat 기능 테스트 코드에 case 추가
+- ai, board, chat 기능 테스트 코드에 case 추가
 - 예외 메세지나 URL 경로 등은 하나의 파일에 정리하는 등의 조치로 중복 코드 정리
     - 테스트 코드의 중복 코드(로그인 등) 정리
