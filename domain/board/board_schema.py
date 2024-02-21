@@ -61,8 +61,19 @@ class ResponsePostsRead(BaseModel):
     posts: List["ResponsePostRead"]
 
 
-class RequestPostUpdate(RequestPostCreate):
+class RequestPostUpdate(BaseModel):
     id: int = Field(ge=1)
+    name: str | None = Field(default=None, min_length=1, max_length=64)
+    content: str | None = Field(default=None, min_length=1, max_length=1024)
+    board_id: int = Field(ge=1)
+    is_file_attached: bool | None = Field(default=None)
+    is_visible: bool | None = Field(default=None)
+
+    @field_validator("name", "content")
+    def is_not_empty(cls, value: str):
+        if (value != None) and (not value.strip()):
+            raise ValueError("값이 공백일 수 없습니다.")
+        return value
 
 
 class RequestPostDelete(BaseModel):
@@ -119,8 +130,19 @@ class ResponseCommentsRead(BaseModel):
     comments: List["ResponseCommentRead"]
 
 
-class RequestCommentUpdate(RequestCommentCreate):
+class RequestCommentUpdate(BaseModel):
     id: int = Field(ge=1)
+
+    content: str | None = Field(default=None, min_length=1, max_length=256)
+    post_id: int = Field(ge=1)
+    is_file_attached: bool | None = Field(default=None)
+    is_visible: bool | None = Field(default=None)
+
+    @field_validator("content")
+    def is_not_empty(cls, value: str):
+        if (value != None) and (not value.strip()):
+            raise ValueError("값이 공백일 수 없습니다.")
+        return value
 
 
 class CommentDelete(BaseModel):
