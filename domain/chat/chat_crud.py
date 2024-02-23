@@ -64,7 +64,7 @@ def get_chatsessions(
     )
     total = chat_sessions.count()
     chat_sessions = chat_sessions.offset(skip).limit(limit).all()
-    return {"total": total, "chat_sesstions": chat_sessions}
+    return {"total": total, "chat_sessions": chat_sessions}
 
 
 def update_chatsession(

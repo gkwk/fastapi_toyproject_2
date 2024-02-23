@@ -22,7 +22,7 @@ class RequestChatSessionRead(BaseModel):
 
 
 class RequestChatSessionsRead(BaseModel):
-    user_create_id: int | None = Field(ge=1)
+    user_create_id: int | None = Field(default=None,ge=1)
     skip: int | None = Field(default=None, ge=0)
     limit: int | None = Field(default=None, ge=0)
 
