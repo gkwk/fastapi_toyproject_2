@@ -4,8 +4,6 @@ import uuid
 
 from fastapi import Depends, HTTPException, Request, WebSocket
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from sqlalchemy import column
-from starlette import status
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 
@@ -18,6 +16,7 @@ from models import (
 from database import data_base_dependency
 from config import get_settings
 from http_execption_params import http_exception_params
+
 
 # ref : https://github.com/tiangolo/fastapi/issues/2031
 class CustomOAuth2PasswordBearer(OAuth2PasswordBearer):

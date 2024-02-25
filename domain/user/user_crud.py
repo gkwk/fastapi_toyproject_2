@@ -63,6 +63,7 @@ def create_user(
     data_base.add(user)
     data_base.commit()
 
+    return user.id
 
 def get_user_detail(
     data_base: data_base_dependency,

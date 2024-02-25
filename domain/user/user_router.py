@@ -23,14 +23,14 @@ def create_user(
     data_base: data_base_dependency,
     schema: user_schema.RequestUserCreate,
 ):
-    user_crud.create_user(
+    user_id = user_crud.create_user(
         data_base=data_base,
         name=schema.name,
         password=schema.password1,
         email=schema.email,
     )
 
-    return {"result": "success"}
+    return {"result": "success", "id" : user_id}
 
 
 @router.post(v1_urn.USER_LOGIN_USER, response_model=user_schema.ResponseUserToken)

@@ -642,7 +642,7 @@ class TestAI:
     @pytest.mark.parametrize(**test_parameter_dict["test_create_user"])
     def test_create_user(self, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
-        user_test_methods.create_user_test_success(
+        user_test_methods.create_user_test(
             response_test, name, password1, email
         )
 
@@ -738,7 +738,7 @@ class TestAIlog:
     @pytest.mark.parametrize(**test_parameter_dict["test_create_user"])
     def test_create_user(self, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
-        user_test_methods.create_user_test_success(
+        user_test_methods.create_user_test(
             response_test, name, password1, email
         )
 

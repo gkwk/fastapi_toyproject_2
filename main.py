@@ -1,8 +1,7 @@
 import sys
 import contextlib
-from typing import Optional
 
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from starlette.middleware.cors import CORSMiddleware
@@ -21,7 +20,14 @@ async def app_lifespan(app: FastAPI):
     database_engine_shutdown()
 
 
-app = FastAPI(lifespan=app_lifespan)
+app = FastAPI(
+    lifespan=app_lifespan,
+    servers=[
+        # {"url": "/test", "description": "Test environment"},
+        # {"url": "/", "description": "Production environment"},
+    ],
+)
+
 app.mount("/static", StaticFiles(directory="staticfile"), name="static")
 
 origins = ["*"]
@@ -40,17 +46,6 @@ app.include_router(v1_router.router)
 @app.get("/", tags=["main"])
 def index_page():
     return {"message": "Hello, FastAPI!"}
-
-
-@app.post("/uploadfile/")
-async def create_upload_file(files: list[Optional[UploadFile]] = File(None)):
-    if files != None:
-        for i, file in enumerate(files):
-            if file != None:
-                file_location = f"staticfile/{i}_{file.filename}"
-                with open(file_location, "wb+") as file_object:
-                    file_object.write(file.file.read())
-    return {"filename": "success"}
 
 
 if __name__ == "__main__":

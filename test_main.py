@@ -2,7 +2,7 @@ from pytest import MonkeyPatch
 
 from fastapi.testclient import TestClient
 
-from sqlalchemy import select, delete, text
+from sqlalchemy import delete, text
 
 from main import app
 import models

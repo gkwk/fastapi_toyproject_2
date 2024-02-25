@@ -20,13 +20,6 @@ from test_main import main_test_methods
 client = TestClient(app)
 
 
-TEST_CHAT_CONTENT = "chat_content"
-TEST_CHAT_IS_VISIBLE = True
-
-TEST_CHAT_CONTENT_UPDATE = "chat_content_UPDATE"
-TEST_CHAT_IS_VISIBLE_UPDATE = False
-
-
 url_dict = {
     "URL_USER_CREATE_USER": [
         v1_urn.API_V1_ROUTER_PREFIX,
@@ -539,8 +532,6 @@ class ChatTestMethods:
 
         assert response_test_json.get("total") >= 0
 
-        ["content", "is_visible"]
-
         for chat in response_test_json.get("chats"):
             chat: dict
 
@@ -692,9 +683,7 @@ class TestChatSession:
     @pytest.mark.parametrize(**test_parameter_dict["test_create_user"])
     def test_create_user(self, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
-        user_test_methods.create_user_test_success(
-            response_test, name, password1, email
-        )
+        user_test_methods.create_user_test(response_test, name, password1, email)
 
     @pytest.mark.parametrize(**test_parameter_dict["test_create_chatsession"])
     def test_create_chatsession(self, admin_name, admin_password1, chatsession_args):
@@ -789,9 +778,7 @@ class TestChat:
     @pytest.mark.parametrize(**test_parameter_dict["test_create_user"])
     def test_create_user(self, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
-        user_test_methods.create_user_test_success(
-            response_test, name, password1, email
-        )
+        user_test_methods.create_user_test(response_test, name, password1, email)
 
     @pytest.mark.parametrize(**test_parameter_dict["test_create_chatsession"])
     def test_create_chatsession(self, admin_name, admin_password1, chatsession_args):

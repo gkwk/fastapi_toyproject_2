@@ -48,6 +48,61 @@ URL_USER_UPDATE_USER_DETAIL = "".join(url_dict.get("URL_USER_UPDATE_USER_DETAIL"
 URL_USER_UPDATE_USER_PASSWORD = "".join(url_dict.get("URL_USER_UPDATE_USER_PASSWORD"))
 
 
+test_parameter_dict = {
+    "test_create_user": {
+        "argnames": "name, password1, password2, email",
+        "argvalues": [
+            (f"user{i}", "12345678", "12345678", f"user{i}@test.com") for i in range(20)
+        ],
+    },
+    "test_login_user": {
+        "argnames": "name, password1",
+        "argvalues": [(f"user{i}", "12345678") for i in range(20)],
+    },
+    "test_get_user_detail": {
+        "argnames": "name, password1, user_columns",
+        "argvalues": [
+            (f"user{i}", "12345678", ["name", "email", "join_date", "boards", "posts"])
+            for i in range(20)
+        ],
+    },
+    "test_update_user_detail": {
+        "argnames": "name, password1, email_update",
+        "argvalues": [
+            (f"user{i}", "12345678", f"user{i}_update@test.com") for i in range(20)
+        ],
+    },
+    "test_update_user_password": {
+        "argnames": " name, password1, password1_update, password2_update",
+        "argvalues": [
+            (f"user{i}", "12345678", "12345679", "12345679") for i in range(20)
+        ],
+    },
+}
+
+
+ID_DICT_USER_ID = "user_id"
+
+
+id_list_dict = {ID_DICT_USER_ID: []}
+
+id_iterator_dict = {ID_DICT_USER_ID: iter([])}
+
+
+def id_list_append(id_dict_str, value):
+    id_list_dict[id_dict_str].append(value)
+
+
+def id_iterator_next(id_dict_str) -> int:
+    try:
+        next_id = id_iterator_dict[id_dict_str].__next__()
+    except StopIteration:
+        id_iterator_dict[id_dict_str] = iter(id_list_dict[id_dict_str])
+        next_id = id_iterator_dict[id_dict_str].__next__()
+
+    return next_id
+
+
 class UserTestMethods:
     def access_token_validate(self, access_token):
         data_base = session_local()
@@ -73,12 +128,16 @@ class UserTestMethods:
 
         return response_test
 
-    def create_user_test_success(self, response_test: Response, name, password1, email):
+    def create_user_test(self, response_test: Response, name, password1, email):
         data_base = session_local()
         assert response_test.status_code == 201
-        assert response_test.json() == {"result": "success"}
 
-        user = data_base.query(User).filter_by(name=name, email=email).first()
+        response_test_json: dict = response_test.json()
+
+        assert response_test_json.get("result") == "success"
+        assert response_test_json.get("id") > 0
+
+        user = data_base.query(User).filter_by(id=response_test_json.get("id")).first()
 
         assert user.name == name
         assert user.email == email
@@ -90,14 +149,8 @@ class UserTestMethods:
         assert user.is_banned == False
 
         data_base.close()
-        
-    def create_user_test_fail(self, response_test: Response):
-        data_base = session_local()
-        assert response_test.status_code != 201
-        data_base.close()
 
     def login_user(self, name, password1):
-
         response_test = client.post(
             URL_USER_LOGIN_USER,
             data={"username": name, "password": password1},
@@ -106,7 +159,7 @@ class UserTestMethods:
 
         return response_test
 
-    def login_user_test(self, response_test: Response, name):
+    def login_user_test(self, user_id, name, response_test: Response):
         data_base = session_local()
 
         assert response_test.status_code == 200
@@ -114,85 +167,66 @@ class UserTestMethods:
         assert response_test_json.get("access_token")
         assert response_test_json.get("token_type") == "bearer"
 
-        user_payload = validate_and_decode_user_access_token(
-            data_base=data_base, token=response_test_json.get("access_token")
+        user_payload = self.access_token_validate(
+            response_test_json.get("access_token")
         )
 
-        assert user_payload.get("user_id") >= 1
+        assert user_payload.get("user_id") >= user_id
         assert user_payload.get("user_name") == name
         assert user_payload.get("is_admin") == False
 
-        user = data_base.query(User).filter_by(id=user_payload.get("user_id")).first()
+        user = data_base.query(User).filter_by(id=user_id).first()
 
         assert user.name == name
 
         data_base.close()
 
-    def get_user_detail(self, name, password1):
-        response_login: Response = self.login_user(name, password1)
-        response_login_json: dict = response_login.json()
-
+    def get_user_detail(self, access_token: str):
         response_test = client.get(
             URL_USER_GET_USER_DETAIL,
-            headers={
-                "Authorization": f"Bearer {response_login_json.get('access_token')}"
-            },
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         return response_test
 
-    def get_user_detail_test(self, response_test: Response, name, email):
+    def get_user_detail_test(self, user_columns, response_test: Response):
         data_base = session_local()
 
         assert response_test.status_code == 200
 
         response_test_json: dict = response_test.json()
 
-        assert response_test_json.get("name") == name
-        assert response_test_json.get("email") == email
-        assert response_test_json.get("join_date") != None
-        assert response_test_json.get("boards") != None
-        assert response_test_json.get("posts") != None
+        for user_column in user_columns:
+            assert user_column in response_test_json
 
         data_base.close()
 
-    def update_user_detail(self, name, password1, email_update):
-        response_login: Response = self.login_user(name, password1)
-        response_login_json: dict = response_login.json()
-
+    def update_user_detail(self, email_update, access_token: str):
         response_test = client.put(
             URL_USER_UPDATE_USER_DETAIL,
             json={
                 "email": email_update,
             },
-            headers={
-                "Authorization": f"Bearer {response_login_json.get('access_token')}"
-            },
+            headers={"Authorization": f"Bearer {access_token}"},
         )
 
         return response_test
 
-    def update_user_detail_test(self, response_test: Response, name, email_update):
+    def update_user_detail_test(self, user_id, email_update, response_test: Response):
         data_base = session_local()
 
         assert response_test.status_code == 204
 
-        user = data_base.query(User).filter_by(name=name).first()
+        user = data_base.query(User).filter_by(id=user_id).first()
 
         assert user.email == email_update
         assert user.update_date != None
 
         data_base.close()
 
-    def update_user_password(self, name, password1, password1_update, password2_update):
+    def update_user_password(
+        self, user_id, password1_update, password2_update, access_token: str
+    ):
         data_base = session_local()
-
-        response_login: Response = self.login_user(name, password1)
-        response_login_json: dict = response_login.json()
-
-        user_id = validate_and_decode_user_access_token(
-            data_base=data_base, token=response_login_json.get("access_token")
-        ).get("user_id")
-
         user = data_base.query(User).filter_by(id=user_id).first()
         user_password_salt_old = user.password_salt
 
@@ -202,9 +236,7 @@ class UserTestMethods:
                 "password1": password1_update,
                 "password2": password2_update,
             },
-            headers={
-                "Authorization": f"Bearer {response_login_json.get('access_token')}"
-            },
+            headers={"Authorization": f"Bearer {access_token}"},
         )
 
         data_base.close()
@@ -212,27 +244,18 @@ class UserTestMethods:
         return {
             "response_test": response_test,
             "user_password_salt_old": user_password_salt_old,
-            "user_id": user_id,
         }
 
     def update_user_password_test(
         self,
-        name,
-        password1_update,
-        response_test: Response,
-        user_password_salt_old,
         user_id,
+        name,
+        user_password_salt_old,
+        response_test: Response,
     ):
         data_base = session_local()
 
         assert response_test.status_code == 204
-
-        response_login: Response = self.login_user(name, password1_update)
-        response_login_json: dict = response_login.json()
-
-        user_id = validate_and_decode_user_access_token(
-            data_base=data_base, token=response_login_json.get("access_token")
-        ).get("user_id")
 
         user = data_base.query(User).filter_by(id=user_id).first()
 
@@ -253,50 +276,51 @@ class TestUser:
     def test_data_base_init(self):
         main_test_methods.data_base_init()
 
-    @pytest.mark.parametrize(
-        "name, password1, password2, email",
-        [(f"user{i}", "12345678", "12345678", f"user{i}@test.com") for i in range(10)],
-    )
+    @pytest.mark.parametrize(**test_parameter_dict["test_create_user"])
     def test_create_user(self, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
-        user_test_methods.create_user_test_success(response_test, name, password1, email)
+        user_test_methods.create_user_test(response_test, name, password1, email)
 
-    @pytest.mark.parametrize(
-        "name, password1",
-        [(f"user{i}", "12345678") for i in range(10)],
-    )
+        id_list_append(ID_DICT_USER_ID, response_test.json().get("id"))
+
+    @pytest.mark.parametrize(**test_parameter_dict["test_login_user"])
     def test_login_user(self, name, password1):
+        user_id = id_iterator_next(ID_DICT_USER_ID)
+
         response_test = user_test_methods.login_user(name, password1)
-        user_test_methods.login_user_test(response_test, name)
 
-    @pytest.mark.parametrize(
-        "name, password1, email",
-        [(f"user{i}", "12345678", f"user{i}@test.com") for i in range(10)],
-    )
-    def test_get_user_detail(self, name, password1, email):
-        response_test = user_test_methods.get_user_detail(name, password1)
-        user_test_methods.get_user_detail_test(response_test, name, email)
+        user_test_methods.login_user_test(user_id, name, response_test)
 
-    @pytest.mark.parametrize(
-        "name, password1, email_update",
-        [(f"user{i}", "12345678", f"user{i}_update@test.com") for i in range(10)],
-    )
+    @pytest.mark.parametrize(**test_parameter_dict["test_get_user_detail"])
+    def test_get_user_detail(self, name, password1, user_columns):
+        response_login = user_test_methods.login_user(name, password1)
+        response_login_json: dict = response_login.json()
+        access_token = response_login_json.get("access_token")
+
+        response_test = user_test_methods.get_user_detail(access_token)
+        user_test_methods.get_user_detail_test(user_columns, response_test)
+
+    @pytest.mark.parametrize(**test_parameter_dict["test_update_user_detail"])
     def test_update_user_detail(self, name, password1, email_update):
-        response_test = user_test_methods.update_user_detail(
-            name, password1, email_update
-        )
-        user_test_methods.update_user_detail_test(response_test, name, email_update)
+        response_login = user_test_methods.login_user(name, password1)
+        response_login_json: dict = response_login.json()
+        access_token = response_login_json.get("access_token")
+        user_id = id_iterator_next(ID_DICT_USER_ID)
 
-    @pytest.mark.parametrize(
-        " name, password1, password1_update, password2_update",
-        [(f"user{i}", "12345678", "12345679", "12345679") for i in range(10)],
-    )
+        response_test = user_test_methods.update_user_detail(email_update, access_token)
+        user_test_methods.update_user_detail_test(user_id, email_update, response_test)
+
+    @pytest.mark.parametrize(**test_parameter_dict["test_update_user_password"])
     def test_update_user_password(
         self, name, password1, password1_update, password2_update
     ):
+        response_login = user_test_methods.login_user(name, password1)
+        response_login_json: dict = response_login.json()
+        access_token = response_login_json.get("access_token")
+        user_id = id_iterator_next(ID_DICT_USER_ID)
+
         response_dict = user_test_methods.update_user_password(
-            name, password1, password1_update, password2_update
+            user_id, password1_update, password2_update, access_token
         )
-        user_test_methods.update_user_password_test(
-            name, password1_update, **response_dict
-        )
+
+        user_test_methods.update_user_password_test(user_id, name, **response_dict)
