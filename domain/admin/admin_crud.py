@@ -2,6 +2,8 @@ from datetime import datetime
 import secrets
 import getpass
 
+from pydantic import ValidationError
+
 from starlette import status
 
 from sqlalchemy.orm import Session
@@ -11,9 +13,14 @@ from domain.user.user_crud import (
     get_user_with_username,
     get_user_with_email,
 )
-from domain.user.user_schema import RequestUserCreate
+from domain.user import user_schema
 from database import data_base_dependency, get_data_base_decorator
-from auth import get_password_context, ban_access_token,current_user_payload,current_admin_payload
+from auth import (
+    get_password_context,
+    ban_access_token,
+    current_user_payload,
+    current_admin_payload,
+)
 from http_execption_params import http_exception_params
 
 
@@ -28,6 +35,7 @@ def create_admin_with_terminal(data_base: Session = None):
                 raise ValueError(
                     http_exception_params["already_user_name_existed"]["detail"]
                 )
+            user_schema.AdminCreateName(name=name)
             break
         except Exception as ex:
             print(ex)
@@ -39,9 +47,7 @@ def create_admin_with_terminal(data_base: Session = None):
                 raise ValueError(
                     http_exception_params["already_user_email_existed"]["detail"]
                 )
-            RequestUserCreate(
-                name=name, password1="12345678", password2="12345678", email=email
-            )
+            user_schema.AdminCreateEmail(email=email)
             break
         except Exception as ex:
             print(ex)
@@ -50,21 +56,18 @@ def create_admin_with_terminal(data_base: Session = None):
         try:
             password1 = getpass.getpass("Password : ")
             password2 = getpass.getpass("Password Confirm : ")
-            schema = RequestUserCreate(
-                name=name, password1=password1, password2=password2, email=email
-            )
+            user_schema.AdminCreatePassword(password1=password1, password2=password2)
             break
         except Exception as ex:
             print(ex)
 
     user = User(
-        name=schema.name,
+        name=name,
         password=get_password_context().hash(
-            schema.password1 + generated_password_salt
+            password1 + generated_password_salt
         ),
         password_salt=generated_password_salt,
-        join_date=datetime.now(),
-        email=schema.email,
+        email=email,
         is_superuser=True,
     )
     data_base.add(user)
@@ -219,10 +222,10 @@ def update_board(
     data_base: data_base_dependency,
     token: current_admin_payload,
     id: int,
-    name : str | None,
-    information : str| None,
-    is_visible: bool| None,
-    is_available:bool| None,
+    name: str | None,
+    information: str | None,
+    is_visible: bool | None,
+    is_available: bool | None,
 ):
     board = data_base.query(Board).filter_by(id=id).first()
 
@@ -251,7 +254,6 @@ def delete_board(
 
     # if not board:
     #     raise HTTPException(**http_exception_params["ai_model_not_found"])
-
 
     data_base.delete(board)
     data_base.commit()
