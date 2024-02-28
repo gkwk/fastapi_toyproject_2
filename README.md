@@ -20,7 +20,7 @@
     - [x] 비밀번호 초기화 기능
     - [x] JWT refresh token 기능
     - [x] JWT access token 블랙리스트
-    - [ ] 예외 처리
+    - [x] 예외 처리
     - [x] 테스트 코드 작성
     - [ ] 코드 품질 개선
 - [ ] 관리자
@@ -235,7 +235,7 @@ with connectable.connect() as connection:
 ```
 
 # 개선을 위한 임시 목표 (개선 후 삭제)
-- admin, board, chat, user 기능 예외 처리 코드 추가
+- admin, board, chat 기능 예외 처리 코드 추가
 - 예외 메세지나 URL 경로 등은 하나의 파일에 정리하는 등의 조치로 중복 코드 정리
     - 테스트 코드의 중복 코드(로그인 등) 정리
 - test app 생성
