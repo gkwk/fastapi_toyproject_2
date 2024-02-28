@@ -1,0 +1,61 @@
+{
+    "argnames": "name, password1, user_columns",
+    "argvalues_pass": [
+        [
+            "user0",
+            "12345678aA!",
+            [
+                "name",
+                "email",
+                "join_date",
+                "boards",
+                "posts"
+            ]
+        ],
+        [
+            "user1",
+            "12345678aA!",
+            [
+                "name",
+                "email",
+                "join_date",
+                "boards",
+                "posts"
+            ]
+        ],
+        [
+            "user2",
+            "12345678aA!",
+            [
+                "name",
+                "email",
+                "join_date",
+                "boards",
+                "posts"
+            ]
+        ],
+        [
+            "user3",
+            "12345678aA!",
+            [
+                "name",
+                "email",
+                "join_date",
+                "boards",
+                "posts"
+            ]
+        ],
+        [
+            "user4",
+            "12345678aA!",
+            [
+                "name",
+                "email",
+                "join_date",
+                "boards",
+                "posts"
+            ]
+        ]
+    ],
+    "argvalues_fail": []
+}

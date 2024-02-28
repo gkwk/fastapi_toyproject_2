@@ -1,4 +1,5 @@
 import pytest
+import json
 
 from fastapi.testclient import TestClient
 from httpx import Response
@@ -48,37 +49,24 @@ URL_USER_UPDATE_USER_DETAIL = "".join(url_dict.get("URL_USER_UPDATE_USER_DETAIL"
 URL_USER_UPDATE_USER_PASSWORD = "".join(url_dict.get("URL_USER_UPDATE_USER_PASSWORD"))
 
 
-test_parameter_dict = {
-    "test_create_user": {
-        "argnames": "name, password1, password2, email",
-        "argvalues": [
-            (f"user{i}", "12345678", "12345678", f"user{i}@test.com") for i in range(20)
-        ],
-    },
-    "test_login_user": {
-        "argnames": "name, password1",
-        "argvalues": [(f"user{i}", "12345678") for i in range(20)],
-    },
-    "test_get_user_detail": {
-        "argnames": "name, password1, user_columns",
-        "argvalues": [
-            (f"user{i}", "12345678", ["name", "email", "join_date", "boards", "posts"])
-            for i in range(20)
-        ],
-    },
-    "test_update_user_detail": {
-        "argnames": "name, password1, email_update",
-        "argvalues": [
-            (f"user{i}", "12345678", f"user{i}_update@test.com") for i in range(20)
-        ],
-    },
-    "test_update_user_password": {
-        "argnames": " name, password1, password1_update, password2_update",
-        "argvalues": [
-            (f"user{i}", "12345678", "12345679", "12345679") for i in range(20)
-        ],
-    },
-}
+def parameter_data_loader(path):
+    test_data = {"argnames": None, "argvalues": []}
+
+    with open(path, "r", encoding="UTF-8") as f:
+        json_data: dict = json.load(f)
+
+    test_data["argnames"] = json_data.get("argnames")
+
+    for value in json_data.get("argvalues_pass", []):
+        test_data["argvalues"].append(tuple(value))
+
+    for value in json_data.get("argvalues_fail", []):
+        value_temp = pytest.param(
+            *value[:-1], marks=pytest.mark.xfail(reason=value[-1])
+        )
+        test_data["argvalues"].append(value_temp)
+
+    return test_data
 
 
 ID_DICT_USER_ID = "user_id"
@@ -276,14 +264,18 @@ class TestUser:
     def test_data_base_init(self):
         main_test_methods.data_base_init()
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_user"])
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/user/test_create_user.json")
+    )
     def test_create_user(self, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
         user_test_methods.create_user_test(response_test, name, password1, email)
 
         id_list_append(ID_DICT_USER_ID, response_test.json().get("id"))
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_login_user"])
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/user/test_login_user.json")
+    )
     def test_login_user(self, name, password1):
         user_id = id_iterator_next(ID_DICT_USER_ID)
 
@@ -291,7 +283,9 @@ class TestUser:
 
         user_test_methods.login_user_test(user_id, name, response_test)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_get_user_detail"])
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/user/test_get_user_detail.json")
+    )
     def test_get_user_detail(self, name, password1, user_columns):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
@@ -300,7 +294,9 @@ class TestUser:
         response_test = user_test_methods.get_user_detail(access_token)
         user_test_methods.get_user_detail_test(user_columns, response_test)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_update_user_detail"])
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/user/test_update_user_detail.json")
+    )
     def test_update_user_detail(self, name, password1, email_update):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
@@ -310,7 +306,9 @@ class TestUser:
         response_test = user_test_methods.update_user_detail(email_update, access_token)
         user_test_methods.update_user_detail_test(user_id, email_update, response_test)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_update_user_password"])
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/user/test_update_user_password.json")
+    )
     def test_update_user_password(
         self, name, password1, password1_update, password2_update
     ):
