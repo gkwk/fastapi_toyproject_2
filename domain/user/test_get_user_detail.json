@@ -57,5 +57,30 @@
             ]
         ]
     ],
-    "argvalues_fail": []
+    "argvalues_fail": [
+        [
+            "user0",
+            "12345678aA!",
+            [
+                "name",
+                "email",
+                "join_date",
+                "boards"
+            ],
+            "의도하지 않은 칼럼 삭제"
+        ],
+        [
+            "user1",
+            "12345678aA!",
+            [
+                "name",
+                "email",
+                "join_date",
+                "boards",
+                "posts",
+                "fail1"
+            ],
+            "의도하지 않은 칼럼 추가"
+        ]
+    ]
 }

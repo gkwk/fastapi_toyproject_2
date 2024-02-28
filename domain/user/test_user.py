@@ -55,14 +55,14 @@ def parameter_data_loader(path):
     with open(path, "r", encoding="UTF-8") as f:
         json_data: dict = json.load(f)
 
-    test_data["argnames"] = json_data.get("argnames")
+    test_data["argnames"] = "pn," + json_data.get("argnames")
 
     for value in json_data.get("argvalues_pass", []):
-        test_data["argvalues"].append(tuple(value))
+        test_data["argvalues"].append(tuple([1, *value]))
 
     for value in json_data.get("argvalues_fail", []):
         value_temp = pytest.param(
-            *value[:-1], marks=pytest.mark.xfail(reason=value[-1])
+            0, *value[:-1], marks=pytest.mark.xfail(reason=value[-1])
         )
         test_data["argvalues"].append(value_temp)
 
@@ -81,14 +81,21 @@ def id_list_append(id_dict_str, value):
     id_list_dict[id_dict_str].append(value)
 
 
-def id_iterator_next(id_dict_str) -> int:
-    try:
-        next_id = id_iterator_dict[id_dict_str].__next__()
-    except StopIteration:
-        id_iterator_dict[id_dict_str] = iter(id_list_dict[id_dict_str])
-        next_id = id_iterator_dict[id_dict_str].__next__()
+def id_iterator_next(pn, id_dict_str) -> int | None:
+    if pn:
+        try:
+            next_id = id_iterator_dict[id_dict_str].__next__()
+        except StopIteration:
+            id_iterator_dict[id_dict_str] = iter(id_list_dict[id_dict_str])
+            next_id = id_iterator_dict[id_dict_str].__next__()
 
-    return next_id
+        return next_id
+
+    return None
+
+
+def id_iterator_clear(id_dict_str):
+    id_iterator_dict[id_dict_str] = iter(id_list_dict[id_dict_str])
 
 
 class UserTestMethods:
@@ -183,8 +190,7 @@ class UserTestMethods:
 
         response_test_json: dict = response_test.json()
 
-        for user_column in user_columns:
-            assert user_column in response_test_json
+        assert set(user_columns) == set(response_test_json.keys())
 
         data_base.close()
 
@@ -267,7 +273,7 @@ class TestUser:
     @pytest.mark.parametrize(
         **parameter_data_loader("domain/user/test_create_user.json")
     )
-    def test_create_user(self, name, password1, password2, email):
+    def test_create_user(self, pn, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
         user_test_methods.create_user_test(response_test, name, password1, email)
 
@@ -276,8 +282,8 @@ class TestUser:
     @pytest.mark.parametrize(
         **parameter_data_loader("domain/user/test_login_user.json")
     )
-    def test_login_user(self, name, password1):
-        user_id = id_iterator_next(ID_DICT_USER_ID)
+    def test_login_user(self, pn, name, password1):
+        user_id = id_iterator_next(pn, ID_DICT_USER_ID)
 
         response_test = user_test_methods.login_user(name, password1)
 
@@ -286,7 +292,7 @@ class TestUser:
     @pytest.mark.parametrize(
         **parameter_data_loader("domain/user/test_get_user_detail.json")
     )
-    def test_get_user_detail(self, name, password1, user_columns):
+    def test_get_user_detail(self, pn, name, password1, user_columns):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
@@ -297,11 +303,11 @@ class TestUser:
     @pytest.mark.parametrize(
         **parameter_data_loader("domain/user/test_update_user_detail.json")
     )
-    def test_update_user_detail(self, name, password1, email_update):
+    def test_update_user_detail(self, pn, name, password1, email_update):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
-        user_id = id_iterator_next(ID_DICT_USER_ID)
+        user_id = id_iterator_next(pn, ID_DICT_USER_ID)
 
         response_test = user_test_methods.update_user_detail(email_update, access_token)
         user_test_methods.update_user_detail_test(user_id, email_update, response_test)
@@ -310,12 +316,12 @@ class TestUser:
         **parameter_data_loader("domain/user/test_update_user_password.json")
     )
     def test_update_user_password(
-        self, name, password1, password1_update, password2_update
+        self, pn, name, password1, password1_update, password2_update
     ):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
-        user_id = id_iterator_next(ID_DICT_USER_ID)
+        user_id = id_iterator_next(pn, ID_DICT_USER_ID)
 
         response_dict = user_test_methods.update_user_password(
             user_id, password1_update, password2_update, access_token
