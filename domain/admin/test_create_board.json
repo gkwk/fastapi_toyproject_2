@@ -1,0 +1,86 @@
+{
+    "argnames": "admin_name, admin_password1, board_args",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            [
+                {
+                    "board_name": "board_0_0",
+                    "board_information": "board_0_0_information",
+                    "board_is_visible": true
+                },
+                {
+                    "board_name": "board_0_1",
+                    "board_information": "board_0_1_information",
+                    "board_is_visible": true
+                }
+            ]
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            [
+                {
+                    "board_name": "board_1_0",
+                    "board_information": "board_1_0_information",
+                    "board_is_visible": true
+                },
+                {
+                    "board_name": "board_1_1",
+                    "board_information": "board_1_1_information",
+                    "board_is_visible": true
+                }
+            ]
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            [
+                {
+                    "board_name": "board_2_0",
+                    "board_information": "board_2_0_information",
+                    "board_is_visible": true
+                },
+                {
+                    "board_name": "board_2_1",
+                    "board_information": "board_2_1_information",
+                    "board_is_visible": true
+                }
+            ]
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            [
+                {
+                    "board_name": "board_3_0",
+                    "board_information": "board_3_0_information",
+                    "board_is_visible": true
+                },
+                {
+                    "board_name": "board_3_1",
+                    "board_information": "board_3_1_information",
+                    "board_is_visible": true
+                }
+            ]
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            [
+                {
+                    "board_name": "board_4_0",
+                    "board_information": "board_4_0_information",
+                    "board_is_visible": true
+                },
+                {
+                    "board_name": "board_4_1",
+                    "board_information": "board_4_1_information",
+                    "board_is_visible": true
+                }
+            ]
+        ]
+    ],
+    "argvalues_fail": []
+}

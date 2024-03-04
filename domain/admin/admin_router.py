@@ -9,7 +9,7 @@ from auth import (
     current_admin_payload,
     current_user_payload,
     validate_and_decode_admin_access_token,
-    scope_checker
+    scope_checker,
 )
 import v1_urn
 
@@ -65,7 +65,7 @@ def create_board(
     token: current_admin_payload,
     schema: admin_schema.RequestBoradCreate,
 ):
-    admin_crud.create_board(
+    id = admin_crud.create_board(
         data_base=data_base,
         name=schema.name,
         information=schema.information,
@@ -73,7 +73,7 @@ def create_board(
         user_id_list=schema.user_id_list,
     )
 
-    return {"result": "success"}
+    return {"result": "success", "id": id}
 
 
 @router.get(v1_urn.ADMIN_GET_BOARD)
@@ -83,8 +83,8 @@ def get_board(
     # schema: Annotated[ai_schema.RequestAIRead, Depends()],
     board_id: int,
 ):
-    scope_checker(token=token,target_scopes=[board_id])
-    
+    scope_checker(token=token, target_scopes=[board_id])
+
     return admin_crud.get_board(
         data_base=data_base,
         board_id=board_id,

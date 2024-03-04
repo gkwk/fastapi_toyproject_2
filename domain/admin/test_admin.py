@@ -1,3 +1,4 @@
+import json
 from pytest import MonkeyPatch
 import pytest
 
@@ -49,79 +50,6 @@ url_dict = {
     ],
 }
 
-test_parameter_dict = {
-    "test_create_admin": {
-        "argnames": "name, password1, password2, email",
-        "argvalues": [
-            (f"admin{i}", "12345678", "12345678", f"admin{i}@test.com")
-            for i in range(10)
-        ],
-    },
-    "test_get_users": {
-        "argnames": "name, password1",
-        "argvalues": [(f"admin{i}", "12345678") for i in range(10)],
-    },
-    "test_create_board": {
-        "argnames": "admin_name, admin_password1, board_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "board_name": f"board_{i}_{j}",
-                        "board_information": f"board_{i}_{j}_information",
-                        "board_is_visible": True,
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_create_user_for_update_user_board_permission": {
-        "argnames": "name, password1, password2, email",
-        "argvalues": [
-            (f"user{i}", "12345678", "12345678", f"user{i}@test.com") for i in range(20)
-        ],
-    },
-    "test_update_user_board_permission": {
-        "argnames": "name, password1, test_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "user_id": f"{11+(i*2)+j}",
-                        "board_id": f"{1+(i*2)+j}",
-                        "user_is_permitted": True,
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_update_user_is_banned": {
-        "argnames": "name, password1, test_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "user_id": f"{11+(i*2)+j}",
-                        "user_is_banned": True,
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-}
-
 
 URL_USER_CREATE_USER = "".join(url_dict.get("URL_USER_CREATE_USER"))
 URL_USER_LOGIN_USER = "".join(url_dict.get("URL_USER_LOGIN_USER"))
@@ -135,6 +63,64 @@ URL_ADMIN_UPDATE_USER_IS_BANNED = "".join(
 )
 
 
+def parameter_data_loader(path):
+    test_data = {"argnames": None, "argvalues": []}
+
+    with open(path, "r", encoding="UTF-8") as f:
+        json_data: dict = json.load(f)
+
+    test_data["argnames"] = "pn," + json_data.get("argnames")
+
+    for value in json_data.get("argvalues_pass", []):
+        test_data["argvalues"].append(tuple([1, *value]))
+
+    for value in json_data.get("argvalues_fail", []):
+        value_temp = pytest.param(
+            0, *value[:-1], marks=pytest.mark.xfail(reason=value[-1])
+        )
+        test_data["argvalues"].append(value_temp)
+
+    return test_data
+
+
+ID_DICT_ADMIN_ID = "admin_id"
+ID_DICT_USER_ID = "user_id"
+ID_DICT_BOARD_ID = "board_id"
+
+id_list_dict = {
+    ID_DICT_ADMIN_ID: [],
+    ID_DICT_USER_ID: [],
+    ID_DICT_BOARD_ID: [],
+}
+
+id_iterator_dict = {
+    ID_DICT_ADMIN_ID: iter([]),
+    ID_DICT_USER_ID: iter([]),
+    ID_DICT_BOARD_ID: iter([]),
+}
+
+
+def id_list_append(id_dict_str, value):
+    id_list_dict[id_dict_str].append(value)
+
+
+def id_iterator_next(pn, id_dict_str) -> int | None:
+    if pn:
+        try:
+            next_id = id_iterator_dict[id_dict_str].__next__()
+        except StopIteration:
+            id_iterator_dict[id_dict_str] = iter(id_list_dict[id_dict_str])
+            next_id = id_iterator_dict[id_dict_str].__next__()
+
+        return next_id
+
+    return None
+
+
+def id_iterator_clear(id_dict_str):
+    id_iterator_dict[id_dict_str] = iter(id_list_dict[id_dict_str])
+
+
 class AdminTestMethods:
     def create_admin(self, name, password1, password2, email):
         input_iter = iter([name, email]).__next__
@@ -144,7 +130,7 @@ class AdminTestMethods:
         monkeypatch.setattr("builtins.input", lambda _: input_iter())
         monkeypatch.setattr("getpass.getpass", lambda _: getpass_iter())
 
-        create_admin_with_terminal(data_base=None)
+        return create_admin_with_terminal(data_base=None, debug=True)
 
     def create_admin_test(self, name, password1, email):
         # create_admin 후 진행
@@ -174,7 +160,7 @@ class AdminTestMethods:
 
         return response_test
 
-    def get_users_test(self, response_test: Response):
+    def get_users_test(self, user_columns, response_test: Response):
         # get_users 후 진행
 
         assert response_test.status_code == 200
@@ -183,12 +169,7 @@ class AdminTestMethods:
 
         for user in response_test_json.get("users"):
             user: dict
-
-            assert user.get("name") != None
-            assert user.get("email") != None
-            assert user.get("join_date") != None
-            assert user.get("boards") != None
-            assert user.get("posts") != None
+            assert set(user_columns) == set(user.keys())
 
     def create_board(
         self, board_name, board_information, board_is_visible, access_token: str
@@ -215,7 +196,9 @@ class AdminTestMethods:
         data_base = session_local()
 
         assert response_test.status_code == 201
-        assert response_test.json() == {"result": "success"}
+        response_test_json: dict = response_test.json()
+        assert response_test_json.get("result") == "success"
+        assert response_test_json.get("id") > 0
 
         board = (
             data_base.query(Board)
@@ -303,22 +286,37 @@ class TestAdmin:
     def test_data_base_init(self):
         main_test_methods.data_base_init()
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_admin"])
-    def test_create_admin(self, name, password1, password2, email):
-        admin_test_methods.create_admin(name, password1, password2, email)
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/admin/test_create_admin.json")
+    )
+    def test_create_admin(self, pn, name, password1, password2, email):
+        admin_id = admin_test_methods.create_admin(name, password1, password2, email)
         admin_test_methods.create_admin_test(name, password1, email)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_get_users"])
-    def test_get_users(self, name, password1):
+        id_list_append(ID_DICT_ADMIN_ID, admin_id)
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/admin/test_create_user.json")
+    )
+    def test_create_user(self, pn, name, password1, password2, email):
+        response_test = user_test_methods.create_user(name, password1, password2, email)
+        id_list_append(ID_DICT_USER_ID, response_test.json().get("id"))
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/admin/test_get_users.json")
+    )
+    def test_get_users(self, pn, name, password1, user_columns):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
         response_test = admin_test_methods.get_users(access_token)
-        admin_test_methods.get_users_test(response_test)
+        admin_test_methods.get_users_test(user_columns, response_test)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_board"])
-    def test_create_board(self, admin_name, admin_password1, board_args):
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/admin/test_create_board.json")
+    )
+    def test_create_board(self, pn, admin_name, admin_password1, board_args):
         for board_arg in board_args:
             response_login = user_test_methods.login_user(admin_name, admin_password1)
             response_login_json: dict = response_login.json()
@@ -330,46 +328,59 @@ class TestAdmin:
             admin_test_methods.create_board_test(
                 **board_arg, response_test=response_test
             )
+            id_list_append(ID_DICT_BOARD_ID, response_test.json().get("id"))
 
     @pytest.mark.parametrize(
-        **test_parameter_dict["test_create_user_for_update_user_board_permission"]
+        **parameter_data_loader("domain/admin/test_update_user_board_permission.json")
     )
-    def test_create_user_for_update_user_board_permission(
-        self, name, password1, password2, email
-    ):
-        response_test = user_test_methods.create_user(name, password1, password2, email)
-        user_test_methods.create_user_test(
-            response_test, name, password1, email
-        )
-
-    @pytest.mark.parametrize(**test_parameter_dict["test_update_user_board_permission"])
-    def test_update_user_board_permission(self, name, password1, test_args):
+    def test_update_user_board_permission(self, pn, name, password1, test_args):
 
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
+
+        user_id = id_iterator_next(pn, ID_DICT_USER_ID)
+        board_id = id_iterator_next(pn, ID_DICT_BOARD_ID)
+
 
         for test_arg in test_args:
+            args_dict = {}
+        
+            if pn:
+                args_dict["user_id"] = user_id
+                args_dict["board_id"] = board_id
 
+
+            
             response_test = admin_test_methods.update_user_board_permission(
-                **test_arg, access_token=access_token
+                user_id=user_id,
+                board_id=board_id,
+                **test_arg,
+                access_token=access_token,
             )
             admin_test_methods.update_user_board_permission_test(
-                **test_arg, response_test=response_test
+                user_id=user_id,
+                board_id=board_id,
+                **test_arg,
+                response_test=response_test,
             )
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_update_user_is_banned"])
-    def test_update_user_is_banned(self, name, password1, test_args):
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/admin/test_update_user_is_banned.json")
+    )
+    def test_update_user_is_banned(self, pn, name, password1, test_args):
 
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
+
+        user_id = id_iterator_next(pn, ID_DICT_USER_ID)
 
         for test_arg in test_args:
 
             response_test = admin_test_methods.update_user_is_banned(
-                **test_arg, access_token=access_token
+                user_id=user_id, **test_arg, access_token=access_token
             )
             admin_test_methods.update_user_is_banned_test(
-                **test_arg, response_test=response_test
+                user_id=user_id, **test_arg, response_test=response_test
             )

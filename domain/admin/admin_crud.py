@@ -25,7 +25,7 @@ from http_execption_params import http_exception_params
 
 
 @get_data_base_decorator
-def create_admin_with_terminal(data_base: Session = None):
+def create_admin_with_terminal(data_base: Session = None, debug=False):
     generated_password_salt = secrets.token_hex(4)
 
     while True:
@@ -40,6 +40,9 @@ def create_admin_with_terminal(data_base: Session = None):
         except Exception as ex:
             print(ex)
 
+            if debug:
+                raise ValueError()
+
     while True:
         try:
             email = input("Admin email : ")
@@ -52,6 +55,9 @@ def create_admin_with_terminal(data_base: Session = None):
         except Exception as ex:
             print(ex)
 
+            if debug:
+                raise ValueError()
+
     while True:
         try:
             password1 = getpass.getpass("Password : ")
@@ -60,18 +66,21 @@ def create_admin_with_terminal(data_base: Session = None):
             break
         except Exception as ex:
             print(ex)
+            if debug:
+                raise ValueError()
 
     user = User(
         name=name,
-        password=get_password_context().hash(
-            password1 + generated_password_salt
-        ),
+        password=get_password_context().hash(password1 + generated_password_salt),
         password_salt=generated_password_salt,
         email=email,
         is_superuser=True,
     )
     data_base.add(user)
     data_base.commit()
+    
+    if debug:
+        return user.id
 
 
 def get_users(data_base: data_base_dependency):
@@ -146,6 +155,7 @@ def create_board(
             user_access_token=user.access_token,
         )
 
+    return board.id
 
 def update_user_board_permission(
     data_base: data_base_dependency, user_id: int, board_id: int, is_visible: bool

@@ -1,0 +1,51 @@
+{
+    "argnames": "name, password1, test_args",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            [
+                {
+                    "user_is_banned": true
+                }
+            ]
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            [
+                {
+                    "user_is_banned": true
+                }
+            ]
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            [
+                {
+                    "user_is_banned": true
+                }
+            ]
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            [
+                {
+                    "user_is_banned": true
+                }
+            ]
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            [
+                {
+                    "user_is_banned": true
+                }
+            ]
+        ]
+    ],
+    "argvalues_fail": []
+}

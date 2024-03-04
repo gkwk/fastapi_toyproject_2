@@ -1,0 +1,51 @@
+{
+    "argnames": "name, password1, test_args",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            [
+                {
+                    "user_is_permitted": false
+                }
+            ]
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            [
+                {
+                    "user_is_permitted": false
+                }
+            ]
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            [
+                {
+                    "user_is_permitted": false
+                }
+            ]
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            [
+                {
+                    "user_is_permitted": false
+                }
+            ]
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            [
+                {
+                    "user_is_permitted": false
+                }
+            ]
+        ]
+    ],
+    "argvalues_fail": []
+}
