@@ -1,0 +1,30 @@
+{
+    "argnames": "name, password1, ai_id",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            1
+        ]
+    ],
+    "argvalues_fail": [
+        [
+            "admin0",
+            "12345678aA!",
+            0,
+            "ai id 오류"
+        ],
+        [
+            "admin0",
+            "12345678aA!",
+            -1,
+            "ai id 오류"
+        ],
+        [
+            "admin0",
+            "12345678aA!",
+            "test",
+            "ai id 오류"
+        ]
+    ]
+}

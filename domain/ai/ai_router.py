@@ -17,7 +17,7 @@ def train_ai(
     token: current_admin_payload,
     schema: ai_schema.RequestAICreate,
 ):
-    async_task = ai_crud.create_ai(
+    async_task, ai_id = ai_crud.create_ai(
         data_base=data_base,
         token=token,
         name=schema.name,
@@ -25,7 +25,7 @@ def train_ai(
         is_visible=schema.is_visible,
     )
 
-    return {"task_id": async_task.id}
+    return {"task_id": async_task.id, "id" : ai_id}
 
 
 @router.get(v1_urn.AI_GET_AI)
@@ -92,13 +92,13 @@ def ai_infer(
     token: current_user_payload,
     schema: ai_schema.RequestAILogCreate,
 ):
-    async_task = ai_crud.create_ailog(
+    async_task, ai_log_id = ai_crud.create_ailog(
         data_base=data_base,
         token=token,
         ai_id=schema.ai_id,
         description=schema.description,
     )
-    return {"task_id": async_task.id}
+    return {"task_id": async_task.id, "id" : ai_log_id}
 
 
 @router.get(v1_urn.AI_GET_AILOG)

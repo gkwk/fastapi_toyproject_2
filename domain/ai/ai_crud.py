@@ -38,7 +38,7 @@ def create_ai(
         kwargs={"data_base": None, "ai_id": ai.id, "is_visible": is_visible},
         task_id=celery_task_id,
     )
-    return async_task
+    return (async_task, ai.id)
 
 
 def get_ai(
@@ -159,7 +159,7 @@ def create_ailog(
         kwargs={"data_base": None, "ai_id": ai.id, "ai_log_id": ai_log.id},
         task_id=celery_task_id,
     )
-    return async_task
+    return (async_task, ai_log.id)
 
 
 def get_ailog(

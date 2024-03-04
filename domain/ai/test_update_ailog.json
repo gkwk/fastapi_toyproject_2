@@ -1,0 +1,41 @@
+{
+    "argnames": "name, password1, ailog_arg",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "ailog_description_update": "admin0_description_update"
+            }
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "ailog_description_update": "admin1_description_update"
+            }
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            {
+                "ailog_description_update": "admin2_description_update"
+            }
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            {
+                "ailog_description_update": "admin3_description_update"
+            }
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            {
+                "ailog_description_update": "admin4_description_update"
+            }
+        ]
+    ],
+    "argvalues_fail": []
+}

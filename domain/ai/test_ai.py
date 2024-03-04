@@ -1,15 +1,15 @@
 from pytest import MonkeyPatch
 import pytest
 import time
+import json
 
 from fastapi.testclient import TestClient
 from httpx import Response
 
-
 from celery.result import AsyncResult
 
 from main import app
-from models import User, AI, AIlog
+from models import AI, AIlog
 from database import session_local
 from auth import validate_and_decode_user_access_token
 import v1_urn
@@ -78,211 +78,6 @@ url_dict = {
     ],
 }
 
-test_parameter_dict = {
-    "test_create_admin": {
-        "argnames": "name, password1, password2, email",
-        "argvalues": [
-            (f"admin{i}", "12345678", "12345678", f"admin{i}@test.com")
-            for i in range(10)
-        ],
-    },
-    "test_create_user": {
-        "argnames": "name, password1, password2, email",
-        "argvalues": [
-            (f"user{i}", "12345678", "12345678", f"user{i}@test.com") for i in range(20)
-        ],
-    },
-    "test_train_ai": {
-        "argnames": "name, password1, ai_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "ai_name": f"admin{i}_{j}_ai",
-                        "ai_description": f"admin{i}_{j}_ai_description",
-                        "ai_is_visible": True,
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_get_ai": {
-        "argnames": "name, password1, ai_args1, ai_args2",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "ai_id": f"{1+(i*2)+j}",
-                    }
-                    for j in range(2)
-                ],
-                [
-                    {
-                        "ai_name": f"admin{i}_{j}_ai",
-                        "ai_description": f"admin{i}_{j}_ai_description",
-                        "ai_is_visible": True,
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_get_ais": {
-        "argnames": "name, password1, ais_params, ai_columns",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                {
-                    "ai_is_available": True,
-                    "ai_is_visible": True,
-                    "ai_skip": None,
-                    "ai_limit": 100,
-                },
-                [
-                    "id",
-                    "is_available",
-                    "name",
-                    "is_visible",
-                    "description",
-                    "create_date",
-                    "finish_date",
-                    "update_date",
-                    "celery_task_id",
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_update_ai": {
-        "argnames": "name, password1, ai_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "ai_id": j,
-                        "ai_description_update": f"{j}_admin{i}_description_update",
-                        "ai_is_visible_update": False,
-                        "ai_is_available_update": False,
-                    }
-                    for j in range(1, 20 + 1)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_delete_ai": {
-        "argnames": "name, password1, ai_id_list",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [1 + (i * 2) + j for j in range(2)],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_ai_infer": {
-        "argnames": "name, password1, ai_id_list, ailog_description_list",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [1 + (i * 2) + j for j in range(2)],
-                [
-                    f"AIlog_test_admin{i}_ai_{1 + (i * 2) + j}_description"
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_get_ailog": {
-        "argnames": "name, password1, ailog_ids, ailog_columns",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [1 + (i * 2) + j for j in range(2)],
-                [
-                    "user_id",
-                    "ai_id",
-                    "description",
-                    "create_date",
-                    "result",
-                    "is_finished",
-                    "update_date",
-                    "celery_task_id",
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_get_ailogs": {
-        "argnames": "name, password1, ailogs_params, ailog_columns",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                {
-                    "user_id": None,
-                    "ai_id": None,
-                    "ailog_skip": None,
-                    "ailog_limit": 100,
-                },
-                [
-                    "user_id",
-                    "ai_id",
-                    "description",
-                    "create_date",
-                    "result",
-                    "is_finished",
-                    "update_date",
-                    "celery_task_id",
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_update_ailog": {
-        "argnames": "name, password1, ailog_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "ailog_id": 1 + (i * 2) + j,
-                        "ailog_description_update": f"{1 + (i * 2) + j}_admin{i}_description_update",
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_delete_ailog": {
-        "argnames": "name, password1, ailog_id_list",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [1 + (i * 2) + j for j in range(2)],
-            )
-            for i in range(10)
-        ],
-    },
-}
-
 URL_USER_CREATE_USER = "".join(url_dict.get("URL_USER_CREATE_USER"))
 URL_USER_LOGIN_USER = "".join(url_dict.get("URL_USER_LOGIN_USER"))
 URL_AI_TRAIN_AI = "".join(url_dict.get("URL_AI_TRAIN_AI"))
@@ -295,6 +90,67 @@ URL_AI_GET_AILOG = "".join(url_dict.get("URL_AI_GET_AILOG"))
 URL_AI_GET_AILOGS = "".join(url_dict.get("URL_AI_GET_AILOGS"))
 URL_AI_UPDATE_AILOG = "".join(url_dict.get("URL_AI_UPDATE_AILOG"))
 URL_AI_DELETE_AILOG = "".join(url_dict.get("URL_AI_DELETE_AILOG"))
+
+
+def parameter_data_loader(path):
+    test_data = {"argnames": None, "argvalues": []}
+
+    with open(path, "r", encoding="UTF-8") as f:
+        json_data: dict = json.load(f)
+
+    test_data["argnames"] = "pn," + json_data.get("argnames")
+
+    for value in json_data.get("argvalues_pass", []):
+        test_data["argvalues"].append(tuple([1, *value]))
+
+    for value in json_data.get("argvalues_fail", []):
+        value_temp = pytest.param(
+            0, *value[:-1], marks=pytest.mark.xfail(reason=value[-1])
+        )
+        test_data["argvalues"].append(value_temp)
+
+    return test_data
+
+
+ID_DICT_ADMIN_ID = "admin_id"
+ID_DICT_USER_ID = "user_id"
+ID_DICT_AI_ID = "ai_id"
+ID_DICT_AILOG_ID = "ailog_id"
+
+id_list_dict = {
+    ID_DICT_ADMIN_ID: [],
+    ID_DICT_USER_ID: [],
+    ID_DICT_AI_ID: [],
+    ID_DICT_AILOG_ID: [],
+}
+
+id_iterator_dict = {
+    ID_DICT_ADMIN_ID: iter([]),
+    ID_DICT_USER_ID: iter([]),
+    ID_DICT_AI_ID: iter([]),
+    ID_DICT_AILOG_ID: iter([]),
+}
+
+
+def id_list_append(id_dict_str, value):
+    id_list_dict[id_dict_str].append(value)
+
+
+def id_iterator_next(pn, id_dict_str) -> int | None:
+    if pn:
+        try:
+            next_id = id_iterator_dict[id_dict_str].__next__()
+        except StopIteration:
+            id_iterator_dict[id_dict_str] = iter(id_list_dict[id_dict_str])
+            next_id = id_iterator_dict[id_dict_str].__next__()
+
+        return next_id
+
+    return None
+
+
+def id_iterator_clear(id_dict_str):
+    id_iterator_dict[id_dict_str] = iter(id_list_dict[id_dict_str])
 
 
 class AITestMethods:
@@ -318,6 +174,7 @@ class AITestMethods:
         assert response_test.status_code == 201
         response_test_json: dict = response_test.json()
         assert response_test_json.get("task_id")
+        assert response_test_json.get("id") > 0
 
         task_result = AsyncResult(response_test_json.get("task_id"))
 
@@ -352,28 +209,13 @@ class AITestMethods:
 
         return response_test
 
-    def get_ai_test(
-        self, ai_name, ai_description, ai_is_visible, response_test: Response
-    ):
+    def get_ai_test(self, ai_columns, response_test: Response):
         data_base = session_local()
 
         assert response_test.status_code == 200
         response_test_json: dict = response_test.json()
 
-        assert response_test_json.get("is_available") == True
-        assert response_test_json.get("name") == ai_name
-        assert response_test_json.get("is_visible") == ai_is_visible
-        assert response_test_json.get("description") == ai_description
-        assert response_test_json.get("create_date") != None
-
-        if response_test_json.get("is_available"):
-            assert response_test_json.get("finish_date") != None
-            assert response_test_json.get("update_date") != None
-        else:
-            assert response_test_json.get("finish_date") == None
-            assert response_test_json.get("update_date") == None
-
-        assert response_test_json.get("celery_task_id") != None
+        assert set(ai_columns) == set(response_test_json.keys())
 
         data_base.close()
 
@@ -408,27 +250,29 @@ class AITestMethods:
 
         for ai in response_test_json.get("ais"):
             ai: dict
-
-            for column in ai_columns:
-                assert column in ai
+            assert set(ai_columns) == set(ai.keys())
         data_base.close()
 
     def update_ai(
         self,
+        *,
         ai_id,
-        ai_description_update,
-        ai_is_visible_update,
-        ai_is_available_update,
+        ai_description_update=None,
+        ai_is_visible_update=None,
+        ai_is_available_update=None,
         access_token: str,
     ):
+        params = {}
+        if ai_description_update != None:
+            params["description"] = ai_description_update
+        if ai_is_visible_update != None:
+            params["is_visible"] = ai_is_visible_update
+        if ai_is_available_update != None:
+            params["is_available"] = ai_is_available_update
+
         response_test = client.put(
             URL_AI_UPDATE_AI,
-            json={
-                "ai_id": ai_id,
-                "description": ai_description_update,
-                "is_visible": ai_is_visible_update,
-                "is_available": ai_is_available_update,
-            },
+            json={"ai_id": ai_id, **params},
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
@@ -436,10 +280,11 @@ class AITestMethods:
 
     def update_ai_test(
         self,
+        *,
         ai_id,
-        ai_description_update,
-        ai_is_visible_update,
-        ai_is_available_update,
+        ai_description_update=None,
+        ai_is_visible_update=None,
+        ai_is_available_update=None,
         response_test: Response,
     ):
         data_base = session_local()
@@ -448,9 +293,13 @@ class AITestMethods:
 
         assert response_test.status_code == 204
 
-        assert ai.is_available == ai_is_available_update
-        assert ai.is_visible == ai_is_visible_update
-        assert ai.description == ai_description_update
+        if ai_is_available_update != None:
+            assert ai.is_available == ai_is_available_update
+        if ai_is_visible_update != None:
+            assert ai.is_visible == ai_is_visible_update
+        if ai_description_update != None:
+            assert ai.description == ai_description_update
+
         assert ai.update_date != None
 
         data_base.close()
@@ -501,6 +350,7 @@ class AIlogTestMethods:
         assert response_test_json.get("task_id")
 
         task_result = AsyncResult(response_test_json.get("task_id"))
+        assert response_test_json.get("id") > 0
 
         while task_result.state == "PENDING":
             time.sleep(0.5)
@@ -542,8 +392,7 @@ class AIlogTestMethods:
         assert response_test.status_code == 200
         response_test_json: dict = response_test.json()
 
-        for ailog_column in ailog_columns:
-            assert ailog_column in response_test_json
+        assert set(ailog_columns) == set(response_test_json.keys())
         data_base.close()
 
     def get_ailogs(self, user_id, ai_id, ailog_skip, ailog_limit, access_token: str):
@@ -575,32 +424,36 @@ class AIlogTestMethods:
 
         for ailog in response_test_json.get("ailogs"):
             ailog: dict
+            assert set(ailog_columns) == set(ailog.keys())
 
-            for ailog_column in ailog_columns:
-                assert ailog_column in ailog
         data_base.close()
 
-    def update_ailog(self, ailog_id, ailog_description_update, access_token: str):
+    def update_ailog(
+        self, *, ailog_id, ailog_description_update=None, access_token: str
+    ):
+        params = {}
+        if ailog_description_update != None:
+            params["description"] = ailog_description_update
+
         response_test = client.put(
             URL_AI_UPDATE_AILOG,
-            json={
-                "ailog_id": ailog_id,
-                "description": ailog_description_update,
-            },
+            json={"ailog_id": ailog_id, **params},
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
         return response_test
 
     def update_ailog_test(
-        self, ailog_id, ailog_description_update, response_test: Response
+        self, *, ailog_id, ailog_description_update=None, response_test: Response
     ):
         data_base = session_local()
 
         assert response_test.status_code == 204
         ailog = data_base.query(AIlog).filter_by(id=ailog_id).first()
 
-        assert ailog.description == ailog_description_update
+        if ailog_description_update != None:
+            assert ailog.description == ailog_description_update
+
         assert ailog.update_date != None
 
         data_base.close()
@@ -634,26 +487,27 @@ class TestAI:
     def test_data_base_init(self):
         main_test_methods.data_base_init()
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_admin"])
-    def test_create_admin(self, name, password1, password2, email):
-        admin_test_methods.create_admin(name, password1, password2, email)
-        admin_test_methods.create_admin_test(name, password1, email)
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/ai/test_create_admin.json")
+    )
+    def test_create_admin(self, pn, name, password1, password2, email):
+        admin_id = admin_test_methods.create_admin(name, password1, password2, email)
+        id_list_append(ID_DICT_ADMIN_ID, admin_id)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_user"])
-    def test_create_user(self, name, password1, password2, email):
+    @pytest.mark.parametrize(**parameter_data_loader("domain/ai/test_create_user.json"))
+    def test_create_user(self, pn, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
-        user_test_methods.create_user_test(
-            response_test, name, password1, email
-        )
+        id_list_append(ID_DICT_USER_ID, response_test.json().get("id"))
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_train_ai"])
+    @pytest.mark.parametrize(**parameter_data_loader("domain/ai/test_train_ai.json"))
     def test_train_ai(
         self,
         celery_app,
         celery_worker,
+        pn,
         name,
         password1,
-        ai_args,
+        ai_arg,
     ):
         celery_worker.reload()
 
@@ -661,31 +515,27 @@ class TestAI:
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for ai_arg in ai_args:
-            response_test = ai_test_methods.train_ai(
-                **ai_arg, access_token=access_token
-            )
-            ai_test_methods.train_ai_test(**ai_arg, response_test=response_test)
+        response_test = ai_test_methods.train_ai(**ai_arg, access_token=access_token)
+        ai_test_methods.train_ai_test(**ai_arg, response_test=response_test)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_get_ai"])
-    def test_get_ai(
-        self,
-        name,
-        password1,
-        ai_args1,
-        ai_args2,
-    ):
+        id_list_append(ID_DICT_AI_ID, response_test.json().get("id"))
+
+    @pytest.mark.parametrize(**parameter_data_loader("domain/ai/test_get_ai.json"))
+    def test_get_ai(self, pn, name, password1, ai_columns):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for ai_arg1, ai_arg2 in zip(ai_args1, ai_args2):
-            response_test = ai_test_methods.get_ai(**ai_arg1, access_token=access_token)
-            ai_test_methods.get_ai_test(**ai_arg2, response_test=response_test)
+        ai_id = id_iterator_next(pn, ID_DICT_AI_ID)
+        ai_id = ai_id if ai_id else 1
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_get_ais"])
+        response_test = ai_test_methods.get_ai(ai_id=ai_id, access_token=access_token)
+        ai_test_methods.get_ai_test(ai_columns, response_test=response_test)
+
+    @pytest.mark.parametrize(**parameter_data_loader("domain/ai/test_get_ais.json"))
     def test_get_ais(
         self,
+        pn,
         name,
         password1,
         ais_params,
@@ -698,58 +548,63 @@ class TestAI:
         response_test = ai_test_methods.get_ais(**ais_params, access_token=access_token)
         ai_test_methods.get_ais_test(ai_columns, response_test=response_test)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_update_ai"])
+    @pytest.mark.parametrize(**parameter_data_loader("domain/ai/test_update_ai.json"))
     def test_update_ai(
         self,
+        pn,
         name,
         password1,
-        ai_args,
+        ai_arg,
     ):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for ai_arg in ai_args:
-            response_test = ai_test_methods.update_ai(
-                **ai_arg, access_token=access_token
-            )
-            ai_test_methods.update_ai_test(**ai_arg, response_test=response_test)
+        ai_id = id_iterator_next(pn, ID_DICT_AI_ID)
+        ai_id = ai_id if ai_id else 1
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_delete_ai"])
-    def test_delete_ai(self, name, password1, ai_id_list):
+        response_test = ai_test_methods.update_ai(
+            ai_id=ai_id, **ai_arg, access_token=access_token
+        )
+        ai_test_methods.update_ai_test(
+            ai_id=ai_id, **ai_arg, response_test=response_test
+        )
+
+    @pytest.mark.parametrize(**parameter_data_loader("domain/ai/test_delete_ai.json"))
+    def test_delete_ai(self, pn, name, password1, ai_id):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for ai_id in ai_id_list:
-            response_test = ai_test_methods.delete_ai(ai_id, access_token=access_token)
-            ai_test_methods.delete_ai_test(ai_id, response_test=response_test)
+        response_test = ai_test_methods.delete_ai(ai_id, access_token=access_token)
+        ai_test_methods.delete_ai_test(ai_id, response_test=response_test)
 
 
 class TestAIlog:
     def test_data_base_init(self):
         main_test_methods.data_base_init()
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_admin"])
-    def test_create_admin(self, name, password1, password2, email):
-        admin_test_methods.create_admin(name, password1, password2, email)
-        admin_test_methods.create_admin_test(name, password1, email)
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/ai/test_create_admin.json")
+    )
+    def test_create_admin(self, pn, name, password1, password2, email):
+        admin_id = admin_test_methods.create_admin(name, password1, password2, email)
+        id_list_append(ID_DICT_ADMIN_ID, admin_id)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_user"])
-    def test_create_user(self, name, password1, password2, email):
+    @pytest.mark.parametrize(**parameter_data_loader("domain/ai/test_create_user.json"))
+    def test_create_user(self, pn, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
-        user_test_methods.create_user_test(
-            response_test, name, password1, email
-        )
+        id_list_append(ID_DICT_USER_ID, response_test.json().get("id"))
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_train_ai"])
+    @pytest.mark.parametrize(**parameter_data_loader("domain/ai/test_train_ai.json"))
     def test_train_ai(
         self,
         celery_app,
         celery_worker,
+        pn,
         name,
         password1,
-        ai_args,
+        ai_arg,
     ):
         celery_worker.reload()
 
@@ -757,21 +612,20 @@ class TestAIlog:
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for ai_arg in ai_args:
-            response_test = ai_test_methods.train_ai(
-                **ai_arg, access_token=access_token
-            )
-            ai_test_methods.train_ai_test(**ai_arg, response_test=response_test)
+        response_test = ai_test_methods.train_ai(**ai_arg, access_token=access_token)
+        ai_test_methods.train_ai_test(**ai_arg, response_test=response_test)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_ai_infer"])
+        id_list_append(ID_DICT_AI_ID, response_test.json().get("id"))
+
+    @pytest.mark.parametrize(**parameter_data_loader("domain/ai/test_ai_infer.json"))
     def test_ai_infer(
         self,
         celery_app,
         celery_worker,
+        pn,
         name,
         password1,
-        ai_id_list,
-        ailog_description_list,
+        ailog_description,
     ):
         celery_worker.reload()
 
@@ -779,30 +633,34 @@ class TestAIlog:
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for ai_id, ailog_description in zip(ai_id_list, ailog_description_list):
-            response_test = ailog_test_methods.ai_infer(
-                ai_id, ailog_description, access_token=access_token
-            )
-            ailog_test_methods.ai_infer_test(
-                ai_id, ailog_description, access_token, response_test=response_test
-            )
+        ai_id = id_iterator_next(pn, ID_DICT_AI_ID)
+        ai_id = ai_id if ai_id else 1
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_get_ailog"])
-    def test_get_ailog(self, name, password1, ailog_ids, ailog_columns):
+        response_test = ailog_test_methods.ai_infer(
+            ai_id, ailog_description, access_token=access_token
+        )
+        ailog_test_methods.ai_infer_test(
+            ai_id, ailog_description, access_token, response_test=response_test
+        )
+
+        id_list_append(ID_DICT_AILOG_ID, response_test.json().get("id"))
+
+    @pytest.mark.parametrize(**parameter_data_loader("domain/ai/test_get_ailog.json"))
+    def test_get_ailog(self, pn, name, password1, ailog_columns):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for ailog_id in ailog_ids:
-            response_test = ailog_test_methods.get_ailog(
-                ailog_id, access_token=access_token
-            )
-            ailog_test_methods.get_ailog_test(
-                ailog_columns, response_test=response_test
-            )
+        ailog_id = id_iterator_next(pn, ID_DICT_AILOG_ID)
+        ailog_id = ailog_id if ailog_id else 1
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_get_ailogs"])
-    def test_get_ailogs(self, name, password1, ailogs_params, ailog_columns):
+        response_test = ailog_test_methods.get_ailog(
+            ailog_id, access_token=access_token
+        )
+        ailog_test_methods.get_ailog_test(ailog_columns, response_test=response_test)
+
+    @pytest.mark.parametrize(**parameter_data_loader("domain/ai/test_get_ailogs.json"))
+    def test_get_ailogs(self, pn, name, password1, ailogs_params, ailog_columns):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
@@ -812,33 +670,39 @@ class TestAIlog:
         )
         ailog_test_methods.get_ailogs_test(ailog_columns, response_test=response_test)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_update_ailog"])
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/ai/test_update_ailog.json")
+    )
     def test_update_ailog(
         self,
+        pn,
         name,
         password1,
-        ailog_args,
+        ailog_arg,
     ):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for ailog_arg in ailog_args:
-            response_test = ailog_test_methods.update_ailog(
-                **ailog_arg, access_token=access_token
-            )
-            ailog_test_methods.update_ailog_test(
-                **ailog_arg, response_test=response_test
-            )
+        ailog_id = id_iterator_next(pn, ID_DICT_AILOG_ID)
+        ailog_id = ailog_id if ailog_id else 1
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_delete_ailog"])
-    def test_delete_ailog(self, name, password1, ailog_id_list):
+        response_test = ailog_test_methods.update_ailog(
+            ailog_id=ailog_id, **ailog_arg, access_token=access_token
+        )
+        ailog_test_methods.update_ailog_test(
+            ailog_id=ailog_id, **ailog_arg, response_test=response_test
+        )
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/ai/test_delete_ailog.json")
+    )
+    def test_delete_ailog(self, pn, name, password1, ailog_id):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for ailog_id in ailog_id_list:
-            response_test = ailog_test_methods.delete_ailog(
-                ailog_id, access_token=access_token
-            )
-            ailog_test_methods.delete_ailog_test(ailog_id, response_test=response_test)
+        response_test = ailog_test_methods.delete_ailog(
+            ailog_id, access_token=access_token
+        )
+        ailog_test_methods.delete_ailog_test(ailog_id, response_test=response_test)

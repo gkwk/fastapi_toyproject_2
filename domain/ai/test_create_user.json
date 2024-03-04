@@ -1,0 +1,36 @@
+{
+    "argnames": "name, password1, password2, email",
+    "argvalues_pass": [
+        [
+            "user0",
+            "12345678aA!",
+            "12345678aA!",
+            "user0@test.com"
+        ],
+        [
+            "user1",
+            "12345678aA!",
+            "12345678aA!",
+            "user1@test.com"
+        ],
+        [
+            "user2",
+            "12345678aA!",
+            "12345678aA!",
+            "user2@test.com"
+        ],
+        [
+            "user3",
+            "12345678aA!",
+            "12345678aA!",
+            "user3@test.com"
+        ],
+        [
+            "user4",
+            "12345678aA!",
+            "12345678aA!",
+            "user4@test.com"
+        ]
+    ],
+    "argvalues_fail": []
+}

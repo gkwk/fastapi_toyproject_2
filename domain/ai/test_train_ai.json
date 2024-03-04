@@ -1,0 +1,51 @@
+{
+    "argnames": "name, password1, ai_arg",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "ai_name": "admin0_0_ai",
+                "ai_description": "admin0_0_ai_description",
+                "ai_is_visible": true
+            }
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "ai_name": "admin1_0_ai",
+                "ai_description": "admin1_0_ai_description",
+                "ai_is_visible": true
+            }
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            {
+                "ai_name": "admin2_0_ai",
+                "ai_description": "admin2_0_ai_description",
+                "ai_is_visible": true
+            }
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            {
+                "ai_name": "admin3_0_ai",
+                "ai_description": "admin3_0_ai_description",
+                "ai_is_visible": true
+            }
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            {
+                "ai_name": "admin4_0_ai",
+                "ai_description": "admin4_0_ai_description",
+                "ai_is_visible": true
+            }
+        ]
+    ],
+    "argvalues_fail": []
+}

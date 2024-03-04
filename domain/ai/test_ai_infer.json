@@ -1,0 +1,31 @@
+{
+    "argnames": "name, password1, ailog_description",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            "AIlog_test_admin0_description"
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            "AIlog_test_admin1_description"
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            "AIlog_test_admin2_description"
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            "AIlog_test_admin3_description"
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            "AIlog_test_admin4_description"
+        ]
+    ],
+    "argvalues_fail": []
+}

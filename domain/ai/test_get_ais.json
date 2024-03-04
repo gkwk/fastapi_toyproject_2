@@ -1,0 +1,156 @@
+{
+    "argnames": "name, password1, ais_params, ai_columns",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "ai_is_available": true,
+                "ai_is_visible": true,
+                "ai_skip": null,
+                "ai_limit": 100
+            },
+            [
+                "id",
+                "is_available",
+                "name",
+                "is_visible",
+                "description",
+                "create_date",
+                "finish_date",
+                "update_date",
+                "celery_task_id"
+            ]
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "ai_is_available": true,
+                "ai_is_visible": true,
+                "ai_skip": null,
+                "ai_limit": 100
+            },
+            [
+                "id",
+                "is_available",
+                "name",
+                "is_visible",
+                "description",
+                "create_date",
+                "finish_date",
+                "update_date",
+                "celery_task_id"
+            ]
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            {
+                "ai_is_available": true,
+                "ai_is_visible": true,
+                "ai_skip": null,
+                "ai_limit": 100
+            },
+            [
+                "id",
+                "is_available",
+                "name",
+                "is_visible",
+                "description",
+                "create_date",
+                "finish_date",
+                "update_date",
+                "celery_task_id"
+            ]
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            {
+                "ai_is_available": true,
+                "ai_is_visible": true,
+                "ai_skip": null,
+                "ai_limit": 100
+            },
+            [
+                "id",
+                "is_available",
+                "name",
+                "is_visible",
+                "description",
+                "create_date",
+                "finish_date",
+                "update_date",
+                "celery_task_id"
+            ]
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            {
+                "ai_is_available": true,
+                "ai_is_visible": true,
+                "ai_skip": null,
+                "ai_limit": 100
+            },
+            [
+                "id",
+                "is_available",
+                "name",
+                "is_visible",
+                "description",
+                "create_date",
+                "finish_date",
+                "update_date",
+                "celery_task_id"
+            ]
+        ]
+    ],
+    "argvalues_fail": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "ai_is_available": true,
+                "ai_is_visible": true,
+                "ai_skip": null,
+                "ai_limit": 100
+            },
+            [
+                "id",
+                "is_available",
+                "name",
+                "is_visible",
+                "description",
+                "create_date",
+                "finish_date",
+                "update_date"
+            ],
+            "의도하지 않은 칼럼 삭제"
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "ai_is_available": true,
+                "ai_is_visible": true,
+                "ai_skip": null,
+                "ai_limit": 100
+            },
+            [
+                "id",
+                "is_available",
+                "name",
+                "is_visible",
+                "description",
+                "create_date",
+                "finish_date",
+                "update_date",
+                "celery_task_id",
+                "fail0"
+            ],
+            "의도하지 않은 칼럼 추가"
+        ]
+    ]
+}
