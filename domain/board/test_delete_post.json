@@ -1,0 +1,10 @@
+{
+    "argnames": "name, password1",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!"
+        ]
+    ],
+    "argvalues_fail": []
+}

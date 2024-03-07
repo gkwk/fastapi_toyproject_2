@@ -1,0 +1,163 @@
+{
+    "argnames": "name, password1, posts_params, post_columns",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "post_skip": null,
+                "post_limit": 100
+        },
+            [
+                "id",
+                "user_id",
+                "board_id",
+                "name",
+                "content",
+                "create_date",
+                "update_date",
+                "number_of_view",
+                "number_of_comment",
+                "number_of_like",
+                "is_file_attached",
+                "is_visible"
+        ]
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "post_skip": null,
+                "post_limit": 100
+        },
+            [
+                "id",
+                "user_id",
+                "board_id",
+                "name",
+                "content",
+                "create_date",
+                "update_date",
+                "number_of_view",
+                "number_of_comment",
+                "number_of_like",
+                "is_file_attached",
+                "is_visible"
+            ]
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            {
+                "post_skip": null,
+                "post_limit": 100
+        },
+            [
+                "id",
+                "user_id",
+                "board_id",
+                "name",
+                "content",
+                "create_date",
+                "update_date",
+                "number_of_view",
+                "number_of_comment",
+                "number_of_like",
+                "is_file_attached",
+                "is_visible"
+            ]
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            {
+                "post_skip": null,
+                "post_limit": 100
+        },
+            [
+                "id",
+                "user_id",
+                "board_id",
+                "name",
+                "content",
+                "create_date",
+                "update_date",
+                "number_of_view",
+                "number_of_comment",
+                "number_of_like",
+                "is_file_attached",
+                "is_visible"
+            ]
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            {
+                "post_skip": null,
+                "post_limit": 100
+        },
+            [
+                "id",
+                "user_id",
+                "board_id",
+                "name",
+                "content",
+                "create_date",
+                "update_date",
+                "number_of_view",
+                "number_of_comment",
+                "number_of_like",
+                "is_file_attached",
+                "is_visible"
+            ]
+        ]
+    ],
+    "argvalues_fail": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "post_skip": null,
+                "post_limit": 100
+        },
+            [
+                "id",
+                "user_id",
+                "board_id",
+                "name",
+                "content",
+                "create_date",
+                "update_date",
+                "number_of_view",
+                "number_of_comment",
+                "number_of_like",
+                "is_file_attached"
+            ],
+            "의도하지 않은 칼럼 삭제"
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "post_skip": null,
+                "post_limit": 100
+        },
+            [
+                "id",
+                "user_id",
+                "board_id",
+                "name",
+                "content",
+                "create_date",
+                "update_date",
+                "number_of_view",
+                "number_of_comment",
+                "number_of_like",
+                "is_file_attached",
+                "is_visible",
+                "fail0"
+            ],
+            "의도하지 않은 칼럼 추가"
+        ]
+    ]
+}

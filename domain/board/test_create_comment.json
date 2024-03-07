@@ -1,0 +1,51 @@
+{
+    "argnames": "name, password1, comment_arg",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "comment_content": "comment_admin0_content",
+                "comment_is_file_attached": true,
+                "comment_is_visible": true
+            }
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "comment_content": "comment_admin1_content",
+                "comment_is_file_attached": true,
+                "comment_is_visible": true
+            }
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            {
+                "comment_content": "comment_admin2_content",
+                "comment_is_file_attached": true,
+                "comment_is_visible": true
+            }
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            {
+                "comment_content": "comment_admin3_content",
+                "comment_is_file_attached": true,
+                "comment_is_visible": true
+            }
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            {
+                "comment_content": "comment_admin4_content",
+                "comment_is_file_attached": true,
+                "comment_is_visible": true
+            }
+        ]
+    ],
+    "argvalues_fail": []
+}

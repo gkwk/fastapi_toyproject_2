@@ -1,5 +1,6 @@
 from pytest import MonkeyPatch
 import pytest
+import json
 
 from fastapi.testclient import TestClient
 from httpx import Response
@@ -14,6 +15,7 @@ import v1_urn
 from domain.user.test_user import user_test_methods
 from domain.admin.test_admin import admin_test_methods
 from test_main import main_test_methods
+
 
 client = TestClient(app)
 
@@ -87,146 +89,6 @@ url_dict = {
 }
 
 test_parameter_dict = {
-    "test_create_admin": {
-        "argnames": "name, password1, password2, email",
-        "argvalues": [
-            (f"admin{i}", "12345678", "12345678", f"admin{i}@test.com")
-            for i in range(10)
-        ],
-    },
-    "test_create_user": {
-        "argnames": "name, password1, password2, email",
-        "argvalues": [
-            (f"user{i}", "12345678", "12345678", f"user{i}@test.com") for i in range(20)
-        ],
-    },
-    "test_create_board": {
-        "argnames": "admin_name, admin_password1, board_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "board_name": f"board_{i}_{j}",
-                        "board_information": f"board_{i}_{j}_information",
-                        "board_is_visible": True,
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_create_post": {
-        "argnames": "admin_name, admin_password1, post_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "post_name": f"post_admin{i}_board{1 + (i * 2) + j}",
-                        "post_content": f"post_admin{i}_board{1 + (i * 2) + j}_content",
-                        "board_id": 1 + (i * 2) + j,
-                        "post_is_file_attached": True,
-                        "post_is_visible": True,
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_get_post": {
-        "argnames": "name, password1, post_ids, board_ids, ailog_columns",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [1 + (i * 2) + j for j in range(2)],
-                [1 + (i * 2) + j for j in range(2)],
-                [
-                    "id",
-                    "name",
-                    "content",
-                    "board_id",
-                    "create_date",
-                    "number_of_view",
-                    "number_of_comment",
-                    "number_of_like",
-                    "is_file_attached",
-                    "is_visible",
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_get_posts": {
-        "argnames": "name, password1, posts_params, post_columns",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                {
-                    "board_id": 1,
-                    "post_skip": None,
-                    "post_limit": 100,
-                },
-                [
-                    "id",
-                    "name",
-                    "content",
-                    "board_id",
-                    "create_date",
-                    "number_of_view",
-                    "number_of_comment",
-                    "number_of_like",
-                    "is_file_attached",
-                    "is_visible",
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_update_post": {
-        "argnames": "name, password1, post_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "post_id": 1 + (i * 2) + j,
-                        "post_name": f"post_admin{i}_board{1 + (i * 2) + j}_update",
-                        "post_content": f"post_admin{i}_board{1 + (i * 2) + j}_content_update",
-                        "board_id": 1 + (i * 2) + j,
-                        "post_is_file_attached": None,
-                        "post_is_visible": None,
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_delete_post": {
-        "argnames": "name, password1, post_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "post_id": 1 + (i * 2) + j,
-                        "board_id": 1 + (i * 2) + j,
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
     "test_create_comment": {
         "argnames": "name, password1, comment_args",
         "argvalues": [
@@ -345,6 +207,75 @@ URL_BOARD_UPDATE_COMMENT = "".join(url_dict.get("URL_BOARD_UPDATE_COMMENT"))
 URL_BOARD_DELETE_COMMENT = "".join(url_dict.get("URL_BOARD_DELETE_COMMENT"))
 
 
+def parameter_data_loader(path):
+    test_data = {"argnames": None, "argvalues": []}
+
+    with open(path, "r", encoding="UTF-8") as f:
+        json_data: dict = json.load(f)
+
+    test_data["argnames"] = "pn," + json_data.get("argnames")
+
+    for value in json_data.get("argvalues_pass", []):
+        test_data["argvalues"].append(tuple([1, *value]))
+
+    for value in json_data.get("argvalues_fail", []):
+        value_temp = pytest.param(
+            0, *value[:-1], marks=pytest.mark.xfail(reason=value[-1])
+        )
+        test_data["argvalues"].append(value_temp)
+
+    return test_data
+
+
+ID_DICT_ADMIN_ID = "admin_id"
+ID_DICT_USER_ID = "user_id"
+ID_DICT_BOARD_ID = "board_id"
+ID_DICT_POST_ID = "post_id"
+ID_DICT_COMMENT_ID = "comment_id"
+
+
+id_list_dict = {
+    ID_DICT_ADMIN_ID: [],
+    ID_DICT_USER_ID: [],
+    ID_DICT_BOARD_ID: [],
+    ID_DICT_POST_ID: [],
+    ID_DICT_COMMENT_ID: [],
+}
+
+id_iterator_dict = {
+    ID_DICT_ADMIN_ID: iter([]),
+    ID_DICT_USER_ID: iter([]),
+    ID_DICT_BOARD_ID: iter([]),
+    ID_DICT_POST_ID: iter([]),
+    ID_DICT_COMMENT_ID: iter([]),
+}
+
+
+def id_list_append(id_dict_str, value):
+    id_list_dict[id_dict_str].append(value)
+
+
+def id_iterator_next(pn, id_dict_str) -> int | None:
+    if pn:
+        try:
+            next_id = id_iterator_dict[id_dict_str].__next__()
+        except StopIteration:
+            id_iterator_dict[id_dict_str] = iter(id_list_dict[id_dict_str])
+            next_id = id_iterator_dict[id_dict_str].__next__()
+
+        return next_id
+
+    return None
+
+
+def id_list_clear(id_dict_str):
+    id_list_dict[id_dict_str] = []
+
+
+def id_iterator_clear(id_dict_str):
+    id_iterator_dict[id_dict_str] = iter(id_list_dict[id_dict_str])
+
+
 class PostTestMethods:
     def create_post(
         self,
@@ -382,13 +313,17 @@ class PostTestMethods:
     ):
         data_base = session_local()
         assert response_test.status_code == 201
-        assert response_test.json() == {"result": "success"}
+        response_test_json: dict = response_test.json()
+        assert response_test_json.get("result")
+        assert response_test_json.get("id") > 0
 
         user_id = validate_and_decode_user_access_token(
             data_base=data_base, token=access_token
         ).get("user_id")
         post = (
-            data_base.query(Post).filter_by(name=post_name, board_id=board_id).first()
+            data_base.query(Post)
+            .filter_by(id=response_test_json.get("id"), board_id=board_id)
+            .first()
         )
 
         assert post.user_id == user_id
@@ -424,8 +359,7 @@ class PostTestMethods:
 
         response_test_json: dict = response_test.json()
 
-        for post_column in post_columns:
-            assert post_column in response_test_json
+        assert set(post_columns) == set(response_test_json.keys())
 
         data_base.close()
 
@@ -457,19 +391,18 @@ class PostTestMethods:
 
         for post in response_test_json.get("posts"):
             post: dict
-
-            for ailog_column in post_columns:
-                assert ailog_column in post
+            assert set(post_columns) == set(post.keys())
         data_base.close()
 
     def update_post(
         self,
+        *,
         post_id,
-        post_name,
-        post_content,
+        post_name=None,
+        post_content=None,
         board_id,
-        post_is_file_attached,
-        post_is_visible,
+        post_is_file_attached=None,
+        post_is_visible=None,
         access_token: str,
     ):
         response_test = client.put(
@@ -489,12 +422,13 @@ class PostTestMethods:
 
     def update_post_test(
         self,
+        *,
         post_id,
-        post_name,
-        post_content,
+        post_name=None,
+        post_content=None,
         board_id,
-        post_is_file_attached,
-        post_is_visible,
+        post_is_file_attached=None,
+        post_is_visible=None,
         response_test: Response,
     ):
         data_base = session_local()
@@ -572,14 +506,18 @@ class CommentTestMethods:
     ):
         data_base = session_local()
         assert response_test.status_code == 201
-        assert response_test.json() == {"result": "success"}
+        response_test_json: dict = response_test.json()
+        assert response_test_json.get("result")
+        assert response_test_json.get("id") > 0
 
         user_id = validate_and_decode_user_access_token(
             data_base=data_base, token=access_token
         ).get("user_id")
         comment = (
             data_base.query(Comment)
-            .filter_by(user_id=user_id, post_id=post_id, content=comment_content)
+            .filter_by(
+                user_id=user_id, post_id=post_id, id=response_test_json.get("id")
+            )
             .first()
         )
 
@@ -612,12 +550,13 @@ class CommentTestMethods:
 
         response_test_json: dict = response_test.json()
 
-        for comment_column in comment_columns:
-            assert comment_column in response_test_json
+        assert set(comment_columns) == set(response_test_json.keys())
 
         data_base.close()
 
-    def get_comments(self, post_id, comment_skip, comment_limit, access_token: str):
+    def get_comments(
+        self, *, post_id, comment_skip=None, comment_limit=None, access_token: str
+    ):
         params = {}
         if post_id != None:
             params["post_id"] = post_id
@@ -645,19 +584,18 @@ class CommentTestMethods:
 
         for comment in response_test_json.get("comments"):
             comment: dict
-
-            for comment_column in comment_columns:
-                assert comment_column in comment
+            assert set(comment_columns) == set(comment.keys())
 
         data_base.close()
 
     def update_comment(
         self,
+        *,
         comment_id,
-        comment_content,
+        comment_content=None,
         post_id,
-        comment_is_file_attached,
-        comment_is_visible,
+        comment_is_file_attached=None,
+        comment_is_visible=None,
         access_token: str,
     ):
         response_test = client.put(
@@ -676,11 +614,12 @@ class CommentTestMethods:
 
     def update_comment_test(
         self,
+        *,
         comment_id,
-        comment_content,
+        comment_content=None,
         post_id,
-        comment_is_file_attached,
-        comment_is_visible,
+        comment_is_file_attached=None,
+        comment_is_visible=None,
         response_test: Response,
     ):
         data_base = session_local()
@@ -733,214 +672,280 @@ comment_test_methods = CommentTestMethods()
 class TestPost:
     def test_data_base_init(self):
         main_test_methods.data_base_init()
+        for id in id_list_dict:
+            id_list_clear(id)
+            id_iterator_clear(id)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_admin"])
-    def test_create_admin(self, name, password1, password2, email):
-        admin_test_methods.create_admin(name, password1, password2, email)
-        admin_test_methods.create_admin_test(name, password1, email)
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_create_admin.json")
+    )
+    def test_create_admin(self, pn, name, password1, password2, email):
+        admin_id = admin_test_methods.create_admin(name, password1, password2, email)
+        id_list_append(ID_DICT_ADMIN_ID, admin_id)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_user"])
-    def test_create_user(self, name, password1, password2, email):
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_create_user.json")
+    )
+    def test_create_user(self, pn, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
-        user_test_methods.create_user_test(
-            response_test, name, password1, email
-        )
+        id_list_append(ID_DICT_USER_ID, response_test.json().get("id"))
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_board"])
-    def test_create_board(self, admin_name, admin_password1, board_args):
-        for board_arg in board_args:
-            response_login = user_test_methods.login_user(admin_name, admin_password1)
-            response_login_json: dict = response_login.json()
-            access_token = response_login_json.get("access_token")
-
-            response_test = admin_test_methods.create_board(
-                **board_arg, access_token=access_token
-            )
-            admin_test_methods.create_board_test(
-                **board_arg, response_test=response_test
-            )
-
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_post"])
-    def test_create_post(self, admin_name, admin_password1, post_args):
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_create_board.json")
+    )
+    def test_create_board(self, pn, admin_name, admin_password1, board_arg):
         response_login = user_test_methods.login_user(admin_name, admin_password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for post_arg in post_args:
-            response_test = post_test_methods.create_post(
-                **post_arg, access_token=access_token
-            )
-            post_test_methods.create_post_test(
-                **post_arg, access_token=access_token, response_test=response_test
-            )
+        response_test = admin_test_methods.create_board(
+            **board_arg, access_token=access_token
+        )
+        admin_test_methods.create_board_test(**board_arg, response_test=response_test)
+        id_list_append(ID_DICT_BOARD_ID, response_test.json().get("id"))
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_get_post"])
-    def test_get_post(self, name, password1, post_ids, board_ids, ailog_columns):
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_create_post.json")
+    )
+    def test_create_post(self, pn, name, password1, post_arg):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for post_id, board_id in zip(post_ids, board_ids):
-            response_test = post_test_methods.get_post(
-                post_id, board_id, access_token=access_token
-            )
-            post_test_methods.get_post_test(ailog_columns, response_test=response_test)
+        board_id = id_iterator_next(pn, ID_DICT_BOARD_ID)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_get_posts"])
-    def test_get_posts(self, name, password1, posts_params, post_columns):
+        response_test = post_test_methods.create_post(
+            board_id=board_id, **post_arg, access_token=access_token
+        )
+        post_test_methods.create_post_test(
+            board_id=board_id,
+            **post_arg,
+            access_token=access_token,
+            response_test=response_test,
+        )
+        id_list_append(ID_DICT_POST_ID, (board_id, response_test.json().get("id")))
+
+    @pytest.mark.parametrize(**parameter_data_loader("domain/board/test_get_post.json"))
+    def test_get_post(self, pn, name, password1, post_columns):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
+
+        board_id, post_id = id_iterator_next(pn, ID_DICT_POST_ID)
+
+        response_test = post_test_methods.get_post(
+            post_id, board_id, access_token=access_token
+        )
+        post_test_methods.get_post_test(post_columns, response_test=response_test)
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_get_posts.json")
+    )
+    def test_get_posts(self, pn, name, password1, posts_params, post_columns):
+        response_login = user_test_methods.login_user(name, password1)
+        response_login_json: dict = response_login.json()
+        access_token = response_login_json.get("access_token")
+        board_id = id_iterator_next(pn, ID_DICT_BOARD_ID)
 
         response_test = post_test_methods.get_posts(
-            **posts_params, access_token=access_token
+            board_id=board_id, **posts_params, access_token=access_token
         )
         post_test_methods.get_posts_test(post_columns, response_test=response_test)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_update_post"])
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_update_post.json")
+    )
     def test_update_post(
         self,
+        pn,
         name,
         password1,
-        post_args,
+        post_arg,
     ):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for post_arg in post_args:
-            response_test = post_test_methods.update_post(
-                **post_arg, access_token=access_token
-            )
-            post_test_methods.update_post_test(**post_arg, response_test=response_test)
+        board_id, post_id = id_iterator_next(pn, ID_DICT_POST_ID)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_delete_post"])
-    def test_delete_post(self, name, password1, post_args):
+        response_test = post_test_methods.update_post(
+            board_id=board_id, post_id=post_id, **post_arg, access_token=access_token
+        )
+        post_test_methods.update_post_test(
+            board_id=board_id, post_id=post_id, **post_arg, response_test=response_test
+        )
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_delete_post.json")
+    )
+    def test_delete_post(self, pn, name, password1):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for post_arg in post_args:
-            response_test = post_test_methods.delete_post(
-                **post_arg, access_token=access_token
-            )
-            post_test_methods.delete_post_test(**post_arg, response_test=response_test)
+        board_id, post_id = id_iterator_next(pn, ID_DICT_POST_ID)
+
+        response_test = post_test_methods.delete_post(
+            post_id, board_id, access_token=access_token
+        )
+        post_test_methods.delete_post_test(
+            post_id, board_id, response_test=response_test
+        )
 
 
 class TestComment:
     def test_data_base_init(self):
         main_test_methods.data_base_init()
+        for id in id_list_dict:
+            id_list_clear(id)
+            id_iterator_clear(id)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_admin"])
-    def test_create_admin(self, name, password1, password2, email):
-        admin_test_methods.create_admin(name, password1, password2, email)
-        admin_test_methods.create_admin_test(name, password1, email)
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_create_admin.json")
+    )
+    def test_create_admin(self, pn, name, password1, password2, email):
+        admin_id = admin_test_methods.create_admin(name, password1, password2, email)
+        id_list_append(ID_DICT_ADMIN_ID, admin_id)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_user"])
-    def test_create_user(self, name, password1, password2, email):
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_create_user.json")
+    )
+    def test_create_user(self, pn, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
-        user_test_methods.create_user_test(
-            response_test, name, password1, email
-        )
+        id_list_append(ID_DICT_USER_ID, response_test.json().get("id"))
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_board"])
-    def test_create_board(self, admin_name, admin_password1, board_args):
-        for board_arg in board_args:
-            response_login = user_test_methods.login_user(admin_name, admin_password1)
-            response_login_json: dict = response_login.json()
-            access_token = response_login_json.get("access_token")
-
-            response_test = admin_test_methods.create_board(
-                **board_arg, access_token=access_token
-            )
-            admin_test_methods.create_board_test(
-                **board_arg, response_test=response_test
-            )
-
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_post"])
-    def test_create_post(self, admin_name, admin_password1, post_args):
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_create_board.json")
+    )
+    def test_create_board(self, pn, admin_name, admin_password1, board_arg):
         response_login = user_test_methods.login_user(admin_name, admin_password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for post_arg in post_args:
-            response_test = post_test_methods.create_post(
-                **post_arg, access_token=access_token
-            )
-            post_test_methods.create_post_test(
-                **post_arg, access_token=access_token, response_test=response_test
-            )
+        response_test = admin_test_methods.create_board(
+            **board_arg, access_token=access_token
+        )
+        admin_test_methods.create_board_test(**board_arg, response_test=response_test)
+        id_list_append(ID_DICT_BOARD_ID, response_test.json().get("id"))
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_comment"])
-    def test_create_comment(self, name, password1, comment_args):
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_create_post.json")
+    )
+    def test_create_post(self, pn, name, password1, post_arg):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for comment_arg in comment_args:
-            response_test = comment_test_methods.create_comment(
-                **comment_arg, access_token=access_token
-            )
-            comment_test_methods.create_comment_test(
-                **comment_arg, access_token=access_token, response_test=response_test
-            )
+        board_id = id_iterator_next(pn, ID_DICT_BOARD_ID)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_get_comment"])
-    def test_get_comment(self, name, password1, comment_id, post_id, comment_columns):
+        response_test = post_test_methods.create_post(
+            board_id=board_id, **post_arg, access_token=access_token
+        )
+        post_test_methods.create_post_test(
+            board_id=board_id,
+            **post_arg,
+            access_token=access_token,
+            response_test=response_test,
+        )
+        id_list_append(ID_DICT_POST_ID, (board_id, response_test.json().get("id")))
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_create_comment.json")
+    )
+    def test_create_comment(self, pn, name, password1, comment_arg):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for post_id, board_id in zip(comment_id, post_id):
-            response_test = comment_test_methods.get_comment(
-                post_id, board_id, access_token=access_token
-            )
-            comment_test_methods.get_comment_test(
-                comment_columns, response_test=response_test
-            )
+        board_id, post_id = id_iterator_next(pn, ID_DICT_POST_ID)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_get_comments"])
-    def test_get_comments(self, name, password1, comments_params, comment_columns):
+        response_test = comment_test_methods.create_comment(
+            post_id=post_id, **comment_arg, access_token=access_token
+        )
+        comment_test_methods.create_comment_test(
+            post_id=post_id,
+            **comment_arg,
+            access_token=access_token,
+            response_test=response_test,
+        )
+        id_list_append(ID_DICT_COMMENT_ID, (post_id, response_test.json().get("id")))
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_get_comment.json")
+    )
+    def test_get_comment(self, pn, name, password1, comment_columns):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
+
+        post_id, comment_id = id_iterator_next(pn, ID_DICT_COMMENT_ID)
+
+        response_test = comment_test_methods.get_comment(
+            comment_id, post_id, access_token=access_token
+        )
+        comment_test_methods.get_comment_test(
+            comment_columns, response_test=response_test
+        )
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_get_comments.json")
+    )
+    def test_get_comments(self, pn, name, password1, comments_params, comment_columns):
+        response_login = user_test_methods.login_user(name, password1)
+        response_login_json: dict = response_login.json()
+        access_token = response_login_json.get("access_token")
+
+        post_id, comment_id = id_iterator_next(pn, ID_DICT_COMMENT_ID)
 
         response_test = comment_test_methods.get_comments(
-            **comments_params, access_token=access_token
+            post_id=post_id, **comments_params, access_token=access_token
         )
         comment_test_methods.get_comments_test(
             comment_columns, response_test=response_test
         )
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_update_comment"])
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_update_comment.json")
+    )
     def test_update_comment(
         self,
+        pn,
         name,
         password1,
-        comment_args,
+        comment_arg,
     ):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for comment_arg in comment_args:
-            response_test = comment_test_methods.update_comment(
-                **comment_arg, access_token=access_token
-            )
-            comment_test_methods.update_comment_test(
-                **comment_arg, response_test=response_test
-            )
+        post_id, comment_id = id_iterator_next(pn, ID_DICT_COMMENT_ID)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_delete_comment"])
-    def test_delete_comment(self, name, password1, comment_args):
+        response_test = comment_test_methods.update_comment(
+            comment_id=comment_id,
+            post_id=post_id,
+            **comment_arg,
+            access_token=access_token,
+        )
+        comment_test_methods.update_comment_test(
+            comment_id=comment_id,
+            post_id=post_id,
+            **comment_arg,
+            response_test=response_test,
+        )
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/board/test_delete_comment.json")
+    )
+    def test_delete_comment(self, pn, name, password1):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for comment_arg in comment_args:
-            response_test = comment_test_methods.delete_comment(
-                **comment_arg, access_token=access_token
-            )
-            comment_test_methods.delete_comment_test(
-                **comment_arg, response_test=response_test
-            )
+        post_id, comment_id = id_iterator_next(pn, ID_DICT_COMMENT_ID)
+
+        response_test = comment_test_methods.delete_comment(
+            comment_id=comment_id, post_id=post_id, access_token=access_token
+        )
+        comment_test_methods.delete_comment_test(
+            comment_id=comment_id, post_id=post_id, response_test=response_test
+        )

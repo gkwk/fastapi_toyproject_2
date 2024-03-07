@@ -1,0 +1,56 @@
+{
+    "argnames": "name, password1, post_arg",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "post_name": "post_admin0_update",
+                "post_content": "post_admin0_content_update",
+                "post_is_file_attached": null,
+                "post_is_visible": null
+            }
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "post_name": "post_admin1_update",
+                "post_content": "post_admin1_content_update",
+                "post_is_file_attached": null,
+                "post_is_visible": null
+            }
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            {
+                "post_name": "post_admin2_update",
+                "post_content": "post_admin2_content_update",
+                "post_is_file_attached": null,
+                "post_is_visible": null
+            }
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            {
+                "post_name": "post_admin3_update",
+                "post_content": "post_admin3_content_update",
+                "post_is_file_attached": null,
+                "post_is_visible": null
+            }
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            {
+                "post_name": "post_admin4_update",
+                "post_content": "post_admin4_content_update",
+                "post_is_file_attached": null,
+                "post_is_visible": null
+            }
+        ]
+    ],
+    "argvalues_fail": []
+}

@@ -30,7 +30,7 @@ def create_post(
     except ValidationError as e:
         return e.errors()
 
-    board_crud.create_post(
+    post_id = board_crud.create_post(
         data_base=data_base,
         token=token,
         name=schema.name,
@@ -41,7 +41,7 @@ def create_post(
         files=schema.files,
     )
 
-    return {"result": "success"}
+    return {"result": "success", "id" : post_id}
 
 
 @router.get(v1_urn.BOARD_GET_POST, response_model=board_schema.ResponsePostRead)
@@ -121,7 +121,7 @@ def create_comment(
     except ValidationError as e:
         return e.errors()
 
-    board_crud.create_comment(
+    comment_id = board_crud.create_comment(
         data_base=data_base,
         token=token,
         post_id=schema.post_id,
@@ -131,7 +131,7 @@ def create_comment(
         files=schema.files,
     )
 
-    return {"result": "success"}
+    return {"result": "success", "id": comment_id}
 
 
 @router.get(v1_urn.BOARD_GET_COMMENT, response_model=board_schema.ResponseCommentRead)

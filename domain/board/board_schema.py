@@ -44,6 +44,7 @@ class RequestPostsRead(BaseModel):
 
 class ResponsePostRead(BaseModel):
     id: int = Field(ge=1)
+    user_id: int = Field(ge=1)
     name: str = Field(min_length=1, max_length=64)
     content: str = Field(min_length=1, max_length=1024)
     board_id: int = Field(ge=1)

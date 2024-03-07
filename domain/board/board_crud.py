@@ -49,6 +49,7 @@ def create_post(
                     data_base.add(post_file)
                     data_base.commit()
 
+    return post.id
 
 def get_posts(
     data_base: data_base_dependency,
@@ -172,6 +173,7 @@ def create_comment(
                     data_base.add(comment_file)
                     data_base.commit()
 
+    return comment.id
 
 def get_comments(
     data_base: data_base_dependency,
