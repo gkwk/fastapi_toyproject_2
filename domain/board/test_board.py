@@ -421,6 +421,7 @@ class PostTestMethods:
             json={
                 "name": post_name,
                 "board_id": board_id,
+                "id" : post_id,
                 **params
             },
             headers={"Authorization": f"Bearer {access_token}"},
