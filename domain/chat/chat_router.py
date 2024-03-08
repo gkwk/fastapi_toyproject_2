@@ -24,7 +24,7 @@ def create_chatsession(
     token: current_user_payload,
     schema: chat_schema.RequestChatSessionCreate,
 ):
-    chat_crud.create_chatsession(
+    chatsession_id =  chat_crud.create_chatsession(
         data_base=data_base,
         token=token,
         name=schema.name,
@@ -33,7 +33,7 @@ def create_chatsession(
         is_closed=schema.is_closed,
     )
 
-    return {"result": "success"}
+    return {"result": "success", "id" : chatsession_id}
 
 
 @router.get(v1_urn.CHAT_GET_CHATSESSION)
@@ -100,14 +100,14 @@ def create_chat(
     token: current_user_payload,
     schema: chat_schema.RequestChatCreate,
 ):
-    chat_crud.create_chat(
+    chat_id = chat_crud.create_chat(
         data_base=data_base,
         token=token,
         content=schema.content,
         chat_session_id=schema.chat_session_id,
     )
 
-    return {"result": "success"}
+    return {"result": "success","id" : chat_id}
 
 
 @router.get(v1_urn.CHAT_GET_CHATS)

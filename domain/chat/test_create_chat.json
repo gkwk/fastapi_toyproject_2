@@ -1,0 +1,41 @@
+{
+    "argnames": "name, password1, chat_arg",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "chat_content": "chat_admin0_content"
+            }
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "chat_content": "chat_admin1_content"
+            }
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            {
+                "chat_content": "chat_admin2_content"
+            }
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            {
+                "chat_content": "chat_admin3_content"
+            }
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            {
+                "chat_content": "chat_admin4_content"
+            }
+        ]
+    ],
+    "argvalues_fail": []
+}

@@ -405,15 +405,23 @@ class PostTestMethods:
         post_is_visible=None,
         access_token: str,
     ):
+        params = {}
+        if post_name != None:
+            params["name"] = post_name
+        if post_content != None:
+            params["content"] = post_content
+        if post_is_file_attached != None:
+            params["is_file_attached"] = post_is_file_attached
+        if post_is_visible != None:
+            params["is_visible"] = post_is_visible
+
+        
         response_test = client.put(
             URL_BOARD_UPDATE_POST,
             json={
-                "id": post_id,
                 "name": post_name,
-                "content": post_content,
                 "board_id": board_id,
-                "is_file_attached": post_is_file_attached,
-                "is_visible": post_is_visible,
+                **params
             },
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -598,14 +606,20 @@ class CommentTestMethods:
         comment_is_visible=None,
         access_token: str,
     ):
+        params = {}
+        if comment_content != None:
+            params["content"] = comment_content
+        if comment_is_file_attached != None:
+            params["is_file_attached"] = comment_is_file_attached
+        if comment_is_visible != None:
+            params["is_visible"] = comment_is_visible
+        
         response_test = client.put(
             URL_BOARD_UPDATE_COMMENT,
             json={
                 "id": comment_id,
-                "content": comment_content,
                 "post_id": post_id,
-                "is_file_attached": comment_is_file_attached,
-                "is_visible": comment_is_visible,
+                **params
             },
             headers={"Authorization": f"Bearer {access_token}"},
         )

@@ -26,6 +26,8 @@ def create_chatsession(
     )
     data_base.add(chat_session)
     data_base.commit()
+    
+    return chat_session.id
 
 
 def get_chatsession(
@@ -115,6 +117,7 @@ def create_chat(
     data_base.add(chat)
     data_base.commit()
 
+    return chat.id
 
 def get_chats(
     data_base: data_base_dependency,

@@ -1,0 +1,128 @@
+{
+    "argnames": "name, password1, chats_params, chat_columns",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "chat_skip": null,
+                "chat_limit": 100
+            },
+            [
+                "content",
+                "is_visible",
+                "update_date",
+                "chat_session_id",
+                "id",
+                "create_date",
+                "user_id"
+            ]
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "chat_skip": null,
+                "chat_limit": 100
+            },
+            [
+                "content",
+                "is_visible",
+                "update_date",
+                "chat_session_id",
+                "id",
+                "create_date",
+                "user_id"
+            ]
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            {
+                "chat_skip": null,
+                "chat_limit": 100
+            },
+            [
+                "content",
+                "is_visible",
+                "update_date",
+                "chat_session_id",
+                "id",
+                "create_date",
+                "user_id"
+            ]
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            {
+                "chat_skip": null,
+                "chat_limit": 100
+            },
+            [
+                "content",
+                "is_visible",
+                "update_date",
+                "chat_session_id",
+                "id",
+                "create_date",
+                "user_id"
+            ]
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            {
+                "chat_skip": null,
+                "chat_limit": 100
+            },
+            [
+                "content",
+                "is_visible",
+                "update_date",
+                "chat_session_id",
+                "id",
+                "create_date",
+                "user_id"
+            ]
+        ]
+    ],
+    "argvalues_fail": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "chat_skip": null,
+                "chat_limit": 100
+            },
+            [
+                "content",
+                "is_visible",
+                "update_date",
+                "chat_session_id",
+                "id",
+                "create_date"
+            ],
+            "의도하지 않은 칼럼 삭제"
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "chat_skip": null,
+                "chat_limit": 100
+            },
+            [
+                "content",
+                "is_visible",
+                "update_date",
+                "chat_session_id",
+                "id",
+                "create_date",
+                "user_id",
+                "fail0"
+            ],
+            "의도하지 않은 칼럼 추가"
+        ]
+    ]
+}

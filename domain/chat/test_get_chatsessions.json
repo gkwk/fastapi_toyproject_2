@@ -1,0 +1,135 @@
+{
+    "argnames": "name, password1, chatsessions_params, chatsession_columns",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "chat_session_skip": null,
+                "chat_session_limit": 100
+            },
+            [
+                "name",
+                "create_date",
+                "update_date",
+                "user_create_id",
+                "id",
+                "information",
+                "is_visible",
+                "is_closed"
+            ]
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "chat_session_skip": null,
+                "chat_session_limit": 100
+            },
+            [
+                "name",
+                "create_date",
+                "update_date",
+                "user_create_id",
+                "id",
+                "information",
+                "is_visible",
+                "is_closed"
+            ]
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            {
+                "chat_session_skip": null,
+                "chat_session_limit": 100
+            },
+            [
+                "name",
+                "create_date",
+                "update_date",
+                "user_create_id",
+                "id",
+                "information",
+                "is_visible",
+                "is_closed"
+            ]
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            {
+                "chat_session_skip": null,
+                "chat_session_limit": 100
+            },
+            [
+                "name",
+                "create_date",
+                "update_date",
+                "user_create_id",
+                "id",
+                "information",
+                "is_visible",
+                "is_closed"
+            ]
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            {
+                "chat_session_skip": null,
+                "chat_session_limit": 100
+            },
+            [
+                "name",
+                "create_date",
+                "update_date",
+                "user_create_id",
+                "id",
+                "information",
+                "is_visible",
+                "is_closed"
+            ]
+        ]
+    ],
+    "argvalues_fail": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "chat_session_skip": null,
+                "chat_session_limit": 100
+            },
+            [
+                "name",
+                "create_date",
+                "update_date",
+                "user_create_id",
+                "id",
+                "information",
+                "is_visible"
+            ],
+            "의도하지 않은 칼럼 삭제"
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "chat_session_skip": null,
+                "chat_session_limit": 100
+            },
+            [
+                "name",
+                "create_date",
+                "update_date",
+                "user_create_id",
+                "id",
+                "information",
+                "is_visible",
+                "is_closed",
+                "fail0"
+            ],
+            "의도하지 않은 칼럼 추가"
+        ]
+    ]
+}

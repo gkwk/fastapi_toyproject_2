@@ -84,38 +84,6 @@ url_dict = {
 }
 
 test_parameter_dict = {
-    "test_create_admin": {
-        "argnames": "name, password1, password2, email",
-        "argvalues": [
-            (f"admin{i}", "12345678", "12345678", f"admin{i}@test.com")
-            for i in range(10)
-        ],
-    },
-    "test_create_user": {
-        "argnames": "name, password1, password2, email",
-        "argvalues": [
-            (f"user{i}", "12345678", "12345678", f"user{i}@test.com") for i in range(20)
-        ],
-    },
-    "test_create_chatsession": {
-        "argnames": "admin_name, admin_password1, chatsession_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "chat_session_name": f"chat_session_{i}_{j}",
-                        "chat_session_information": f"chat_session_{i}_{j}_information",
-                        "chat_session_is_visible": True,
-                        "chat_session_is_closed": False,
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
     "test_get_chatsession": {
         "argnames": "name, password1, chatsession_id_list, chatsession_columns",
         "argvalues": [
@@ -272,6 +240,72 @@ URL_CHAT_DELETE_CHAT = "".join(url_dict.get("URL_CHAT_DELETE_CHAT"))
 URL_CHAT_WEBSOCKET = "".join(url_dict.get("URL_CHAT_WEBSOCKET"))
 
 
+def parameter_data_loader(path):
+    test_data = {"argnames": None, "argvalues": []}
+
+    with open(path, "r", encoding="UTF-8") as f:
+        json_data: dict = json.load(f)
+
+    test_data["argnames"] = "pn," + json_data.get("argnames")
+
+    for value in json_data.get("argvalues_pass", []):
+        test_data["argvalues"].append(tuple([1, *value]))
+
+    for value in json_data.get("argvalues_fail", []):
+        value_temp = pytest.param(
+            0, *value[:-1], marks=pytest.mark.xfail(reason=value[-1])
+        )
+        test_data["argvalues"].append(value_temp)
+
+    return test_data
+
+
+ID_DICT_ADMIN_ID = "admin_id"
+ID_DICT_USER_ID = "user_id"
+ID_DICT_CHATSESSION_ID = "chatsession_id"
+ID_DICT_CHAT_ID = "chat_id"
+
+
+id_list_dict = {
+    ID_DICT_ADMIN_ID: [],
+    ID_DICT_USER_ID: [],
+    ID_DICT_CHATSESSION_ID: [],
+    ID_DICT_CHAT_ID: [],
+}
+
+id_iterator_dict = {
+    ID_DICT_ADMIN_ID: iter([]),
+    ID_DICT_USER_ID: iter([]),
+    ID_DICT_CHATSESSION_ID: iter([]),
+    ID_DICT_CHAT_ID: iter([]),
+}
+
+
+def id_list_append(id_dict_str, value):
+    id_list_dict[id_dict_str].append(value)
+
+
+def id_iterator_next(pn, id_dict_str) -> int | None:
+    if pn:
+        try:
+            next_id = id_iterator_dict[id_dict_str].__next__()
+        except StopIteration:
+            id_iterator_dict[id_dict_str] = iter(id_list_dict[id_dict_str])
+            next_id = id_iterator_dict[id_dict_str].__next__()
+
+        return next_id
+
+    return None
+
+
+def id_list_clear(id_dict_str):
+    id_list_dict[id_dict_str] = []
+
+
+def id_iterator_clear(id_dict_str):
+    id_iterator_dict[id_dict_str] = iter(id_list_dict[id_dict_str])
+
+
 class ChatSessionTestMethods:
     def create_chatsession(
         self,
@@ -307,14 +341,16 @@ class ChatSessionTestMethods:
         data_base = session_local()
 
         assert response_test.status_code == 201
-        assert response_test.json() == {"result": "success"}
+        response_test_json: dict = response_test.json()
+        assert response_test_json.get("result")
+        assert response_test_json.get("id") > 0
 
         user_id = validate_and_decode_user_access_token(
             data_base=data_base, token=access_token
         ).get("user_id")
         chat_session = (
             data_base.query(ChatSession)
-            .filter_by(user_create_id=user_id, name=chat_session_name)
+            .filter_by(user_create_id=user_id, id=response_test_json.get("id"))
             .first()
         )
 
@@ -346,13 +382,17 @@ class ChatSessionTestMethods:
 
         response_test_json: dict = response_test.json()
 
-        for chat_session_column in chat_session_columns:
-            assert chat_session_column in response_test_json
+        assert set(chat_session_columns) == set(response_test_json.keys())
 
         data_base.close()
 
     def get_chatsessions(
-        self, user_create_id, chat_session_skip, chat_session_limit, access_token: str
+        self,
+        *,
+        user_create_id,
+        chat_session_skip=None,
+        chat_session_limit=None,
+        access_token: str,
     ):
         params = {}
         if user_create_id != None:
@@ -381,30 +421,33 @@ class ChatSessionTestMethods:
 
         for chat_session in response_test_json.get("chat_sessions"):
             chat_session: dict
-
-            for chat_session_column in chat_session_columns:
-                assert chat_session_column in chat_session
+            assert set(chat_session_columns) == set(chat_session.keys())
 
         data_base.close()
 
     def update_chatsession(
         self,
+        *,
         chatsession_id,
-        chatsession_name,
-        chatsession_information,
-        chatsession_is_visible,
-        chatsession_is_closed,
+        chatsession_name=None,
+        chatsession_information=None,
+        chatsession_is_visible=None,
+        chatsession_is_closed=None,
         access_token: str,
     ):
+        params = {}
+        if chatsession_name != None:
+            params["name"] = chatsession_name
+        if chatsession_information != None:
+            params["information"] = chatsession_information
+        if chatsession_is_visible != None:
+            params["is_visible"] = chatsession_is_visible
+        if chatsession_is_closed != None:
+            params["is_closed"] = chatsession_is_closed
+
         response_test = client.put(
             URL_CHAT_UPDATE_CHATSESSION,
-            json={
-                "id": chatsession_id,
-                "name": chatsession_name,
-                "information": chatsession_information,
-                "is_visible": chatsession_is_visible,
-                "is_closed": chatsession_is_closed,
-            },
+            json={"id": chatsession_id, **params},
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
@@ -412,11 +455,12 @@ class ChatSessionTestMethods:
 
     def update_chatsession_test(
         self,
+        *,
         chatsession_id,
-        chatsession_name,
-        chatsession_information,
-        chatsession_is_visible,
-        chatsession_is_closed,
+        chatsession_name=None,
+        chatsession_information=None,
+        chatsession_is_visible=None,
+        chatsession_is_closed=None,
         response_test: Response,
     ):
         data_base = session_local()
@@ -488,7 +532,9 @@ class ChatTestMethods:
         data_base = session_local()
 
         assert response_test.status_code == 201
-        assert response_test.json() == {"result": "success"}
+        response_test_json: dict = response_test.json()
+        assert response_test_json.get("result")
+        assert response_test_json.get("id") > 0
 
         user_id = validate_and_decode_user_access_token(
             data_base=data_base, token=access_token
@@ -497,7 +543,9 @@ class ChatTestMethods:
         chat = (
             data_base.query(Chat)
             .filter_by(
-                user_id=user_id, chat_session_id=chat_session_id, content=chat_content
+                user_id=user_id,
+                chat_session_id=chat_session_id,
+                id=response_test_json.get("id"),
             )
             .first()
         )
@@ -507,7 +555,9 @@ class ChatTestMethods:
 
         data_base.close()
 
-    def get_chats(self, chat_session_id, chat_skip, chat_limit, access_token: str):
+    def get_chats(
+        self, *, chat_session_id, chat_skip=None, chat_limit=None, access_token: str
+    ):
         params = {}
         if chat_session_id != None:
             params["chat_session_id"] = chat_session_id
@@ -535,27 +585,28 @@ class ChatTestMethods:
         for chat in response_test_json.get("chats"):
             chat: dict
 
-            for chat_column in chat_columns:
-                assert chat_column in chat
+            assert set(chat_columns) == set(chat.keys())
 
         data_base.close()
 
     def update_chat(
         self,
+        *,
         chat_id,
         chat_session_id,
-        chat_content,
-        chat_is_visible,
+        chat_content=None,
+        chat_is_visible=None,
         access_token: str,
     ):
+        params = {}
+        if chat_content != None:
+            params["content"] = chat_content
+        if chat_is_visible != None:
+            params["is_visible"] = chat_is_visible
+
         response_test = client.put(
             URL_CHAT_UPDATE_CHAT,
-            json={
-                "id": chat_id,
-                "chat_session_id": chat_session_id,
-                "content": chat_content,
-                "is_visible": chat_is_visible,
-            },
+            json={"id": chat_id, "chat_session_id": chat_session_id, **params},
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
@@ -563,10 +614,11 @@ class ChatTestMethods:
 
     def update_chat_test(
         self,
+        *,
         chat_id,
         chat_session_id,
-        chat_content,
-        chat_is_visible,
+        chat_content=None,
+        chat_is_visible=None,
         response_test: Response,
     ):
         data_base = session_local()
@@ -674,191 +726,251 @@ chat_test_methods = ChatTestMethods()
 class TestChatSession:
     def test_data_base_init(self):
         main_test_methods.data_base_init()
+        for id in id_list_dict:
+            id_list_clear(id)
+            id_iterator_clear(id)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_admin"])
-    def test_create_admin(self, name, password1, password2, email):
-        admin_test_methods.create_admin(name, password1, password2, email)
-        admin_test_methods.create_admin_test(name, password1, email)
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_create_admin.json")
+    )
+    def test_create_admin(self, pn, name, password1, password2, email):
+        admin_id = admin_test_methods.create_admin(name, password1, password2, email)
+        id_list_append(ID_DICT_ADMIN_ID, admin_id)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_user"])
-    def test_create_user(self, name, password1, password2, email):
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_create_user.json")
+    )
+    def test_create_user(self, pn, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
-        user_test_methods.create_user_test(response_test, name, password1, email)
+        id_list_append(ID_DICT_USER_ID, response_test.json().get("id"))
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_chatsession"])
-    def test_create_chatsession(self, admin_name, admin_password1, chatsession_args):
-        response_login = user_test_methods.login_user(admin_name, admin_password1)
-        response_login_json: dict = response_login.json()
-        access_token = response_login_json.get("access_token")
-
-        for chatsession_arg in chatsession_args:
-            response_test = chat_session_test_methods.create_chatsession(
-                **chatsession_arg, access_token=access_token
-            )
-            chat_session_test_methods.create_chatsession_test(
-                **chatsession_arg,
-                access_token=access_token,
-                response_test=response_test,
-            )
-
-    @pytest.mark.parametrize(**test_parameter_dict["test_get_chatsession"])
-    def test_get_chatsession(
-        self, name, password1, chatsession_id_list, chatsession_columns
-    ):
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_create_chatsession.json")
+    )
+    def test_create_chatsession(self, pn, name, password1, chatsession_arg):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for chatsession_id in chatsession_id_list:
-            response_test = chat_session_test_methods.get_chatsession(
-                chatsession_id, access_token=access_token
-            )
-            chat_session_test_methods.get_chatsession_test(
-                chatsession_columns, response_test=response_test
-            )
+        response_test = chat_session_test_methods.create_chatsession(
+            **chatsession_arg, access_token=access_token
+        )
+        chat_session_test_methods.create_chatsession_test(
+            **chatsession_arg,
+            access_token=access_token,
+            response_test=response_test,
+        )
+        id_list_append(ID_DICT_CHATSESSION_ID, response_test.json().get("id"))
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_get_chatsessions"])
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_get_chatsession.json")
+    )
+    def test_get_chatsession(self, pn, name, password1, chatsession_columns):
+        response_login = user_test_methods.login_user(name, password1)
+        response_login_json: dict = response_login.json()
+        access_token = response_login_json.get("access_token")
+
+        chatsession_id = id_iterator_next(pn, ID_DICT_CHATSESSION_ID)
+
+        response_test = chat_session_test_methods.get_chatsession(
+            chatsession_id, access_token=access_token
+        )
+        chat_session_test_methods.get_chatsession_test(
+            chatsession_columns, response_test=response_test
+        )
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_get_chatsessions.json")
+    )
     def test_get_chatsessions(
-        self, name, password1, chatsessions_params, chatsession_columns
+        self, pn, name, password1, chatsessions_params, chatsession_columns
     ):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
+
+        user_id = id_iterator_next(pn, ID_DICT_ADMIN_ID)
 
         response_test = chat_session_test_methods.get_chatsessions(
-            **chatsessions_params, access_token=access_token
+            user_create_id=user_id, **chatsessions_params, access_token=access_token
         )
         chat_session_test_methods.get_chatsessions_test(
             chatsession_columns, response_test=response_test
         )
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_update_chatsession"])
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_update_chatsession.json")
+    )
     def test_update_chatsession(
         self,
+        pn,
         name,
         password1,
-        chatsession_args,
+        chatsession_arg,
     ):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for chatsession_arg in chatsession_args:
-            response_test = chat_session_test_methods.update_chatsession(
-                **chatsession_arg, access_token=access_token
-            )
-            chat_session_test_methods.update_chatsession_test(
-                **chatsession_arg, response_test=response_test
-            )
+        chatsession_id = id_iterator_next(pn, ID_DICT_CHATSESSION_ID)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_delete_chatsession"])
-    def test_delete_chatsession(self, name, password1, chatsession_args):
+        response_test = chat_session_test_methods.update_chatsession(
+            chatsession_id=chatsession_id, **chatsession_arg, access_token=access_token
+        )
+        chat_session_test_methods.update_chatsession_test(
+            chatsession_id=chatsession_id,
+            **chatsession_arg,
+            response_test=response_test,
+        )
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_delete_chatsession.json")
+    )
+    def test_delete_chatsession(self, pn, name, password1):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for chatsession_arg in chatsession_args:
-            response_test = chat_session_test_methods.delete_chatsession(
-                **chatsession_arg, access_token=access_token
-            )
-            chat_session_test_methods.delete_chatsession_test(
-                **chatsession_arg, response_test=response_test
-            )
+        chatsession_id = id_iterator_next(pn, ID_DICT_CHATSESSION_ID)
+
+        response_test = chat_session_test_methods.delete_chatsession(
+            chatsession_id=chatsession_id, access_token=access_token
+        )
+        chat_session_test_methods.delete_chatsession_test(
+            chatsession_id=chatsession_id, response_test=response_test
+        )
 
 
 class TestChat:
     def test_data_base_init(self):
         main_test_methods.data_base_init()
+        for id in id_list_dict:
+            id_list_clear(id)
+            id_iterator_clear(id)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_admin"])
-    def test_create_admin(self, name, password1, password2, email):
-        admin_test_methods.create_admin(name, password1, password2, email)
-        admin_test_methods.create_admin_test(name, password1, email)
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_create_admin.json")
+    )
+    def test_create_admin(self, pn, name, password1, password2, email):
+        admin_id = admin_test_methods.create_admin(name, password1, password2, email)
+        id_list_append(ID_DICT_ADMIN_ID, admin_id)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_user"])
-    def test_create_user(self, name, password1, password2, email):
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_create_user.json")
+    )
+    def test_create_user(self, pn, name, password1, password2, email):
         response_test = user_test_methods.create_user(name, password1, password2, email)
-        user_test_methods.create_user_test(response_test, name, password1, email)
+        id_list_append(ID_DICT_USER_ID, response_test.json().get("id"))
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_chatsession"])
-    def test_create_chatsession(self, admin_name, admin_password1, chatsession_args):
-        response_login = user_test_methods.login_user(admin_name, admin_password1)
-        response_login_json: dict = response_login.json()
-        access_token = response_login_json.get("access_token")
-
-        for chatsession_arg in chatsession_args:
-            response_test = chat_session_test_methods.create_chatsession(
-                **chatsession_arg, access_token=access_token
-            )
-            chat_session_test_methods.create_chatsession_test(
-                **chatsession_arg,
-                access_token=access_token,
-                response_test=response_test,
-            )
-
-    @pytest.mark.parametrize(**test_parameter_dict["test_create_chat"])
-    def test_create_chat(self, admin_name, admin_password1, chat_args):
-        response_login = user_test_methods.login_user(admin_name, admin_password1)
-        response_login_json: dict = response_login.json()
-        access_token = response_login_json.get("access_token")
-
-        for chat_arg in chat_args:
-            response_test = chat_test_methods.create_chat(
-                **chat_arg, access_token=access_token
-            )
-            chat_test_methods.create_chat_test(
-                **chat_arg,
-                access_token=access_token,
-                response_test=response_test,
-            )
-
-    @pytest.mark.parametrize(**test_parameter_dict["test_get_chats"])
-    def test_get_chats(self, name, password1, chats_params, chat_columns):
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_create_chatsession.json")
+    )
+    def test_create_chatsession(self, pn, name, password1, chatsession_arg):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
+        response_test = chat_session_test_methods.create_chatsession(
+            **chatsession_arg, access_token=access_token
+        )
+        chat_session_test_methods.create_chatsession_test(
+            **chatsession_arg,
+            access_token=access_token,
+            response_test=response_test,
+        )
+        id_list_append(ID_DICT_CHATSESSION_ID, response_test.json().get("id"))
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_create_chat.json")
+    )
+    def test_create_chat(self, pn, name, password1, chat_arg):
+        response_login = user_test_methods.login_user(name, password1)
+        response_login_json: dict = response_login.json()
+        access_token = response_login_json.get("access_token")
+        chat_session_id = id_iterator_next(pn, ID_DICT_CHATSESSION_ID)
+
+        response_test = chat_test_methods.create_chat(
+            chat_session_id=chat_session_id, **chat_arg, access_token=access_token
+        )
+        chat_test_methods.create_chat_test(
+            chat_session_id=chat_session_id,
+            **chat_arg,
+            access_token=access_token,
+            response_test=response_test,
+        )
+        id_list_append(
+            ID_DICT_CHAT_ID, (chat_session_id, response_test.json().get("id"))
+        )
+
+    @pytest.mark.parametrize(**parameter_data_loader("domain/chat/test_get_chats.json"))
+    def test_get_chats(self, pn, name, password1, chats_params, chat_columns):
+        response_login = user_test_methods.login_user(name, password1)
+        response_login_json: dict = response_login.json()
+        access_token = response_login_json.get("access_token")
+
+        chat_session_id = id_iterator_next(pn, ID_DICT_CHATSESSION_ID)
+
         response_test = chat_test_methods.get_chats(
-            **chats_params, access_token=access_token
+            chat_session_id=chat_session_id, **chats_params, access_token=access_token
         )
         chat_test_methods.get_chats_test(chat_columns, response_test=response_test)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_update_chat"])
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_update_chat.json")
+    )
     def test_update_chat(
         self,
+        pn,
         name,
         password1,
-        chat_args,
+        chat_arg,
     ):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for chat_arg in chat_args:
-            response_test = chat_test_methods.update_chat(
-                **chat_arg, access_token=access_token
-            )
-            chat_test_methods.update_chat_test(**chat_arg, response_test=response_test)
+        chat_session_id, chat_id = id_iterator_next(pn, ID_DICT_CHAT_ID)
 
-    @pytest.mark.parametrize(**test_parameter_dict["test_delete_chat"])
-    def test_delete_chat(self, name, password1, chat_args):
+        response_test = chat_test_methods.update_chat(
+            chat_session_id=chat_session_id,
+            chat_id=chat_id,
+            **chat_arg,
+            access_token=access_token,
+        )
+        chat_test_methods.update_chat_test(
+            chat_session_id=chat_session_id,
+            chat_id=chat_id,
+            **chat_arg,
+            response_test=response_test,
+        )
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_delete_chat.json")
+    )
+    def test_delete_chat(self, pn, name, password1):
+        response_login = user_test_methods.login_user(name, password1)
+        response_login_json: dict = response_login.json()
+        access_token = response_login_json.get("access_token")
+        chat_session_id, chat_id = id_iterator_next(pn, ID_DICT_CHAT_ID)
+
+        response_test = chat_test_methods.delete_chat(
+            chat_session_id=chat_session_id, chat_id=chat_id, access_token=access_token
+        )
+        chat_test_methods.delete_chat_test(
+            chat_session_id=chat_session_id,
+            chat_id=chat_id,
+            response_test=response_test,
+        )
+
+    @pytest.mark.parametrize(
+        **parameter_data_loader("domain/chat/test_websocket_test_endpoint.json")
+    )
+    def test_websocket_test_endpoint(self, pn, name, password1, chat_content):
         response_login = user_test_methods.login_user(name, password1)
         response_login_json: dict = response_login.json()
         access_token = response_login_json.get("access_token")
 
-        for chat_arg in chat_args:
-            response_test = chat_test_methods.delete_chat(
-                **chat_arg, access_token=access_token
-            )
-            chat_test_methods.delete_chat_test(**chat_arg, response_test=response_test)
-
-    @pytest.mark.parametrize(**test_parameter_dict["test_websocket_test_endpoint"])
-    def test_websocket_test_endpoint(
-        self, name, password1, chat_content, chat_session_id
-    ):
-        response_login = user_test_methods.login_user(name, password1)
-        response_login_json: dict = response_login.json()
-        access_token = response_login_json.get("access_token")
+        chat_session_id = id_iterator_next(pn, ID_DICT_CHATSESSION_ID)
 
         response_receive_test = chat_test_methods.websocket_test_endpoint(
             chat_content, chat_session_id, access_token=access_token

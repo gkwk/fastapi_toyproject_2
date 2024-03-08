@@ -1,0 +1,11 @@
+{
+    "argnames": "name, password1, chat_content",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            "websocket_test_admin0"
+        ]
+    ],
+    "argvalues_fail": []
+}

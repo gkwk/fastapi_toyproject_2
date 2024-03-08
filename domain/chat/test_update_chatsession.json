@@ -1,0 +1,56 @@
+{
+    "argnames": "name, password1, chatsession_arg",
+    "argvalues_pass": [
+        [
+            "admin0",
+            "12345678aA!",
+            {
+                "chatsession_name": "chat_session_admin0_update",
+                "chatsession_information": "chat_session_admin0_content_update",
+                "chatsession_is_visible": null,
+                "chatsession_is_closed": null
+    }
+        ],
+        [
+            "admin1",
+            "12345678aA!",
+            {
+                "chatsession_name": "chat_session_admin0_update",
+                "chatsession_information": "chat_session_admin0_content_update",
+                "chatsession_is_visible": null,
+                "chatsession_is_closed": null
+            }
+        ],
+        [
+            "admin2",
+            "12345678aA!",
+            {
+                "chatsession_name": "chat_session_admin0_update",
+                "chatsession_information": "chat_session_admin0_content_update",
+                "chatsession_is_visible": null,
+                "chatsession_is_closed": null
+            }
+        ],
+        [
+            "admin3",
+            "12345678aA!",
+            {
+                "chatsession_name": "chat_session_admin0_update",
+                "chatsession_information": "chat_session_admin0_content_update",
+                "chatsession_is_visible": null,
+                "chatsession_is_closed": null
+            }
+        ],
+        [
+            "admin4",
+            "12345678aA!",
+            {
+                "chatsession_name": "chat_session_admin0_update",
+                "chatsession_information": "chat_session_admin0_content_update",
+                "chatsession_is_visible": null,
+                "chatsession_is_closed": null
+            }
+        ]
+    ],
+    "argvalues_fail": []
+}
