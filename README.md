@@ -236,6 +236,12 @@ with connectable.connect() as connection:
 
 # 개선을 위한 임시 목표 (개선 후 삭제)
 - admin, board, chat 기능 예외 처리 코드 추가
+- post 의 조회수나 추천수 등을 자동으로 증가시키는 함수 추가
+- 조회수같이 자주 변하지만 사용자 입장에서 실시간 확인 필요성이 떨어지는 부분의 db 수정 쿼리가 몰아서 반영 될 수 있도록 구축
+- csrf 토큰 등의 보안 미들웨어 추가
+- nginx와 같은 프록시 구축
+- 스크립트 쉘을 사용하여 초기 실행시 db 구축을 자동으로 진행할 수 있도록 코드 추가
+- 쿠버네티스를 통해 스테이징 서버 구축시 완전 자동으로 테스트가 진행 될 수 있도록 하기
 - 예외 메세지나 URL 경로 등은 하나의 파일에 정리하는 등의 조치로 중복 코드 정리
     - 테스트 코드의 중복 코드(로그인 등) 정리
 - test app 생성
@@ -250,4 +256,67 @@ pytest -s
 pytest path
 pytest path/file_name.py
 pytest path/file_name.py::class::method
+```
+
+# 도커 사용법 (AWS EC2 - ubuntu 22.04 기준)
+- VPC 구성
+- 서브넷 구성
+- 인터넷 게이트웨이 구성
+- EC2 인스턴스 구성
+- Docker 설치
+```bash
+sudo apt update
+sudo apt install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt update
+sudo apt install docker-ce
+```
+- Docker 버전 확인 (설치 확인):
+```bash
+docker version
+```
+- Docker 서비스 시작 및 활성화:
+```bash
+sudo systemctl start docker
+sudo systemctl enable docker
+```
+-  Docker Compose 설치:
+```bash
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.1.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+- Docker Compose 버전 확인 (설치 확인):
+```bash
+docker-compose --version
+```
+- Docker image 빌드
+```bash
+docker build -t image-name:tag
+```
+- Docker image를 로컬 저장
+```bash
+docker save -o image-name.tar image-name:tag
+```
+- Docker image와 docker-compose.yml을 EC2 인스턴스에 전송
+- Docker image를 인스턴스의 도커에 등록
+```bash
+docker load -i image-name.tar
+```
+- docker-compose.yml에 기재된 환경 추가 설정
+- docker-compose 프로젝트 실행
+```bash
+docker-compose up -d
+```
+- docker-compose 프로젝트 확인
+```bash
+docker-compose ps
+```
+- docker-compose 프로젝트 종료
+```bash
+docker-compose down
+```
+- docker-compose의 컨테이너 터미널 사용
+```bash
+docker exec -it container-id/name /bin/bash
 ```
