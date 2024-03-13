@@ -18,7 +18,7 @@ services:
     depends_on:
       - rabbitmq
     command: >
-      /bin/bash -c "pytest && uvicorn main:app --host 0.0.0.0 --port 8000"
+      /bin/bash -c "uvicorn main:app --host 0.0.0.0 --port 8000"
     volumes:
       - ./db/celery.sqlite:/code/app/celery.sqlite
       - ./db/test.sqlite:/code/app/test.sqlite
