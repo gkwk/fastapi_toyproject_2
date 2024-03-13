@@ -1,0 +1,49 @@
+version: '3.8'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - app-network
+  app:
+    # image: 사전 빌드한 이미지 혹은 허브 이미지
+    build: .
+    environment:
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      - rabbitmq
+    command: >
+      /bin/bash -c "pytest && uvicorn main:app --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./db/celery.sqlite:/code/app/celery.sqlite
+      - ./db/test.sqlite:/code/app/test.sqlite
+      - ./models_store/:/code/app/models_store/
+      - ./staticfile/:/code/app/staticfile/
+    ports:
+      - "80:8000"
+    networks:
+      - app-network
+  celery:
+    # image: 사전 빌드한 이미지 혹은 허브 이미지
+    build: .
+    environment:
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      - rabbitmq
+    command: /bin/bash -c "celery -A celery_app worker -l info --pool=solo"
+    volumes:
+      - ./db/celery.sqlite:/code/app/celery.sqlite
+      - ./db/test.sqlite:/code/app/test.sqlite
+      - ./models_store/:/code/app/models_store/
+      - ./staticfile/:/code/app/staticfile/
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
