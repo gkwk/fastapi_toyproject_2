@@ -18,10 +18,9 @@ services:
     depends_on:
       - rabbitmq
     command: >
-      /bin/bash -c "uvicorn main:app --host 0.0.0.0 --port 8000"
+      /bin/bash -c "/code/app/init.sh"
     volumes:
-      - ./db/celery.sqlite:/code/app/celery.sqlite
-      - ./db/test.sqlite:/code/app/test.sqlite
+      - ./db/:/code/app/db/
       - ./models_store/:/code/app/models_store/
       - ./staticfile/:/code/app/staticfile/
     ports:
@@ -37,8 +36,7 @@ services:
       - rabbitmq
     command: /bin/bash -c "celery -A celery_app worker -l info --pool=solo"
     volumes:
-      - ./db/celery.sqlite:/code/app/celery.sqlite
-      - ./db/test.sqlite:/code/app/test.sqlite
+      - ./db/:/code/app/db/
       - ./models_store/:/code/app/models_store/
       - ./staticfile/:/code/app/staticfile/
     networks:
