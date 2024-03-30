@@ -195,7 +195,15 @@
 y = 4x_0 + 5x_1 + 2x_2 + 7x_3 + 0.1x_4 + 15x_5 + 0.05x_6+ x_7
 ```
 
-# 실행방법
+# 실행방법(자동)
+- .env 파일 작성
+- 터미널에서 아래의 명령어 입력
+```bash
+sudo bash project_init.sh
+```
+
+# 실행방법(수동)
+- .env 파일 작성
 - 터미널에서 아래의 명령어 입력
 ```bash
 alembic init migrations
