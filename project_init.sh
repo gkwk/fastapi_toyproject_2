@@ -1,5 +1,10 @@
 #!/bin/bash
 
-mkdir -p db models_store staticfile
+ENV_FILE=./app/.env
 
-docker-compose up --build
+if [ -e $ENV_FILE ]; then
+    sudo mkdir -p db models_store staticfile
+    sudo docker-compose up --build
+else
+    echo "env file not found"
+fi
