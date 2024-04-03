@@ -1,7 +1,7 @@
 import sys
 import contextlib
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 
 from starlette.middleware.cors import CORSMiddleware
@@ -30,7 +30,7 @@ app = FastAPI(
 
 app.mount("/static", StaticFiles(directory="staticfile"), name="static")
 
-origins = ["*"]
+origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -44,7 +44,8 @@ app.include_router(v1_router.router)
 
 
 @app.get("/", tags=["main"])
-def index_page():
+def index_page(request: Request):
+    print(request.cookies)
     return {"message": "Hello, FastAPI!"}
 
 

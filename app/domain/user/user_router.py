@@ -30,15 +30,28 @@ def create_user(
         email=schema.email,
     )
 
-    return {"result": "success", "id" : user_id}
+    return {"result": "success", "id": user_id}
 
 
 @router.post(v1_urn.USER_LOGIN_USER, response_model=user_schema.ResponseUserToken)
 def login_user(
+    response: Response,
     data_base: data_base_dependency,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):
-    return generate_user_tokens(form_data=form_data, data_base=data_base)
+    tokens = generate_user_tokens(form_data=form_data, data_base=data_base)
+
+    response.set_cookie(
+        key="refresh_token",
+        value=tokens.get("refresh_token"),
+        httponly=True,
+        max_age=24 * 60 * 60,  # 만료 시간 (단위 : second)
+        path="/",
+        samesite="lax",
+        secure=False,  # HTTPS 환경에서만 쿠키 전송 허용 여부
+    )
+
+    return {"access_token": tokens.get("access_token"), "token_type": "bearer"}
 
 
 @router.post(v1_urn.USER_REFRESH_USER, response_model=user_schema.ResponseAccessToken)
