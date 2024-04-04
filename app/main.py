@@ -30,7 +30,9 @@ app = FastAPI(
 
 app.mount("/static", StaticFiles(directory="staticfile"), name="static")
 
-origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+# origins = ["http://localhost:3000", "http://127.0.0.1:3000"] # 프론트엔드가 사용하는 주소 추가
+origins = ["*"]
+
 
 app.add_middleware(
     CORSMiddleware,
