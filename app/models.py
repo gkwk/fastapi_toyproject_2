@@ -17,6 +17,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
 
 
+class PostViewIncrement(Base):
+    __tablename__ = "post_view_increment"
+    __table_args__ = {"sqlite_autoincrement": True}
+    id: Mapped[int] = mapped_column(primary_key=True)
+    post_id: Mapped[int] = mapped_column(ForeignKey("post.id"))
+    timestamp: Mapped[DateTime] = mapped_column(DateTime(), default=datetime.now)
+
+
 class JWTAccessTokenBlackList(Base):
     __tablename__ = "jwt_access_token_blacklist"
     # __table_args__ = {"sqlite_autoincrement": True}
@@ -202,7 +210,9 @@ class ChatSession(Base):
     users_connect: Mapped[List["User"]] = relationship(
         secondary="user_chat_session_table", back_populates="chat_sessions_connect"
     )
-    chats: Mapped[List["Chat"]] = relationship(back_populates="chat_session", cascade="all, delete")
+    chats: Mapped[List["Chat"]] = relationship(
+        back_populates="chat_session", cascade="all, delete"
+    )
 
     name: Mapped[str] = mapped_column(String(64))
     information: Mapped[str] = mapped_column(String(256))

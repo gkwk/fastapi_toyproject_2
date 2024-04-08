@@ -4,12 +4,11 @@ import uuid
 
 from fastapi import UploadFile
 
-from models import Post, User, Board, Comment, PostFile, CommentFile
+from models import Post, User, Board, Comment, PostFile, CommentFile, PostViewIncrement
 from domain.board import board_schema
 from database import data_base_dependency
 from auth import current_user_payload
 from http_execption_params import http_exception_params
-
 
 def create_post(
     data_base: data_base_dependency,
@@ -51,6 +50,7 @@ def create_post(
 
     return post.id
 
+
 def get_posts(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -76,12 +76,21 @@ def get_posts(
     return {"total": total, "posts": posts}
 
 
+def record_post_view(data_base: data_base_dependency, post_id: int):
+    post_view_increment: PostViewIncrement = PostViewIncrement(
+        post_id=post_id,
+    )
+    data_base.add(post_view_increment)
+    data_base.commit()
+
+
 def get_post_detail(
     data_base: data_base_dependency,
     token: current_user_payload,
     id: int,
     board_id: int,
 ):
+    record_post_view(data_base=data_base, post_id=id)
     return data_base.query(Post).filter_by(id=id, board_id=board_id).first()
 
 
@@ -164,7 +173,7 @@ def create_comment(
                 with open(file_path, "wb+") as file_object:
                     file_object.write(file.file.read())
                     comment_file = CommentFile(
-                        comment_id = comment.id,
+                        comment_id=comment.id,
                         post_id=post_id,
                         file_uuid_name=file_uuid_name,
                         file_original_name=file.filename,
@@ -174,6 +183,7 @@ def create_comment(
                     data_base.commit()
 
     return comment.id
+
 
 def get_comments(
     data_base: data_base_dependency,
