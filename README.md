@@ -245,7 +245,7 @@ with connectable.connect() as connection:
 # 개선을 위한 임시 목표 (개선 후 삭제)
 - admin, board, chat 기능 예외 처리 코드 추가
 - post 의 조회수나 추천수 등을 자동으로 증가시키는 함수 추가
-- 조회수같이 자주 변하지만 사용자 입장에서 실시간 확인 필요성이 떨어지는 부분의 db 수정 쿼리가 몰아서 반영 될 수 있도록 구축
+- 조회수같이 자주 변하지만 사용자 입장에서 실시간 확인 필요성이 떨어지는 부분의 db 수정 쿼리가 몰아서 반영 될 수 있도록 구축 (현재 임시로 db 테이블 형태로 구현, postgresql에서 제공하는 기능 등을 사용하도록 관련 함수 추가 예정)
 - csrf 토큰 등의 보안 미들웨어 추가
 - 쿠버네티스를 통해 스테이징 서버 구축시 완전 자동으로 테스트가 진행 될 수 있도록 하기
 - 예외 메세지나 URL 경로 등은 하나의 파일에 정리하는 등의 조치로 중복 코드 정리
@@ -325,4 +325,10 @@ docker-compose down
 - docker-compose의 컨테이너 터미널 사용
 ```bash
 docker exec -it container-id/name /bin/bash
+```
+
+
+# Celery Beat 실행법
+```bash
+celery -A celery_app beat --loglevel=info
 ```
