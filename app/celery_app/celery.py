@@ -24,9 +24,9 @@ celery_app.autodiscover_tasks(["domain.ai","domain.board"])
 
 
 celery_app.conf.beat_schedule = {
-    "update-post-view-counts-every-minute": {
+    "update_post_view_counts": {
         "task": "update_post_view_counts",
-        "schedule": 10.0,
+        "schedule": 20.0,
         "args" : (None,)
     },
 }

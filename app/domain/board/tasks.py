@@ -8,12 +8,12 @@ from celery_app.celery import celery_app
 @celery_app.task(name="update_post_view_counts")
 @get_data_base_decorator
 def update_post_view_counts(data_base: Session):
-    increments = data_base.query(PostViewIncrement).all()
+    post_view_increments = data_base.query(PostViewIncrement).all()
 
     post_view_counts = dict()
-    for increment in increments:
-        post_view_counts[increment.post_id] = (
-            post_view_counts.get(increment.post_id, 0) + 1
+    for post_view_increment in post_view_increments:
+        post_view_counts[post_view_increment.post_id] = (
+            post_view_counts.get(post_view_increment.post_id, 0) + 1
         )
 
     for post_id, count in post_view_counts.items():
@@ -22,6 +22,8 @@ def update_post_view_counts(data_base: Session):
             synchronize_session=False,
         )
 
-    data_base.query(PostViewIncrement).delete()
+    print(post_view_increments)
+    for post_view_increment in post_view_increments:
+        data_base.delete(post_view_increment)
 
     data_base.commit()
