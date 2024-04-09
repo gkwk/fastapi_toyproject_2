@@ -88,110 +88,6 @@ url_dict = {
     ],
 }
 
-test_parameter_dict = {
-    "test_create_comment": {
-        "argnames": "name, password1, comment_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "comment_content": f"comment_admin{i}_post{1 + (i * 2) + j}_content",
-                        "post_id": 1 + (i * 2) + j,
-                        "comment_is_file_attached": True,
-                        "comment_is_visible": True,
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_get_comment": {
-        "argnames": "name, password1, comment_id ,post_id, comment_columns",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [1 + (i * 2) + j for j in range(2)],
-                [1 + (i * 2) + j for j in range(2)],
-                [
-                    "id",
-                    "content",
-                    "post_id",
-                    "create_date",
-                    "update_date",
-                    "is_file_attached",
-                    "is_visible",
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_get_comments": {
-        "argnames": "name, password1, comments_params, comment_columns",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                {
-                    "post_id": 1,
-                    "comment_skip": None,
-                    "comment_limit": 100,
-                },
-                [
-                    "id",
-                    "content",
-                    "post_id",
-                    "create_date",
-                    "is_file_attached",
-                    "is_visible",
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_update_comment": {
-        "argnames": "name, password1, comment_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "comment_id": 1 + (i * 2) + j,
-                        "comment_content": f"comment_admin{i}_post{1 + (i * 2) + j}_content_update",
-                        "post_id": 1 + (i * 2) + j,
-                        "comment_is_file_attached": None,
-                        "comment_is_visible": None,
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-    "test_delete_comment": {
-        "argnames": "name, password1, comment_args",
-        "argvalues": [
-            (
-                f"admin{i}",
-                "12345678",
-                [
-                    {
-                        "comment_id": 1 + (i * 2) + j,
-                        "post_id": 1 + (i * 2) + j,
-                    }
-                    for j in range(2)
-                ],
-            )
-            for i in range(10)
-        ],
-    },
-}
-
-
 URL_USER_CREATE_USER = "".join(url_dict.get("URL_USER_CREATE_USER"))
 URL_USER_LOGIN_USER = "".join(url_dict.get("URL_USER_LOGIN_USER"))
 URL_ADMIN_CREATE_BOARD = "".join(url_dict.get("URL_ADMIN_CREATE_BOARD"))
@@ -415,15 +311,9 @@ class PostTestMethods:
         if post_is_visible != None:
             params["is_visible"] = post_is_visible
 
-        
         response_test = client.put(
             URL_BOARD_UPDATE_POST,
-            json={
-                "name": post_name,
-                "board_id": board_id,
-                "id" : post_id,
-                **params
-            },
+            json={"name": post_name, "board_id": board_id, "id": post_id, **params},
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
@@ -614,14 +504,10 @@ class CommentTestMethods:
             params["is_file_attached"] = comment_is_file_attached
         if comment_is_visible != None:
             params["is_visible"] = comment_is_visible
-        
+
         response_test = client.put(
             URL_BOARD_UPDATE_COMMENT,
-            json={
-                "id": comment_id,
-                "post_id": post_id,
-                **params
-            },
+            json={"id": comment_id, "post_id": post_id, **params},
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
