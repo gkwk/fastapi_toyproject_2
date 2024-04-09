@@ -22,7 +22,6 @@ def update_post_view_counts(data_base: Session):
             synchronize_session=False,
         )
 
-    print(post_view_increments)
     for post_view_increment in post_view_increments:
         data_base.delete(post_view_increment)
 
