@@ -13,12 +13,12 @@ from auth import (
     refresh_access_token,
     delete_refresh_token,
 )
-import v1_urn
+import v1_url
 
-router = APIRouter(prefix=v1_urn.USER_PREFIX, tags=["user"])
+router = APIRouter(prefix=v1_url.USER_PREFIX, tags=["user"])
 
 
-@router.post(v1_urn.USER_CREATE_USER, status_code=status.HTTP_201_CREATED)
+@router.post(v1_url.USER_CREATE_USER, status_code=status.HTTP_201_CREATED)
 def create_user(
     data_base: data_base_dependency,
     schema: user_schema.RequestUserCreate,
@@ -33,7 +33,7 @@ def create_user(
     return {"result": "success", "id": user_id}
 
 
-@router.post(v1_urn.USER_LOGIN_USER, response_model=user_schema.ResponseUserToken)
+@router.post(v1_url.USER_LOGIN_USER, response_model=user_schema.ResponseUserToken)
 def login_user(
     response: Response,
     data_base: data_base_dependency,
@@ -54,7 +54,7 @@ def login_user(
     return {"access_token": tokens.get("access_token"), "token_type": "bearer"}
 
 
-@router.post(v1_urn.USER_REFRESH_USER, response_model=user_schema.ResponseAccessToken)
+@router.post(v1_url.USER_REFRESH_USER, response_model=user_schema.ResponseAccessToken)
 def refresh_user(
     data_base: data_base_dependency,
     refresh_token: current_refresh_token_payload,
@@ -65,14 +65,14 @@ def refresh_user(
     )
 
 
-@router.post(v1_urn.USER_LOGOUT_USER)
+@router.post(v1_url.USER_LOGOUT_USER)
 def logout_user(data_base: data_base_dependency, token: current_user_payload):
     delete_refresh_token(data_base=data_base, user_id=token.get("user_id"))
 
     return {"result": "success"}
 
 
-@router.get(v1_urn.USER_GET_USER_DETAIL, response_model=user_schema.ResponseUserDetail)
+@router.get(v1_url.USER_GET_USER_DETAIL, response_model=user_schema.ResponseUserDetail)
 def get_user_detail(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -85,7 +85,7 @@ def get_user_detail(
     )
 
 
-@router.put(v1_urn.USER_UPDATE_USER_DETAIL, status_code=status.HTTP_204_NO_CONTENT)
+@router.put(v1_url.USER_UPDATE_USER_DETAIL, status_code=status.HTTP_204_NO_CONTENT)
 def update_user_detail(
     token: current_user_payload,
     data_base: data_base_dependency,
@@ -98,7 +98,7 @@ def update_user_detail(
     )
 
 
-@router.put(v1_urn.USER_UPDATE_USER_PASSWORD, status_code=status.HTTP_204_NO_CONTENT)
+@router.put(v1_url.USER_UPDATE_USER_PASSWORD, status_code=status.HTTP_204_NO_CONTENT)
 def update_user_password(
     token: current_user_payload,
     data_base: data_base_dependency,
@@ -111,7 +111,7 @@ def update_user_password(
     )
 
 
-@router.put(v1_urn.USER_DELETE_USER, status_code=status.HTTP_204_NO_CONTENT)
+@router.put(v1_url.USER_DELETE_USER, status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(
     token: current_user_payload,
     data_base: data_base_dependency,

@@ -10,7 +10,7 @@ from main import app
 from domain.admin.admin_crud import create_admin_with_terminal
 from models import User, Board, UserPermissionTable
 from database import session_local
-import v1_urn
+import v1_url
 from domain.user.test_user import user_test_methods
 from test_main import main_test_methods
 
@@ -19,34 +19,34 @@ client = TestClient(app)
 
 url_dict = {
     "URL_USER_CREATE_USER": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.USER_PREFIX,
-        v1_urn.USER_CREATE_USER,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.USER_PREFIX,
+        v1_url.USER_CREATE_USER,
     ],
     "URL_USER_LOGIN_USER": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.USER_PREFIX,
-        v1_urn.USER_LOGIN_USER,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.USER_PREFIX,
+        v1_url.USER_LOGIN_USER,
     ],
     "URL_ADMIN_GET_USERS": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.ADMIN_PREFIX,
-        v1_urn.ADMIN_GET_USERS,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.ADMIN_PREFIX,
+        v1_url.ADMIN_GET_USERS,
     ],
     "URL_ADMIN_CREATE_BOARD": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.ADMIN_PREFIX,
-        v1_urn.ADMIN_CREATE_BOARD,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.ADMIN_PREFIX,
+        v1_url.ADMIN_CREATE_BOARD,
     ],
     "URL_ADMIN_UPDATE_USER_BOARD_PERMISSION": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.ADMIN_PREFIX,
-        v1_urn.ADMIN_UPDATE_USER_BOARD_PERMISSION,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.ADMIN_PREFIX,
+        v1_url.ADMIN_UPDATE_USER_BOARD_PERMISSION,
     ],
     "URL_ADMIN_UPDATE_USER_IS_BANNED": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.ADMIN_PREFIX,
-        v1_urn.ADMIN_UPDATE_USER_IS_BANNED,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.ADMIN_PREFIX,
+        v1_url.ADMIN_UPDATE_USER_IS_BANNED,
     ],
 }
 

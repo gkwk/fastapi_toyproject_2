@@ -11,7 +11,7 @@ from domain.admin.admin_crud import create_admin_with_terminal
 from models import User, Chat, ChatSession
 from database import session_local
 from auth import validate_and_decode_user_access_token
-import v1_urn
+import v1_url
 from domain.user.test_user import user_test_methods
 from domain.admin.test_admin import admin_test_methods
 from test_main import main_test_methods
@@ -22,64 +22,64 @@ client = TestClient(app)
 
 url_dict = {
     "URL_USER_CREATE_USER": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.USER_PREFIX,
-        v1_urn.USER_CREATE_USER,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.USER_PREFIX,
+        v1_url.USER_CREATE_USER,
     ],
     "URL_USER_LOGIN_USER": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.USER_PREFIX,
-        v1_urn.USER_LOGIN_USER,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.USER_PREFIX,
+        v1_url.USER_LOGIN_USER,
     ],
     "URL_CHAT_CREATE_CHATSESSION": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.CHAT_PREFIX,
-        v1_urn.CHAT_CREATE_CHATSESSION,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.CHAT_PREFIX,
+        v1_url.CHAT_CREATE_CHATSESSION,
     ],
     "URL_CHAT_GET_CHATSESSION": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.CHAT_PREFIX,
-        v1_urn.CHAT_GET_CHATSESSION,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.CHAT_PREFIX,
+        v1_url.CHAT_GET_CHATSESSION,
     ],
     "URL_CHAT_GET_CHATSESSIONS": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.CHAT_PREFIX,
-        v1_urn.CHAT_GET_CHATSESSIONS,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.CHAT_PREFIX,
+        v1_url.CHAT_GET_CHATSESSIONS,
     ],
     "URL_CHAT_UPDATE_CHATSESSION": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.CHAT_PREFIX,
-        v1_urn.CHAT_UPDATE_CHATSESSION,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.CHAT_PREFIX,
+        v1_url.CHAT_UPDATE_CHATSESSION,
     ],
     "URL_CHAT_DELETE_CHATSESSION": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.CHAT_PREFIX,
-        v1_urn.CHAT_DELETE_CHATSESSION,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.CHAT_PREFIX,
+        v1_url.CHAT_DELETE_CHATSESSION,
     ],
     "URL_CHAT_CREATE_CHAT": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.CHAT_PREFIX,
-        v1_urn.CHAT_CREATE_CHAT,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.CHAT_PREFIX,
+        v1_url.CHAT_CREATE_CHAT,
     ],
     "URL_CHAT_GET_CHATS": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.CHAT_PREFIX,
-        v1_urn.CHAT_GET_CHATS,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.CHAT_PREFIX,
+        v1_url.CHAT_GET_CHATS,
     ],
     "URL_CHAT_UPDATE_CHAT": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.CHAT_PREFIX,
-        v1_urn.CHAT_UPDATE_CHAT,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.CHAT_PREFIX,
+        v1_url.CHAT_UPDATE_CHAT,
     ],
     "URL_CHAT_DELETE_CHAT": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.CHAT_PREFIX,
-        v1_urn.CHAT_DELETE_CHAT,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.CHAT_PREFIX,
+        v1_url.CHAT_DELETE_CHAT,
     ],
     "URL_CHAT_WEBSOCKET": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.CHAT_PREFIX,
-        v1_urn.CHAT_WEBSOCKET,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.CHAT_PREFIX,
+        v1_url.CHAT_WEBSOCKET,
     ],
 }
 

@@ -11,7 +11,7 @@ from domain.admin.admin_crud import create_admin_with_terminal
 from models import User, Board, Post, Comment
 from database import session_local
 from auth import validate_and_decode_user_access_token
-import v1_urn
+import v1_url
 from domain.user.test_user import user_test_methods
 from domain.admin.test_admin import admin_test_methods
 from test_main import main_test_methods
@@ -22,69 +22,69 @@ client = TestClient(app)
 
 url_dict = {
     "URL_USER_CREATE_USER": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.USER_PREFIX,
-        v1_urn.USER_CREATE_USER,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.USER_PREFIX,
+        v1_url.USER_CREATE_USER,
     ],
     "URL_USER_LOGIN_USER": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.USER_PREFIX,
-        v1_urn.USER_LOGIN_USER,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.USER_PREFIX,
+        v1_url.USER_LOGIN_USER,
     ],
     "URL_ADMIN_CREATE_BOARD": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.ADMIN_PREFIX,
-        v1_urn.ADMIN_CREATE_BOARD,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.ADMIN_PREFIX,
+        v1_url.ADMIN_CREATE_BOARD,
     ],
     "URL_BOARD_CREATE_POST": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.BOARD_PREFIX,
-        v1_urn.BOARD_CREATE_POST,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.BOARD_PREFIX,
+        v1_url.BOARD_CREATE_POST,
     ],
     "URL_BOARD_GET_POST": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.BOARD_PREFIX,
-        v1_urn.BOARD_GET_POST,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.BOARD_PREFIX,
+        v1_url.BOARD_GET_POST,
     ],
     "URL_BOARD_GET_POSTS": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.BOARD_PREFIX,
-        v1_urn.BOARD_GET_POSTS,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.BOARD_PREFIX,
+        v1_url.BOARD_GET_POSTS,
     ],
     "URL_BOARD_UPDATE_POST": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.BOARD_PREFIX,
-        v1_urn.BOARD_UPDATE_POST,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.BOARD_PREFIX,
+        v1_url.BOARD_UPDATE_POST,
     ],
     "URL_BOARD_DELETE_POST": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.BOARD_PREFIX,
-        v1_urn.BOARD_DELETE_POST,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.BOARD_PREFIX,
+        v1_url.BOARD_DELETE_POST,
     ],
     "URL_BOARD_CREATE_COMMNET": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.BOARD_PREFIX,
-        v1_urn.BOARD_CREATE_COMMNET,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.BOARD_PREFIX,
+        v1_url.BOARD_CREATE_COMMNET,
     ],
     "URL_BOARD_GET_COMMENT": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.BOARD_PREFIX,
-        v1_urn.BOARD_GET_COMMENT,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.BOARD_PREFIX,
+        v1_url.BOARD_GET_COMMENT,
     ],
     "URL_BOARD_GET_COMMENTS": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.BOARD_PREFIX,
-        v1_urn.BOARD_GET_COMMENTS,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.BOARD_PREFIX,
+        v1_url.BOARD_GET_COMMENTS,
     ],
     "URL_BOARD_UPDATE_COMMENT": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.BOARD_PREFIX,
-        v1_urn.BOARD_UPDATE_COMMENT,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.BOARD_PREFIX,
+        v1_url.BOARD_UPDATE_COMMENT,
     ],
     "URL_BOARD_DELETE_COMMENT": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.BOARD_PREFIX,
-        v1_urn.BOARD_DELETE_COMMENT,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.BOARD_PREFIX,
+        v1_url.BOARD_DELETE_COMMENT,
     ],
 }
 

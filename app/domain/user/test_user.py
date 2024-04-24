@@ -8,36 +8,36 @@ from main import app
 from models import User
 from database import session_local
 from auth import validate_and_decode_user_access_token
-import v1_urn
+import v1_url
 from test_main import main_test_methods
 
 client = TestClient(app)
 
 url_dict = {
     "URL_USER_CREATE_USER": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.USER_PREFIX,
-        v1_urn.USER_CREATE_USER,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.USER_PREFIX,
+        v1_url.USER_CREATE_USER,
     ],
     "URL_USER_LOGIN_USER": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.USER_PREFIX,
-        v1_urn.USER_LOGIN_USER,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.USER_PREFIX,
+        v1_url.USER_LOGIN_USER,
     ],
     "URL_USER_GET_USER_DETAIL": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.USER_PREFIX,
-        v1_urn.USER_GET_USER_DETAIL,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.USER_PREFIX,
+        v1_url.USER_GET_USER_DETAIL,
     ],
     "URL_USER_UPDATE_USER_DETAIL": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.USER_PREFIX,
-        v1_urn.USER_UPDATE_USER_DETAIL,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.USER_PREFIX,
+        v1_url.USER_UPDATE_USER_DETAIL,
     ],
     "URL_USER_UPDATE_USER_PASSWORD": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.USER_PREFIX,
-        v1_urn.USER_UPDATE_USER_PASSWORD,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.USER_PREFIX,
+        v1_url.USER_UPDATE_USER_PASSWORD,
     ],
 }
 

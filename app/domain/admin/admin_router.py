@@ -11,13 +11,13 @@ from auth import (
     validate_and_decode_admin_access_token,
     scope_checker,
 )
-import v1_urn
+import v1_url
 
-router = APIRouter(prefix=v1_urn.ADMIN_PREFIX, tags=["admin"])
+router = APIRouter(prefix=v1_url.ADMIN_PREFIX, tags=["admin"])
 
 
 @router.get(
-    v1_urn.ADMIN_GET_USERS,
+    v1_url.ADMIN_GET_USERS,
     response_model=admin_schema.ResponseUserDetailList,
     dependencies=[Depends(validate_and_decode_admin_access_token)],
 )
@@ -31,7 +31,7 @@ def get_users(
 
 
 @router.put(
-    v1_urn.ADMIN_UPDATE_USER_BOARD_PERMISSION, status_code=status.HTTP_204_NO_CONTENT
+    v1_url.ADMIN_UPDATE_USER_BOARD_PERMISSION, status_code=status.HTTP_204_NO_CONTENT
 )
 def update_user_board_permission(
     data_base: data_base_dependency,
@@ -46,7 +46,7 @@ def update_user_board_permission(
     )
 
 
-@router.put(v1_urn.ADMIN_UPDATE_USER_IS_BANNED, status_code=status.HTTP_204_NO_CONTENT)
+@router.put(v1_url.ADMIN_UPDATE_USER_IS_BANNED, status_code=status.HTTP_204_NO_CONTENT)
 def update_user_is_banned(
     data_base: data_base_dependency,
     token: current_admin_payload,
@@ -59,7 +59,7 @@ def update_user_is_banned(
     )
 
 
-@router.post(v1_urn.ADMIN_CREATE_BOARD, status_code=status.HTTP_201_CREATED)
+@router.post(v1_url.ADMIN_CREATE_BOARD, status_code=status.HTTP_201_CREATED)
 def create_board(
     data_base: data_base_dependency,
     token: current_admin_payload,
@@ -76,7 +76,7 @@ def create_board(
     return {"result": "success", "id": id}
 
 
-@router.get(v1_urn.ADMIN_GET_BOARD)
+@router.get(v1_url.ADMIN_GET_BOARD)
 def get_board(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -91,7 +91,7 @@ def get_board(
     )
 
 
-@router.get(v1_urn.ADMIN_GET_BOARDS)
+@router.get(v1_url.ADMIN_GET_BOARDS)
 def get_boards(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -111,7 +111,7 @@ def get_boards(
     )
 
 
-@router.put(v1_urn.ADMIN_UPDATE_BOARD, status_code=status.HTTP_204_NO_CONTENT)
+@router.put(v1_url.ADMIN_UPDATE_BOARD, status_code=status.HTTP_204_NO_CONTENT)
 def update_board(
     data_base: data_base_dependency,
     token: current_admin_payload,
@@ -133,7 +133,7 @@ def update_board(
     )
 
 
-@router.delete(v1_urn.ADMIN_DELET_BOARD, status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(v1_url.ADMIN_DELET_BOARD, status_code=status.HTTP_204_NO_CONTENT)
 def delete_board(
     data_base: data_base_dependency,
     token: current_admin_payload,

@@ -6,12 +6,12 @@ from starlette import status
 from database import data_base_dependency
 from domain.ai import ai_crud, ai_schema
 from auth import current_user_payload, current_admin_payload
-import v1_urn
+import v1_url
 
-router = APIRouter(prefix=v1_urn.AI_PREFIX, tags=["ai"])
+router = APIRouter(prefix=v1_url.AI_PREFIX, tags=["ai"])
 
 
-@router.post(v1_urn.AI_TRAIN_AI, status_code=status.HTTP_201_CREATED)
+@router.post(v1_url.AI_TRAIN_AI, status_code=status.HTTP_201_CREATED)
 def train_ai(
     data_base: data_base_dependency,
     token: current_admin_payload,
@@ -28,7 +28,7 @@ def train_ai(
     return {"task_id": async_task.id, "id" : ai_id}
 
 
-@router.get(v1_urn.AI_GET_AI)
+@router.get(v1_url.AI_GET_AI)
 def get_ai(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -41,7 +41,7 @@ def get_ai(
     )
 
 
-@router.get(v1_urn.AI_GET_AIS)
+@router.get(v1_url.AI_GET_AIS)
 def get_ais(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -57,7 +57,7 @@ def get_ais(
     )
 
 
-@router.put(v1_urn.AI_UPDATE_AI, status_code=status.HTTP_204_NO_CONTENT)
+@router.put(v1_url.AI_UPDATE_AI, status_code=status.HTTP_204_NO_CONTENT)
 def update_ai(
     data_base: data_base_dependency,
     token: current_admin_payload,
@@ -73,7 +73,7 @@ def update_ai(
     )
 
 
-@router.delete(v1_urn.AI_DELETE_AI, status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(v1_url.AI_DELETE_AI, status_code=status.HTTP_204_NO_CONTENT)
 def delete_ai(
     data_base: data_base_dependency,
     token: current_admin_payload,
@@ -86,7 +86,7 @@ def delete_ai(
     )
 
 
-@router.post(v1_urn.AI_AI_INFER, status_code=status.HTTP_201_CREATED)
+@router.post(v1_url.AI_AI_INFER, status_code=status.HTTP_201_CREATED)
 def ai_infer(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -101,7 +101,7 @@ def ai_infer(
     return {"task_id": async_task.id, "id" : ai_log_id}
 
 
-@router.get(v1_urn.AI_GET_AILOG)
+@router.get(v1_url.AI_GET_AILOG)
 def get_ailog(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -114,7 +114,7 @@ def get_ailog(
     )
 
 
-@router.get(v1_urn.AI_GET_AILOGS)
+@router.get(v1_url.AI_GET_AILOGS)
 def get_ailogs(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -130,7 +130,7 @@ def get_ailogs(
     )
 
 
-@router.put(v1_urn.AI_UPDATE_AILOG, status_code=status.HTTP_204_NO_CONTENT)
+@router.put(v1_url.AI_UPDATE_AILOG, status_code=status.HTTP_204_NO_CONTENT)
 def update_ailog(
     data_base: data_base_dependency,
     token: current_user_payload,
@@ -144,7 +144,7 @@ def update_ailog(
     )
 
 
-@router.delete(v1_urn.AI_DELETE_AILOG, status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(v1_url.AI_DELETE_AILOG, status_code=status.HTTP_204_NO_CONTENT)
 def delete_ailog(
     data_base: data_base_dependency,
     token: current_user_payload,

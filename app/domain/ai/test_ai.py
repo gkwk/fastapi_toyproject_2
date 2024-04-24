@@ -12,7 +12,7 @@ from main import app
 from models import AI, AIlog
 from database import session_local
 from auth import validate_and_decode_user_access_token
-import v1_urn
+import v1_url
 from domain.user.test_user import user_test_methods
 from domain.admin.test_admin import admin_test_methods
 from test_main import main_test_methods
@@ -21,60 +21,60 @@ client = TestClient(app)
 
 url_dict = {
     "URL_USER_CREATE_USER": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.USER_PREFIX,
-        v1_urn.USER_CREATE_USER,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.USER_PREFIX,
+        v1_url.USER_CREATE_USER,
     ],
     "URL_USER_LOGIN_USER": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.USER_PREFIX,
-        v1_urn.USER_LOGIN_USER,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.USER_PREFIX,
+        v1_url.USER_LOGIN_USER,
     ],
     "URL_AI_TRAIN_AI": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.AI_PREFIX,
-        v1_urn.AI_TRAIN_AI,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.AI_PREFIX,
+        v1_url.AI_TRAIN_AI,
     ],
-    "URL_AI_GET_AI": [v1_urn.API_V1_ROUTER_PREFIX, v1_urn.AI_PREFIX, v1_urn.AI_GET_AI],
+    "URL_AI_GET_AI": [v1_url.API_V1_ROUTER_PREFIX, v1_url.AI_PREFIX, v1_url.AI_GET_AI],
     "URL_AI_GET_AIS": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.AI_PREFIX,
-        v1_urn.AI_GET_AIS,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.AI_PREFIX,
+        v1_url.AI_GET_AIS,
     ],
     "URL_AI_UPDATE_AI": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.AI_PREFIX,
-        v1_urn.AI_UPDATE_AI,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.AI_PREFIX,
+        v1_url.AI_UPDATE_AI,
     ],
     "URL_AI_DELETE_AI": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.AI_PREFIX,
-        v1_urn.AI_DELETE_AI,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.AI_PREFIX,
+        v1_url.AI_DELETE_AI,
     ],
     "URL_AI_AI_INFER": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.AI_PREFIX,
-        v1_urn.AI_AI_INFER,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.AI_PREFIX,
+        v1_url.AI_AI_INFER,
     ],
     "URL_AI_GET_AILOG": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.AI_PREFIX,
-        v1_urn.AI_GET_AILOG,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.AI_PREFIX,
+        v1_url.AI_GET_AILOG,
     ],
     "URL_AI_GET_AILOGS": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.AI_PREFIX,
-        v1_urn.AI_GET_AILOGS,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.AI_PREFIX,
+        v1_url.AI_GET_AILOGS,
     ],
     "URL_AI_UPDATE_AILOG": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.AI_PREFIX,
-        v1_urn.AI_UPDATE_AILOG,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.AI_PREFIX,
+        v1_url.AI_UPDATE_AILOG,
     ],
     "URL_AI_DELETE_AILOG": [
-        v1_urn.API_V1_ROUTER_PREFIX,
-        v1_urn.AI_PREFIX,
-        v1_urn.AI_DELETE_AILOG,
+        v1_url.API_V1_ROUTER_PREFIX,
+        v1_url.AI_PREFIX,
+        v1_url.AI_DELETE_AILOG,
     ],
 }
 
